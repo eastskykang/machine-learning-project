@@ -1,6 +1,4 @@
-.smt/
 *.gz
 *.tar
 *.npy
 __pycache__/
-data/
