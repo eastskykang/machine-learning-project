@@ -5,6 +5,7 @@ dependencies:
   - scikit-learn=0.18.2
   - scipy=0.19.1
   - gitpython
+  - requests
   - pip:
     - sumatra
     - pyyaml==3.12

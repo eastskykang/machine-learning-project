@@ -24,5 +24,4 @@ transformer = Config.config["class"](**Config.config["params"])
 
 X_new = transformer.fit_transform(X)
 
-
 np.save("/tmp/smt/"+Config.config["name"]+".npy", X_new)

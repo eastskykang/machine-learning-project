@@ -5,6 +5,7 @@ from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_array
 from sklearn.utils.random import sample_without_replacement
 from numpy.testing import assert_equal
+import requests
 
 class RandomSelection(skl.base.BaseEstimator, skl.base.TransformerMixin):
 
@@ -15,7 +16,6 @@ class RandomSelection(skl.base.BaseEstimator, skl.base.TransformerMixin):
         self.components = None
 
     def fit(self, X, y=None):
-
         X = check_array(X)
         n_samples, n_features = X.shape
 
@@ -76,8 +76,35 @@ class RandomSelection(skl.base.BaseEstimator, skl.base.TransformerMixin):
         pass
 
 
-def make_submission(csv):
-    pass
+def make_submission():
+
+    # Fill in your details here to be posted to the login form.
+    payload = {
+        'UserName': 'vwegmayr@inf.ethz.ch',
+        'Password': 'cy9oSh8Kvs',
+        "RememberMe": "false"
+    }
+
+    """
+    # Use 'with' to ensure the session context is closed after use.
+    with requests.Session() as s:
+        p = s.post("https://www.kaggle.com/account/login", data=payload)
+
+        print(p.url)
+        
+        data= {
+        "SubmissionUpload":"/home/vwegmayr/ETH/Neuro/oasis_data/ml-project/data/sampleSubmission_1.csv"
+        }
+
+        r = requests.post("https://inclass.kaggle.com/c/mlp1/submissions/accept",
+        data=data)
+
+        print(r.text)
+    """
+
+    r = requests.post("https://inclass.kaggle.com/account/login", data=payload)
+    print(r.text)
+
 
 """
 def load_data(path):
@@ -100,3 +127,6 @@ class Data(object):
     def check_pipe(X, pipe):
         pipe.transform(X)
 """
+
+if __name__=="__main__":
+    make_submission()
