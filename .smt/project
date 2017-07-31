@@ -1,0 +1,42 @@
+{
+  "on_changed": "store-diff",
+  "sumatra_version": "0.7.4",
+  "input_datastore": {
+    "root": "/",
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
+  },
+  "record_store": {
+    "type": "sumatra.recordstore.django_store.DjangoRecordStore",
+    "db_file": "/home/vwegmayr/ETH/Neuro/oasis_data/ml-project/.smt/records"
+  },
+  "default_launch_mode": {
+    "working_directory": "/home/vwegmayr/ETH/Neuro/oasis_data/ml-project",
+    "type": "sumatra.launch.SerialLaunchMode",
+    "options": null
+  },
+  "description": "",
+  "plugins": [],
+  "data_store": {
+    "root": "/home/vwegmayr/ETH/Neuro/oasis_data/ml-project/archive",
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
+  },
+  "allow_command_line_parameters": true,
+  "label_generator": "timestamp",
+  "name": "ml-project",
+  "data_label": null,
+  "default_executable": {
+    "type": "sumatra.programs.PythonExecutable",
+    "version": "3.5.3",
+    "options": "",
+    "name": "Python",
+    "path": "/home/vwegmayr/miniconda2/envs/ml-project/bin/python"
+  },
+  "_most_recent": "20170731-080229",
+  "timestamp_format": "%Y%m%d-%H%M%S",
+  "default_repository": {
+    "upstream": "git@gitlab.vis.ethz.ch:vwegmayr/ml-project.git",
+    "type": "sumatra.versioncontrol._git.GitRepository",
+    "url": "/home/vwegmayr/ETH/Neuro/oasis_data/ml-project"
+  },
+  "default_main_file": "run.py"
+}
