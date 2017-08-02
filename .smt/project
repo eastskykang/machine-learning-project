@@ -1,42 +1,42 @@
 {
-  "on_changed": "store-diff",
-  "default_repository": {
-    "upstream": "git@gitlab.vis.ethz.ch:vwegmayr/ml-project.git",
-    "url": "/home/vikweg/ETH/Neuro/oasis_data/ml-project",
-    "type": "sumatra.versioncontrol._git.GitRepository"
-  },
-  "data_label": null,
-  "allow_command_line_parameters": true,
-  "timestamp_format": "%Y%m%d-%H%M%S",
-  "label_generator": "timestamp",
-  "record_store": {
-    "db_file": "/home/vikweg/ETH/Neuro/oasis_data/ml-project/.smt/records",
-    "type": "sumatra.recordstore.django_store.DjangoRecordStore"
-  },
   "plugins": [],
-  "description": "",
-  "default_launch_mode": {
-    "options": null,
-    "working_directory": "/home/vikweg/ETH/Neuro/oasis_data/ml-project",
-    "type": "sumatra.launch.SerialLaunchMode"
-  },
-  "default_main_file": "run.py",
-  "sumatra_version": "0.8dev",
-  "input_datastore": {
-    "root": "/home/vikweg/ETH/Neuro/oasis_data/ml-project/archive",
-    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
-  },
-  "_most_recent": "20170802-111818",
-  "data_store": {
-    "root": "/home/vikweg/ETH/Neuro/oasis_data/ml-project/archive",
-    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
-  },
+  "timestamp_format": "%Y%m%d-%H%M%S",
   "default_executable": {
     "version": "3.5.3",
-    "options": "",
     "name": "Python",
-    "path": "/home/vikweg/miniconda2/envs/ml-project/bin/python",
-    "type": "sumatra.programs.PythonExecutable"
+    "type": "sumatra.programs.PythonExecutable",
+    "options": "",
+    "path": "/home/vikweg/miniconda2/envs/ml_project/bin/python"
   },
-  "name": "ml-project"
+  "description": "",
+  "sumatra_version": "0.8dev",
+  "allow_command_line_parameters": true,
+  "default_launch_mode": {
+    "working_directory": "/home/vikweg/ETH/Neuro/oasis_data/ml-project",
+    "type": "sumatra.launch.SerialLaunchMode",
+    "options": null
+  },
+  "input_datastore": {
+    "root": "/home/vikweg/ETH/Neuro/oasis_data/ml-project/data",
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
+  },
+  "record_store": {
+    "type": "sumatra.recordstore.django_store.DjangoRecordStore",
+    "db_file": "/home/vikweg/ETH/Neuro/oasis_data/ml-project/.smt/records"
+  },
+  "default_main_file": "run.py",
+  "on_changed": "store-diff",
+  "name": "ml_project",
+  "data_label": "cmdline",
+  "_most_recent": "20170802-172259",
+  "label_generator": "timestamp",
+  "data_store": {
+    "root": "/home/vikweg/ETH/Neuro/oasis_data/ml-project/data",
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
+  },
+  "default_repository": {
+    "url": "/home/vikweg/ETH/Neuro/oasis_data/ml-project",
+    "type": "sumatra.versioncontrol._git.GitRepository",
+    "upstream": "git@gitlab.vis.ethz.ch:vwegmayr/ml-project.git"
+  }
 }
