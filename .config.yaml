@@ -74,4 +74,4 @@ params:
     - module: ml_project.models.feature_selection
       class: MyVarianceThreshold
       params:
-        threshold: 0.1
+        threshold: 0.0

@@ -39,11 +39,11 @@ class MyVarianceThreshold(BaseEstimator, TransformerMixin):
         self.selector = VarianceThreshold(threshold);
 
     def fit(self, X, y=None):
-        self.selector.fit(X[:, 1:10])
+        self.selector.fit(X)
         return self
 
     def transform(self, X, y):
-        X_new = self.selector.transform(X[:, 1:10])
+        X_new = self.selector.transform(X)
         print("shape = ")
         print(X_new.shape)
         return X_new
