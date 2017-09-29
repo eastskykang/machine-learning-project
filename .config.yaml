@@ -64,7 +64,7 @@
 #class: VarianceThreshold
 #params:
 
-#smt run --config .config.yaml -X data/X_train.npy -a fit_transform
+#smt run --config .config.yaml -X data/X_train.npy -a fit
 module: ml_project.pipeline
 class: Pipeline
 params:
@@ -74,4 +74,6 @@ params:
     - module: ml_project.models.feature_selection
       class: VarianceThreshold
       params:
-        threshold: -0.1
+        threshold: 0
+    - module: sklearn.linear_model
+      class: LinearRegression
