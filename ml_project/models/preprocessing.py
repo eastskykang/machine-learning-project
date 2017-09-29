@@ -2,21 +2,21 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 
-class Standardization(BaseEstimator, TransformerMixin):
+class StandardScaler(StandardScaler):
     """standardize data"""
     def __init__(self):
-        self.scaler = StandardScaler()
+        super(StandardScaler, self).__init__()
 
     def fit(self, X, y=None):
-        self.scaler.fit(X)
-        print("mean")
-        print(self.scaler.mean_)
-        print("variance")
-        print(self.scaler.var_)
+        super(StandardScaler, self).fit(X[:, 1:100])
+        print("mean = ")
+        print(self.mean_)
+        print("variance = ")
+        print(self.var_)
         return self
 
-    def transform(self, X, y=None):
-        return self.scaler.transform(X)
+    def transform(self, X, y='deprecated', copy=None):
+        return super(StandardScaler, self).transform(X[:, 1:100])
 
 
 class PrincipleComponentAnalysis(BaseEstimator, TransformerMixin):

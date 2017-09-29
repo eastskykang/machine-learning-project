@@ -70,7 +70,8 @@ class: Pipeline
 params:
   class_list:
     - module: ml_project.models.preprocessing
-      class: Standardization
+      class: StandardScaler
     - module: ml_project.models.feature_selection
-      class: VarianceThreshold
-      parameter: 0
+      class: MyVarianceThreshold
+      params:
+        threshold: 0.1

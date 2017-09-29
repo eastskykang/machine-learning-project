@@ -32,21 +32,17 @@ class RandomSelection(BaseEstimator, TransformerMixin):
         return X_new
 
 
-class VarianceThreshold(VarianceThreshold):
+class MyVarianceThreshold(BaseEstimator, TransformerMixin):
     def __init__(self, threshold=0.0):
         self.threshold = threshold
-        super(VarianceThreshold, self).__init__(self.threshold)
-    #
-    # def fit(self, X, y=None):
-    #     self.selector.fit(X)
-    #     return self
-    #
-    def transform(self, X, y=None):
-        X_new = super(VarianceThreshold, self).transform(X, y)
+        self.selector = VarianceThreshold(threshold);
+
+    def fit(self, X, y=None):
+        self.selector.fit(X[:, 1:10])
+        return self
+
+    def transform(self, X, y):
+        X_new = self.selector.transform(X[:, 1:10])
+        print("shape = ")
         print(X_new.shape)
         return X_new
-    #
-    # def fit_transform(self, X, y=None):
-    #     X_new = super(VarianceThreshold, self).fit_transform(X)
-    #     print(X_new.shape)
-    #     return X_new
