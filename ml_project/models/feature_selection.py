@@ -41,7 +41,12 @@ class VarianceThreshold(VarianceThreshold):
     #     self.selector.fit(X)
     #     return self
     #
-    def transform(self, X, y=None):
-        X_new = super.selector.transform(X)
+    def transform(selfself, X):
+        X_new = super.transform(X)
+        print(X_new.shape)
+        return X_new
+
+    def fit_transform(self, X, y=None):
+        X_new = super.fit_transform(X)
         print(X_new.shape)
         return X_new
