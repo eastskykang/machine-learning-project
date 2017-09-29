@@ -72,6 +72,6 @@ params:
     - module: ml_project.models.preprocessing
       class: StandardScaler
     - module: ml_project.models.feature_selection
-      class: MyVarianceThreshold
+      class: VarianceThreshold
       params:
-        threshold: 0.0
+        threshold: -0.1
