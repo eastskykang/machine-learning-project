@@ -33,6 +33,7 @@ class RandomSelection(BaseEstimator, TransformerMixin):
 
 
 class MyVarianceThreshold(BaseEstimator, TransformerMixin):
+    """Wrapper for VarianceThreshold (for pipeline)"""
     def __init__(self, threshold=0.0):
         self.threshold = threshold
         self.selector = VarianceThreshold(threshold);
