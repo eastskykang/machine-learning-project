@@ -1,34 +1,23 @@
-# from sklearn import preprocessing
-#
-# class Standardization():
-#     """standardize data"""
-#     def __init__(self, n_components=1000, random_state=None):
-#         self.n_components = n_components
-#         self.random_state = random_state
-#         self.components = None
-#
-#     def fit(self, X, y=None):
-#         X = check_array(X)
-#         n_samples, n_features = X.shape
-#
-#         random_state = check_random_state(self.random_state)
-#         self.components = sample_without_replacement(
-#                             n_features,
-#                             self.n_components,
-#                             random_state=random_state)
-#         return self
-#
-#     def transform(self, X, y=None):
-#         check_is_fitted(self, ["components"])
-#         X = check_array(X)
-#         n_samples, n_features = X.shape
-#         X_new = X[:, self.components]
-#
-#         return X_new
-#
-#
+from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
+
+class Standardization(BaseEstimator, TransformerMixin):
+    """standardize data"""
+    def __init__(self):
+        self.scaler = StandardScaler()
+
+    def fit(self, X, y=None):
+        self.scaler.fit(X)
+        print("mean")
+        print(self.scaler.mean_)
+        print("variance")
+        print(self.scaler.var_)
+        return self
+
+    def transform(self, X, y=None):
+        return self.scaler.transform(X)
+
 
 class PrincipleComponentAnalysis(BaseEstimator, TransformerMixin):
 
