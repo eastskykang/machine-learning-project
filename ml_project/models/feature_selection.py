@@ -42,10 +42,10 @@ class VarianceThreshold(VarianceThreshold):
     #     return self
     #
     def transform(self, X, y=None):
-        X_new = super(VarianceThreshold, self).transform(X)
+        X_new = super(VarianceThreshold, self).transform(X, y)
         print(X_new.shape)
         return X_new
-
+    #
     # def fit_transform(self, X, y=None):
     #     X_new = super(VarianceThreshold, self).fit_transform(X)
     #     print(X_new.shape)
