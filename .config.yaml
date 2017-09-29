@@ -64,7 +64,7 @@
 #class: MyVarianceThreshold
 #params:
 
-#smt run --config .config.yaml -X data/X_train.npy -a fit
+#smt run --config .config.yaml -X data/X_train.npy -a fit_transform
 module: ml_project.pipeline
 class: Pipeline
 params:
@@ -72,5 +72,5 @@ params:
     - module: ml_project.models.preprocessing
       class: Standardization
     - module: ml_project.models.feature_selection
-      class: VarianceThresholdSelection
+      class: VarianceThreshold
       parameter: 0
