@@ -33,47 +33,27 @@
 
 #Example 4
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
-#module: ml_project.model_selection
-#class: GridSearchCV
-#params:
-#  est_module: ml_project.pipeline
-#  est_class: Pipeline
-#  est_params:
-#    - module: ml_project.models.feature_selection
-#      class: RandomSelection
-#      params:
-#        random_state: 37
-#    - module: sklearn.linear_model
-#      class: LinearRegression
-#  param_grid:
-#    RandomSelection__n_components:
-#      - 100
-#      - 1000
-#      - 10000
-#  cv:
-#    module: sklearn.model_selection
-#    class: KFold
-#    params:
-#      n_splits: 3
-#      shuffle: True
-#      random_state: 37
-
-
-#smt run --config .config.yaml -X data/X_train.npy -a fit_transform
-#module: ml_project.models.feature_selection
-#class: VarianceThreshold
-#params:
-
-#smt run --config .config.yaml -X data/X_train.npy -a fit
-module: ml_project.pipeline
-class: Pipeline
+module: ml_project.model_selection
+class: GridSearchCV
 params:
-  class_list:
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
     - module: ml_project.models.feature_selection
-      class: VarianceThreshold
+      class: RandomSelection
       params:
-        threshold: 0
+        random_state: 37
     - module: sklearn.linear_model
       class: LinearRegression
+  param_grid:
+    RandomSelection__n_components:
+      - 100
+      - 1000
+      - 10000
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 3
+      shuffle: True
+      random_state: 37
