@@ -60,17 +60,17 @@
 
 
 #smt run --config .config.yaml -X data/X_train.npy -a fit_transform
-#module: ml_project.models.feature_selection
-#class: MyVarianceThreshold
+module: ml_project.models.feature_selection
+class: VarianceThreshold
 #params:
 
 #smt run --config .config.yaml -X data/X_train.npy -a fit_transform
-module: ml_project.pipeline
-class: Pipeline
-params:
-  class_list:
-    - module: ml_project.models.preprocessing
-      class: Standardization
-    - module: ml_project.models.feature_selection
-      class: VarianceThreshold
-      parameter: 0
+#module: ml_project.pipeline
+#class: Pipeline
+#params:
+#  class_list:
+#    - module: ml_project.models.preprocessing
+#      class: Standardization
+#    - module: ml_project.models.feature_selection
+#      class: VarianceThreshold
+#      parameter: 0
