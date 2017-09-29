@@ -71,6 +71,6 @@ params:
   class_list:
     - module: ml_project.models.preprocessing
       class: Standardization
-    - module: sklearn.feature_selection
-      class: VarianceThreshold
+    - module: ml_project.models.feature_selection
+      class: VarianceThresholdSelection
       parameter: 0
