@@ -37,9 +37,13 @@ class PrincipleComponentAnalysis(BaseEstimator, TransformerMixin):
         self.pca = PCA(n_components)
 
     def fit(self, X, y=None):
-        self.pca.fit(self, X, y);
+        self.pca.fit(X);
+
+        print("\nPCA with n_components = {}".format(self.n_components))
+        print("variances = {}".format(self.pca.explained_variance_))
+
         return self
 
     def transform(self, X, y=None):
-        return self.pca.transform(self, X, y)
+        return self.pca.transform(self, X)
 

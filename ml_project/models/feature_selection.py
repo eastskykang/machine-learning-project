@@ -2,6 +2,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_array, check_is_fitted
 from sklearn.utils.random import sample_without_replacement
+from sklearn.feature_selection import VarianceThreshold
 
 
 class RandomSelection(BaseEstimator, TransformerMixin):
@@ -28,4 +29,19 @@ class RandomSelection(BaseEstimator, TransformerMixin):
         n_samples, n_features = X.shape
         X_new = X[:, self.components]
 
+        return X_new
+
+
+class MyVarianceThreshold(BaseEstimator, TransformerMixin):
+    def __init__(self, threshold=0.5):
+        self.threshold = threshold
+        self.selector = VarianceThreshold(threshold)
+
+    def fit(self, X, y=None):
+        self.selector.fit(X)
+        return self
+
+    def transform(self, X, y=None):
+        X_new = self.selector.transform(X)
+        print(X_new.shape)
         return X_new
