@@ -33,6 +33,50 @@
 
 #Example 4
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_selection
+#      class: RandomSelection
+#      params:
+#        random_state: 37
+#    - module: sklearn.linear_model
+#      class: LinearRegression
+#  param_grid:
+#    RandomSelection__n_components:
+#      - 100
+#      - 1000
+#      - 10000
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 3
+#      shuffle: True
+#      random_state: 37
+
+#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
+# pipeline test =
+#   zero column elim + std. scaler + variance thr + lin reg
+#module: ml_project.pipeline
+#class: Pipeline
+#params:
+#  class_list:
+#    - module: ml_project.models.feature_selection
+#      class: EliminateZeroColumns
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: ml_project.models.feature_selection
+#      class: VarianceThreshold
+#      params:
+#        threshold: 0
+#    - module: sklearn.linear_model
+#      class: LinearRegression
+
+#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 module: ml_project.model_selection
 class: GridSearchCV
 params:
@@ -40,20 +84,24 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_selection
-      class: RandomSelection
-      params:
-        random_state: 37
+      class: EliminateZeroColumns
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: ml_project.models.feature_selection
+      class: VarianceThreshold
     - module: sklearn.linear_model
       class: LinearRegression
   param_grid:
-    RandomSelection__n_components:
-      - 100
-      - 1000
-      - 10000
+    VarianceThreshold__threshold:
+      - 0
+      - 0.1
+      - 0.2
+      - 0.5
+      - 0.9
   cv:
     module: sklearn.model_selection
     class: KFold
     params:
-      n_splits: 3
+      n_splits: 10
       shuffle: True
       random_state: 37

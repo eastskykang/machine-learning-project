@@ -8,15 +8,30 @@ class StandardScaler(StandardScaler):
         super(StandardScaler, self).__init__()
 
     def fit(self, X, y=None):
+        print("------------------------------------")
+        print("StandardScaler fit")
         super(StandardScaler, self).fit(X)
+
+        print("before standardized: ")
         print("mean = ")
         print(self.mean_)
         print("variance = ")
         print(self.var_)
+
         return self
 
     def transform(self, X, y='deprecated', copy=None):
-        return super(StandardScaler, self).transform(X)
+        print("StandardScaler transform")
+        X_new = super(StandardScaler, self).transform(X)
+
+        print("after standardized: ")
+        print("mean = ")
+        print(X_new.mean(axis=0))
+        print("variance = ")
+        print(X_new.std(axis=0))
+
+        return X_new
+
 
 
 class PrincipleComponentAnalysis(BaseEstimator, TransformerMixin):
