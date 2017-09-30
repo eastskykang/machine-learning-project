@@ -40,13 +40,13 @@ class VarianceThreshold(VarianceThreshold):
 
     def fit(self, X, y=None):
         print("------------------------------------")
-        print("VarianceThreshold fit")
+        print("VarianceThreshold fit with thr = {}".format(self.threshold))
         X = check_array(X)
         super(VarianceThreshold, self).fit(X)
         return self
 
     def transform(self, X, y=None):
-        print("VarianceThreshold transform")
+        print("VarianceThreshold transform with thr = {}".format(self.threshold))
         X = check_array(X)
         print("shape before variance threshold: ")
         print(X.shape)

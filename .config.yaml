@@ -90,7 +90,8 @@ params:
     - module: ml_project.models.feature_selection
       class: VarianceThreshold
     - module: sklearn.linear_model
-      class: LinearRegression
+#      class: LinearRegression    # for linear regression
+      class: Lasso                # for lasso
   param_grid:
     VarianceThreshold__threshold:
       - 0
@@ -98,6 +99,12 @@ params:
       - 0.2
       - 0.5
       - 0.9
+    Lasso__alpha:
+      - 2.0
+      - 1.0
+      - 0.7
+      - 0.5
+      - 0.1
   cv:
     module: sklearn.model_selection
     class: KFold
