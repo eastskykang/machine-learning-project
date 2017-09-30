@@ -1,0 +1,42 @@
+{
+  "allow_command_line_parameters": true,
+  "on_changed": "error",
+  "data_store": {
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
+    "root": "/home/kangd/git/ml-project/data"
+  },
+  "label_generator": "timestamp",
+  "timestamp_format": "%Y%m%d-%H%M%S",
+  "description": "",
+  "default_repository": {
+    "upstream": "https://gitlab.vis.ethz.ch/vwegmayr/ml-project.git",
+    "url": "/home/kangd/git/ml-project",
+    "type": "sumatra.versioncontrol._git.GitRepository"
+  },
+  "default_launch_mode": {
+    "options": null,
+    "working_directory": "/home/kangd/git/ml-project",
+    "type": "sumatra.launch.SerialLaunchMode"
+  },
+  "plugins": [],
+  "default_executable": {
+    "version": "3.5.3",
+    "options": "",
+    "name": "Python",
+    "type": "sumatra.programs.PythonExecutable",
+    "path": "/home/kangd/miniconda2/envs/ml_project/bin/python"
+  },
+  "sumatra_version": "0.8dev",
+  "record_store": {
+    "db_file": "/home/kangd/git/ml-project/.smt/records",
+    "type": "sumatra.recordstore.django_store.DjangoRecordStore"
+  },
+  "default_main_file": "run.py",
+  "input_datastore": {
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
+    "root": "/home/kangd/git/ml-project/data"
+  },
+  "data_label": "cmdline",
+  "name": "ml_project",
+  "_most_recent": "20170930-175214"
+}
