@@ -1,42 +1,42 @@
 {
-  "allow_command_line_parameters": true,
-  "on_changed": "error",
+  "sumatra_version": "0.8dev",
   "data_store": {
-    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
-    "root": "/home/kangd/git/ml-project/data"
+    "root": "/home/kangd/git/ml-project/data",
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
   },
-  "label_generator": "timestamp",
-  "timestamp_format": "%Y%m%d-%H%M%S",
+  "input_datastore": {
+    "root": "/home/kangd/git/ml-project/data",
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
+  },
+  "name": "ml_project",
+  "default_main_file": "run.py",
+  "allow_command_line_parameters": true,
   "description": "",
-  "default_repository": {
-    "upstream": "https://gitlab.vis.ethz.ch/vwegmayr/ml-project.git",
-    "url": "/home/kangd/git/ml-project",
-    "type": "sumatra.versioncontrol._git.GitRepository"
-  },
+  "plugins": [],
+  "timestamp_format": "%Y%m%d-%H%M%S",
+  "_most_recent": "20171001-195924",
   "default_launch_mode": {
     "options": null,
-    "working_directory": "/home/kangd/git/ml-project",
-    "type": "sumatra.launch.SerialLaunchMode"
+    "type": "sumatra.launch.SerialLaunchMode",
+    "working_directory": "/home/kangd/git/ml-project"
   },
-  "plugins": [],
-  "default_executable": {
-    "version": "3.5.3",
-    "options": "",
-    "name": "Python",
-    "type": "sumatra.programs.PythonExecutable",
-    "path": "/home/kangd/miniconda2/envs/ml_project/bin/python"
+  "default_repository": {
+    "type": "sumatra.versioncontrol._git.GitRepository",
+    "url": "/home/kangd/git/ml-project",
+    "upstream": "https://gitlab.vis.ethz.ch/vwegmayr/ml-project.git"
   },
-  "sumatra_version": "0.8dev",
   "record_store": {
-    "db_file": "/home/kangd/git/ml-project/.smt/records",
-    "type": "sumatra.recordstore.django_store.DjangoRecordStore"
+    "type": "sumatra.recordstore.django_store.DjangoRecordStore",
+    "db_file": "/home/kangd/git/ml-project/.smt/records"
   },
-  "default_main_file": "run.py",
-  "input_datastore": {
-    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
-    "root": "/home/kangd/git/ml-project/data"
-  },
+  "on_changed": "error",
   "data_label": "cmdline",
-  "name": "ml_project",
-  "_most_recent": "20170930-175214"
+  "label_generator": "timestamp",
+  "default_executable": {
+    "name": "Python",
+    "options": "",
+    "type": "sumatra.programs.PythonExecutable",
+    "path": "/home/kangd/miniconda2/envs/ml_project/bin/python",
+    "version": "3.5.3"
+  }
 }
