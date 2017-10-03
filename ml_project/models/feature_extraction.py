@@ -1,7 +1,6 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, check_array
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class IntensityHistogram(BaseEstimator, TransformerMixin):
@@ -32,7 +31,22 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
                                                self.z_cell_number))
         print("bin numbers = {}".format(self.bin_number))
 
-        show_hist = False   # for debugging
+        # no internal variable. do nothing
+
+        return self
+
+    def transform(self, X, y=None):
+        X = check_array(X)
+        n_samples, n_features = np.shape(X)
+
+        print("IntensityHistogram transform")
+        print("cell numbers = {}x{}x{}".format(self.x_cell_number,
+                                               self.y_cell_number,
+                                               self.z_cell_number))
+        print("bin numbers = {}".format(self.bin_number))
+
+        print("shape of X before transform : ")
+        print(X.shape)
 
         X = check_array(X)
         n_samples, n_features = np.shape(X)
@@ -45,12 +59,11 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         z_cell_edges = np.linspace(0, self.IMAGE_DIM_Z, self.z_cell_number + 1, dtype=int)
 
         # histograms
-        self.histogram = np.zeros((n_samples,
+        histogram = np.zeros((n_samples,
                                   self.x_cell_number,
                                   self.y_cell_number,
                                   self.z_cell_number,
                                   self.bin_number))
-
 
         for i in range(0, n_samples):
             image_3D = X_train_3D[i, :, :, :]
@@ -65,30 +78,12 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
                                                z_cell_edges[zi]:z_cell_edges[zi+1]]
 
                         # histogram
-                        self.histogram[i, xi, yi, zi, :], bins = \
+                        histogram[i, xi, yi, zi, :], bins = \
                             np.histogram(image_block, bins=np.linspace(0, self.BIN_MAX, self.bin_number + 1))
 
-                        if show_hist:
-                            plt.hist(image_block.flatten(), bins=bins)
-                            plt.show()
-                            # show_hist = False
+        X_new = np.reshape(histogram, (n_samples, -1))
 
-        return self
-
-    def transform(self, X, y=None):
-        check_is_fitted(self, ["histogram"])
-
-        print("------------------------------------")
-        print("IntensityHistogram transform")
-        print("cell numbers = {}x{}x{}".format(self.x_cell_number,
-                                               self.y_cell_number,
-                                               self.z_cell_number))
-        print("bin numbers = {}".format(self.bin_number))
-
-        n_samples, n_features = np.shape(X)
-        X_new = np.reshape(self.histogram, (n_samples, -1))
-
-        print("shape of transformed X : ")
+        print("shape of X after transform : ")
         print(X_new.shape)
 
         return X_new
