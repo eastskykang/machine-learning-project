@@ -33,7 +33,6 @@ class StandardScaler(StandardScaler):
         return X_new
 
 
-
 class PrincipleComponentAnalysis(BaseEstimator, TransformerMixin):
 
     def __init__(self, n_components=100):
