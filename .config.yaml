@@ -140,32 +140,32 @@
 module: ml_project.model_selection
 class: GridSearchCV
 params:
-est_module: ml_project.pipeline
-est_class: Pipeline
-est_params:
-  - module: ml_project.models.feature_extraction
-    class: IntensityHistogram
-  - module: ml_project.models.preprocessing
-    class: StandardScaler
-  - module: ml_project.models.feature_selection
-    class: VarianceThreshold
-  - module: sklearn.linear_model
-    class: LinearRegression
-param_grid:
-  VarianceThreshold__threshold:
-    - 0
-    - 0.1
-    - 0.2
-    - 0.5
-    - 0.9
-  InstensityHistogram__bin_number:
-    - 45
-    - 100
-    - 450
-cv:
-  module: sklearn.model_selection
-  class: KFold
-  params:
-    n_splits: 10
-    shuffle: True
-    random_state: 37
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.feature_extraction
+      class: IntensityHistogram
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: ml_project.models.feature_selection
+      class: VarianceThreshold
+    - module: sklearn.linear_model
+      class: LinearRegression
+  param_grid:
+    VarianceThreshold__threshold:
+      - 0
+      - 0.1
+      - 0.2
+      - 0.5
+      - 0.9
+    IntensityHistogram__bin_number:
+      - 45
+      - 100
+      - 450
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 10
+      shuffle: True
+      random_state: 37
