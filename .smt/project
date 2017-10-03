@@ -1,5 +1,24 @@
 {
-  "sumatra_version": "0.8dev",
+  "label_generator": "timestamp",
+  "_most_recent": null,
+  "default_main_file": "run.py",
+  "timestamp_format": "%Y%m%d-%H%M%S",
+  "description": "",
+  "on_changed": "error",
+  "default_launch_mode": {
+    "working_directory": "/home/kangd/git/ml-project",
+    "options": null,
+    "type": "sumatra.launch.SerialLaunchMode"
+  },
+  "record_store": {
+    "db_file": "/home/kangd/git/ml-project/.smt/records",
+    "type": "sumatra.recordstore.django_store.DjangoRecordStore"
+  },
+  "default_repository": {
+    "upstream": "https://gitlab.vis.ethz.ch/vwegmayr/ml-project.git",
+    "url": "/home/kangd/git/ml-project",
+    "type": "sumatra.versioncontrol._git.GitRepository"
+  },
   "data_store": {
     "root": "/home/kangd/git/ml-project/data",
     "type": "sumatra.datastore.filesystem.FileSystemDataStore"
@@ -8,35 +27,16 @@
     "root": "/home/kangd/git/ml-project/data",
     "type": "sumatra.datastore.filesystem.FileSystemDataStore"
   },
-  "name": "ml_project",
-  "default_main_file": "run.py",
-  "allow_command_line_parameters": true,
-  "description": "",
   "plugins": [],
-  "timestamp_format": "%Y%m%d-%H%M%S",
-  "_most_recent": "20171001-195924",
-  "default_launch_mode": {
-    "options": null,
-    "type": "sumatra.launch.SerialLaunchMode",
-    "working_directory": "/home/kangd/git/ml-project"
-  },
-  "default_repository": {
-    "type": "sumatra.versioncontrol._git.GitRepository",
-    "url": "/home/kangd/git/ml-project",
-    "upstream": "https://gitlab.vis.ethz.ch/vwegmayr/ml-project.git"
-  },
-  "record_store": {
-    "type": "sumatra.recordstore.django_store.DjangoRecordStore",
-    "db_file": "/home/kangd/git/ml-project/.smt/records"
-  },
-  "on_changed": "error",
+  "sumatra_version": "0.8dev",
+  "allow_command_line_parameters": true,
+  "name": "ml_project",
   "data_label": "cmdline",
-  "label_generator": "timestamp",
   "default_executable": {
+    "path": "/home/kangd/miniconda2/envs/ml_project/bin/python",
+    "version": "3.5.3",
     "name": "Python",
     "options": "",
-    "type": "sumatra.programs.PythonExecutable",
-    "path": "/home/kangd/miniconda2/envs/ml_project/bin/python",
-    "version": "3.5.3"
+    "type": "sumatra.programs.PythonExecutable"
   }
 }
