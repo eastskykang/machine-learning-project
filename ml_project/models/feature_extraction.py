@@ -1,5 +1,5 @@
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import check_is_fitted, check_array
+from sklearn.utils.validation import check_array
 import numpy as np
 
 
@@ -7,9 +7,12 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
     """Feature from intensity histogram of 3D images"""
 
     # divide 3d image into cells and make histogram per cell
+    def __init__(self,
+                 x_cell_number=8,
+                 y_cell_number=8,
+                 z_cell_number=8,
+                 bin_number=45):
 
-
-    def __init__(self, x_cell_number=8, y_cell_number=8, z_cell_number=8, bin_number=45):
         # image dimension
         self.IMAGE_DIM_X = 176
         self.IMAGE_DIM_Y = 208
@@ -48,19 +51,31 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         X = check_array(X)
         n_samples, n_features = np.shape(X)
 
-        X_train_3D = np.reshape(X, (-1, self.IMAGE_DIM_X, self.IMAGE_DIM_Y, self.IMAGE_DIM_Z))
+        X_train_3D = np.reshape(X, (-1,
+                                    self.IMAGE_DIM_X,
+                                    self.IMAGE_DIM_Y,
+                                    self.IMAGE_DIM_Z))
 
         # cell (contains index of voxels) as bin edge
-        x_cell_edges = np.linspace(0, self.IMAGE_DIM_X, self.x_cell_number + 1, dtype=int)
-        y_cell_edges = np.linspace(0, self.IMAGE_DIM_Y, self.y_cell_number + 1, dtype=int)
-        z_cell_edges = np.linspace(0, self.IMAGE_DIM_Z, self.z_cell_number + 1, dtype=int)
+        x_cell_edges = np.linspace(0,
+                                   self.IMAGE_DIM_X,
+                                   self.x_cell_number + 1,
+                                   dtype=int)
+        y_cell_edges = np.linspace(0,
+                                   self.IMAGE_DIM_Y,
+                                   self.y_cell_number + 1,
+                                   dtype=int)
+        z_cell_edges = np.linspace(0,
+                                   self.IMAGE_DIM_Z,
+                                   self.z_cell_number + 1,
+                                   dtype=int)
 
         # histograms
         histogram = np.zeros((n_samples,
-                                  self.x_cell_number,
-                                  self.y_cell_number,
-                                  self.z_cell_number,
-                                  self.bin_number))
+                              self.x_cell_number,
+                              self.y_cell_number,
+                              self.z_cell_number,
+                              self.bin_number))
 
         for i in range(0, n_samples):
             image_3D = X_train_3D[i, :, :, :]

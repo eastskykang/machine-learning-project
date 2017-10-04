@@ -5,6 +5,7 @@ from sklearn.utils.random import sample_without_replacement
 from sklearn.feature_selection import VarianceThreshold
 import numpy as np
 
+
 class RandomSelection(BaseEstimator, TransformerMixin):
     """Random Selection of features"""
     def __init__(self, n_components=1000, random_state=None):
@@ -40,13 +41,17 @@ class VarianceThreshold(VarianceThreshold):
 
     def fit(self, X, y=None):
         print("------------------------------------")
-        print("VarianceThreshold fit with thr = {}".format(self.threshold))
+        print("VarianceThreshold fit with thr = {}"
+              .format(self.threshold))
+
         X = check_array(X)
         super(VarianceThreshold, self).fit(X)
         return self
 
     def transform(self, X, y=None):
-        print("VarianceThreshold transform with thr = {}".format(self.threshold))
+        print("VarianceThreshold transform with thr = {}"
+              .format(self.threshold))
+
         X = check_array(X)
         print("shape before variance threshold: ")
         print(X.shape)
@@ -80,5 +85,3 @@ class EliminateZeroColumns(BaseEstimator, TransformerMixin):
         print(np.shape(X_new))
 
         return X_new
-
-
