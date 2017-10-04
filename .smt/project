@@ -1,42 +1,42 @@
 {
-  "label_generator": "timestamp",
-  "_most_recent": "20171004-035205",
-  "timestamp_format": "%Y%m%d-%H%M%S",
-  "sumatra_version": "0.8dev",
-  "default_main_file": "run.py",
   "input_datastore": {
     "type": "sumatra.datastore.filesystem.FileSystemDataStore",
     "root": "/home/eastskykang/git/machine-learning-project/data"
   },
+  "allow_command_line_parameters": true,
+  "plugins": [],
+  "sumatra_version": "0.8dev",
+  "timestamp_format": "%Y%m%d-%H%M%S",
+  "default_main_file": "run.py",
   "data_store": {
     "type": "sumatra.datastore.filesystem.FileSystemDataStore",
     "root": "/home/eastskykang/git/machine-learning-project/data"
   },
-  "allow_command_line_parameters": true,
-  "on_changed": "error",
-  "default_executable": {
-    "path": "/home/eastskykang/miniconda2/envs/ml_project/bin/python",
-    "name": "Python",
-    "type": "sumatra.programs.PythonExecutable",
-    "version": "3.5.3",
-    "options": ""
+  "record_store": {
+    "db_file": "/home/eastskykang/git/machine-learning-project/.smt/records",
+    "type": "sumatra.recordstore.django_store.DjangoRecordStore"
   },
-  "plugins": [],
-  "name": "ml_project",
   "default_launch_mode": {
+    "options": null,
     "working_directory": "/home/eastskykang/git/machine-learning-project",
-    "type": "sumatra.launch.SerialLaunchMode",
-    "options": null
+    "type": "sumatra.launch.SerialLaunchMode"
   },
+  "default_executable": {
+    "options": "",
+    "path": "/home/eastskykang/miniconda2/envs/ml_project/bin/python",
+    "version": "3.5.3",
+    "type": "sumatra.programs.PythonExecutable",
+    "name": "Python"
+  },
+  "label_generator": "timestamp",
+  "on_changed": "error",
+  "description": "",
   "data_label": "cmdline",
+  "_most_recent": "20171004-145849",
   "default_repository": {
     "url": "/home/eastskykang/git/machine-learning-project",
     "type": "sumatra.versioncontrol._git.GitRepository",
     "upstream": "https://github.com/EastskyKang/machine-learning-project.git"
   },
-  "description": "",
-  "record_store": {
-    "db_file": "/home/eastskykang/git/machine-learning-project/.smt/records",
-    "type": "sumatra.recordstore.django_store.DjangoRecordStore"
-  }
+  "name": "ml_project"
 }
