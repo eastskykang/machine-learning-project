@@ -85,7 +85,7 @@ Once your VM is running, open a terminal and install git:
 
 .. code-block:: shell
 
-    sudo aptitude install git
+    sudo apt-get install git
 
 After that, please continue with Getting Started for Linux.
 
@@ -112,12 +112,6 @@ Make sure the environment is activated:
 .. code-block:: shell
 
     source activate ml_project
-
-If you encounter problems with site-packages try:
-
-.. code-block:: shell
-
-    export PYTHONNOUSERSITE=True; source activate ml_project
 
 Then download the data:
 
