@@ -1,20 +1,21 @@
+from sklearn.base import BaseEstimator, TransformerMixin
+from scipy import ndimage
 import numpy as np
-import matplotlib.pyplot as plt
 
-class DataReader:
-    """DataReader to do inspection about input sdata"""
-    if __name__ == '__main__':
+class ImageDownSampling(BaseEstimator, TransformerMixin):
+    """Down sample image"""
 
-        # load data
-        X_train = np.load('data/X_train.npy')
-        X_train_3D = np.reshape(X_train, (-1, 176, 208, 176))
+    def __init__(self):
 
-        print(X_train_3D)
 
-        # visualization
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
+    def fit(self, X, y=None):
 
-        # for first image
 
-        # for averaged image
+def block_mean(ar, fact):
+    assert isinstance(fact, int), type(fact)
+    sx, sy = ar.shape
+    X, Y = np.ogrid[0:sx, 0:sy]
+    regions = sy/fact * (X/fact) + Y/fact
+    res = ndimage.mean(ar, labels=regions, index=np.arange(regions.max() + 1))
+    res.shape = (sx/fact, sy/fact)
+    return res

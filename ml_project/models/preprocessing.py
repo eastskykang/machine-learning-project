@@ -21,6 +21,7 @@ class StandardScaler(StandardScaler):
         return self
 
     def transform(self, X, y='deprecated', copy=None):
+        print("------------------------------------")
         print("StandardScaler transform")
         X_new = super(StandardScaler, self).transform(X)
 

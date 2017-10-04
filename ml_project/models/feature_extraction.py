@@ -31,7 +31,8 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
                                                self.z_cell_number))
         print("bin numbers = {}".format(self.bin_number))
 
-        # no internal variable. do nothing
+        # no internal variable
+        X = check_array(X)
 
         return self
 
@@ -39,12 +40,8 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         X = check_array(X)
         n_samples, n_features = np.shape(X)
 
+        print("------------------------------------")
         print("IntensityHistogram transform")
-        print("cell numbers = {}x{}x{}".format(self.x_cell_number,
-                                               self.y_cell_number,
-                                               self.z_cell_number))
-        print("bin numbers = {}".format(self.bin_number))
-
         print("shape of X before transform : ")
         print(X.shape)
 
