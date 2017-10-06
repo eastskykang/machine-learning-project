@@ -173,6 +173,49 @@
 
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 #cv = elim zero columns + std. scaler + var thr + lin reg
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_extraction
+#      class: IntensityHistogram
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: ml_project.models.feature_selection
+#      class: VarianceThreshold
+#    - module: sklearn.kernel_ridge
+#      class: KernelRidge
+#  param_grid:
+#    VarianceThreshold__threshold:
+#      - 0
+#      - 0.1
+#      - 0.2
+#    IntensityHistogram__bin_number:
+#      - 45
+#      - 100
+#      - 450
+#    KernelRidge__kernel:
+#      - "linear"
+#      - "rbf"
+#      - "sigmoid"
+#    KernelRidge__gamma:
+#      - 0.01
+#      - 0.1
+#      - 1.0
+#      - 10.0
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 10
+#      shuffle: True
+#      random_state: 37
+
+
+#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
+#cv = hisogram + std. scaler + var thr + ridge reg
 module: ml_project.model_selection
 class: GridSearchCV
 params:
@@ -185,26 +228,19 @@ params:
       class: StandardScaler
     - module: ml_project.models.feature_selection
       class: VarianceThreshold
-    - module: sklearn.kernel_ridge
-      class: KernelRidge
+    - module: sklearn.linear_model
+      class: Ridge
   param_grid:
     VarianceThreshold__threshold:
       - 0
-      - 0.1
-      - 0.2
     IntensityHistogram__bin_number:
-      - 45
       - 100
       - 450
-    KernelRidge__kernel:
-      - "linear"
-      - "rbf"
-      - "sigmoid"
-    KernelRidge__gamma:
+    Ridge__alpha:
       - 0.01
       - 0.1
       - 1.0
-      - 10.0
+      - 2.0
   cv:
     module: sklearn.model_selection
     class: KFold
