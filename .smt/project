@@ -1,42 +1,42 @@
 {
+  "sumatra_version": "0.8dev",
+  "allow_command_line_parameters": true,
   "name": "ml_project",
-  "default_launch_mode": {
-    "options": null,
-    "type": "sumatra.launch.SerialLaunchMode",
-    "working_directory": "/home/eastskykang/git/machine-learning-project"
+  "default_repository": {
+    "type": "sumatra.versioncontrol._git.GitRepository",
+    "url": "/home/eastskykang/git/machine-learning-project",
+    "upstream": "https://github.com/EastskyKang/machine-learning-project.git"
   },
-  "description": "",
+  "timestamp_format": "%Y%m%d-%H%M%S",
+  "default_launch_mode": {
+    "type": "sumatra.launch.SerialLaunchMode",
+    "working_directory": "/home/eastskykang/git/machine-learning-project",
+    "options": null
+  },
+  "plugins": [],
+  "on_changed": "error",
+  "label_generator": "timestamp",
+  "input_datastore": {
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
+    "root": "/home/eastskykang/git/machine-learning-project/data"
+  },
   "record_store": {
     "type": "sumatra.recordstore.django_store.DjangoRecordStore",
     "db_file": "/home/eastskykang/git/machine-learning-project/.smt/records"
   },
-  "default_executable": {
-    "version": "3.5.3",
-    "path": "/home/eastskykang/miniconda2/envs/ml_project/bin/python",
-    "options": "",
-    "type": "sumatra.programs.PythonExecutable",
-    "name": "Python"
-  },
-  "default_repository": {
-    "upstream": "https://github.com/EastskyKang/machine-learning-project.git",
-    "type": "sumatra.versioncontrol._git.GitRepository",
-    "url": "/home/eastskykang/git/machine-learning-project"
-  },
-  "allow_command_line_parameters": true,
-  "_most_recent": "20171006-134624",
-  "data_store": {
-    "root": "/home/eastskykang/git/machine-learning-project/data",
-    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
-  },
   "data_label": "cmdline",
-  "sumatra_version": "0.8dev",
-  "on_changed": "error",
-  "input_datastore": {
-    "root": "/home/eastskykang/git/machine-learning-project/data",
-    "type": "sumatra.datastore.filesystem.FileSystemDataStore"
+  "data_store": {
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
+    "root": "/home/eastskykang/git/machine-learning-project/data"
   },
-  "plugins": [],
-  "label_generator": "timestamp",
+  "default_executable": {
+    "type": "sumatra.programs.PythonExecutable",
+    "path": "/home/eastskykang/miniconda2/envs/ml_project/bin/python",
+    "name": "Python",
+    "options": "",
+    "version": "3.5.3"
+  },
+  "_most_recent": "20171006-174435",
   "default_main_file": "run.py",
-  "timestamp_format": "%Y%m%d-%H%M%S"
+  "description": ""
 }
