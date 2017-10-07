@@ -332,13 +332,13 @@ params:
       - 450
     IntensityHistogram__x_cell_number:
       - 8
-      - 16
+#      - 16
     IntensityHistogram__y_cell_number:
       - 8
-      - 16
+#      - 16
     IntensityHistogram__z_cell_number:
       - 8
-      - 16
+#      - 16
     VarianceThreshold__threshold:
       - 0
   cv:
