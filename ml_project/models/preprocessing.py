@@ -1,6 +1,7 @@
 from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
+from sklearn.utils.validation import check_array
 
 
 class StandardScaler(StandardScaler):
@@ -35,19 +36,36 @@ class StandardScaler(StandardScaler):
         return X_new
 
 
-class PrincipleComponentAnalysis(BaseEstimator, TransformerMixin):
+class PrincipleComponentAnalysis(PCA):
 
-    def __init__(self, n_components=100):
-        self.n_components = n_components
-        self.pca = PCA(n_components)
+    def __init__(self, n_components=None):
+        super(PrincipleComponentAnalysis, self).__init__(
+            n_components=n_components)
 
     def fit(self, X, y=None):
-        self.pca.fit(X)
 
-        print("\nPCA with n_components = {}".format(self.n_components))
-        print("variances = {}".format(self.pca.explained_variance_))
+        X = check_array(X)
 
+        print("------------------------------------")
+        print("PCA fit")
+        print("n_components = {}".format(self.n_components))
+        print("variances = {}".format(self.explained_variance_))
+
+        super(PrincipleComponentAnalysis, self).fit(X, y)
         return self
 
     def transform(self, X, y=None):
-        return self.pca.transform(self, X)
+
+        X = check_array(X)
+
+        print("------------------------------------")
+        print("PCA transform")
+        print("shape of X before pca : ")
+        print(X.shape)
+
+        X_new = super(PrincipleComponentAnalysis, self).transform(X, y)
+
+        print("shape of X after pca : ")
+        print(X_new.shape)
+
+        return X_new

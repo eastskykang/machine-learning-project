@@ -1,5 +1,6 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
+from ml_project.models import utils
 import numpy as np
 
 
@@ -14,10 +15,10 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
                  bin_number=45):
 
         # image dimension
-        self.IMAGE_DIM_X = 176
-        self.IMAGE_DIM_Y = 208
-        self.IMAGE_DIM_Z = 176
-        self.BIN_MAX = 4500
+        self.imageDimX = utils.Constants.IMAGE_DIM_X
+        self.imageDimY = utils.Constants.IMAGE_DIM_Y
+        self.imageDimZ = utils.Constants.IMAGE_DIM_Z
+        self.histBinMax = utils.Constants.IMAGE_VALUE_MAX
 
         # member variables
         self.x_cell_number = x_cell_number
@@ -40,6 +41,7 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
+
         X = check_array(X)
         n_samples, n_features = np.shape(X)
 
@@ -48,25 +50,22 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         print("shape of X before transform : ")
         print(X.shape)
 
-        X = check_array(X)
-        n_samples, n_features = np.shape(X)
-
-        X_train_3D = np.reshape(X, (-1,
-                                    self.IMAGE_DIM_X,
-                                    self.IMAGE_DIM_Y,
-                                    self.IMAGE_DIM_Z))
+        X_3D = np.reshape(X, (-1,
+                              self.imageDimX,
+                              self.imageDimY,
+                              self.imageDimZ))
 
         # cell (contains index of voxels) as bin edge
         x_cell_edges = np.linspace(0,
-                                   self.IMAGE_DIM_X,
+                                   self.imageDimX,
                                    self.x_cell_number + 1,
                                    dtype=int)
         y_cell_edges = np.linspace(0,
-                                   self.IMAGE_DIM_Y,
+                                   self.imageDimY,
                                    self.y_cell_number + 1,
                                    dtype=int)
         z_cell_edges = np.linspace(0,
-                                   self.IMAGE_DIM_Z,
+                                   self.imageDimZ,
                                    self.z_cell_number + 1,
                                    dtype=int)
 
@@ -78,7 +77,7 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
                               self.bin_number))
 
         for i in range(0, n_samples):
-            image_3D = X_train_3D[i, :, :, :]
+            image_3D = X_3D[i, :, :, :]
 
             for xi in range(0, x_cell_edges.size - 1):
                 for yi in range(0, y_cell_edges.size - 1):
@@ -86,12 +85,12 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
 
                         # image block for histogram
                         image_block = image_3D[x_cell_edges[xi]:x_cell_edges[xi+1],
-                                               y_cell_edges[yi]:y_cell_edges[yi+1],
-                                               z_cell_edges[zi]:z_cell_edges[zi+1]]
+                                      y_cell_edges[yi]:y_cell_edges[yi+1],
+                                      z_cell_edges[zi]:z_cell_edges[zi+1]]
 
                         # histogram
                         histogram[i, xi, yi, zi, :], bins = \
-                            np.histogram(image_block, bins=np.linspace(0, self.BIN_MAX, self.bin_number + 1))
+                            np.histogram(image_block, bins=np.linspace(0, self.histBinMax, self.bin_number + 1))
 
         X_new = np.reshape(histogram, (n_samples, -1))
 
@@ -99,3 +98,34 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         print(X_new.shape)
 
         return X_new
+
+
+# class IntensityGradient(BaseEstimator, TransformerMixin)
+#     """3D Image gradient"""
+#
+#     def __init__(self):
+#         # image dimension
+#         self.imageDimX = utils.Constants.IMAGE_DIM_X
+#         self.imageDimY = utils.Constants.IMAGE_DIM_Y
+#         self.imageDimZ = utils.Constants.IMAGE_DIM_Z
+#         self.histBinMax = utils.Constants.IMAGE_VALUE_MAX
+#
+#     def fit(self, X, y=None):
+#         X = check_array(X)
+#
+#         return self
+#
+#     def transform(self, X, y=None):
+#         X = check_array(X)
+#         n_samples, n_features = np.shape(X)
+#
+#         X_3D = np.reshape(X, (-1,
+#                               self.imageDimX,
+#                               self.imageDimY,
+#                               self.imageDimZ))
+#
+#         for i in range(0, n_samples):
+#             image_3D = X_3D[i, :, :, :]
+#             image_gradient = np.gradient(image_3D)
+#
+#

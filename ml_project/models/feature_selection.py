@@ -49,6 +49,7 @@ class VarianceThreshold(VarianceThreshold):
         return self
 
     def transform(self, X, y=None):
+        print("------------------------------------")
         print("VarianceThreshold transform with thr = {}"
               .format(self.threshold))
 

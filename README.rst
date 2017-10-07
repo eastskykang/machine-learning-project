@@ -22,6 +22,8 @@ ETH Machine Learning Projects
 .. _`.environment`: .environment
 .. _`request access`: https://docs.gitlab.com/ee/user/project/members/index.html#request-access-to-a-project
 .. _`invite link`: https://www.kaggle.com/t/4e959a86df6a450ea3dad585f71f67d1
+.. _`More information`: https://drive.google.com/open?id=1UM_osCot4MomlPQu-G83LHt721nSyIJG5t6rO_yLOZU
+.. _`General Project Information`: https://drive.google.com/open?id=1NvAqcPzgnTIflpG6BzeAt3dSUlu1JlYJ_2BsQVab6pI
 
 This repository contains the *Python 3.5.3* framework for the practical projects offered
 during the *Machine Learning* course at ETH Zurich. It serves two main purposes:
@@ -32,8 +34,8 @@ during the *Machine Learning* course at ETH Zurich. It serves two main purposes:
 
 The project description and result submission are hosted by Kaggle:
 
+- `General Project Information`_
 - `Kaggle Project 1`_ (`invite link`_)
-
 
 .. contents::
 
@@ -60,6 +62,8 @@ Ok, now we understand the code and the experiment setup. So let's run their code
 *ImportError: No module named fancymodule*
 
 Sounds familiar? Don't worry, miniconda_ is a central part of the framework, which provides your code an isolated, functional environment to run.
+
+`More information`_ on how the framework functions.
 
 Getting Started
 ===============
@@ -133,12 +137,6 @@ Make sure the environment is activated:
 .. code-block:: shell
 
     source activate ml_project
-
-If you encounter problems with site-packages try:
-
-.. code-block:: shell
-
-    export PYTHONNOUSERSITE=True; source activate ml_project
 
 Make sure you have downloaded the data to the data_ folder, either by using the
 kaggle-cli_ tool or from the kaggle_ homepage.
