@@ -350,6 +350,7 @@
 #      random_state: 37
 
 
+#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 #cv = std. scaler + pca + ridge reg
 module: ml_project.model_selection
 class: GridSearchCV
