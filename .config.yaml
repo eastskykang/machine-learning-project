@@ -427,3 +427,4 @@ params:
       n_splits: 5
       shuffle: True
       random_state: 37
+      n_jobs: -1
