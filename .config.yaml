@@ -352,31 +352,31 @@
 
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 #cv = std. scaler + pca + ridge reg
-module: ml_project.model_selection
-class: GridSearchCV
-params:
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
-    - module: ml_project.models.preprocessing
-      class: PrincipleComponentAnalysis
-    - module: sklearn.linear_model
-      class: Ridge
-  param_grid:
-    PrincipleComponentAnalysis__n_components:
-      - 1000
-      - 2000
-      - 5000
-    Ridge__alpha:
-      - 0.01
-      - 0.1
-      - 1.0
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 5
-      shuffle: True
-      random_state: 37
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: ml_project.models.preprocessing
+#      class: PrincipleComponentAnalysis
+#    - module: sklearn.linear_model
+#      class: Ridge
+#  param_grid:
+#    PrincipleComponentAnalysis__n_components:
+#      - 1000
+#      - 2000
+#      - 5000
+#    Ridge__alpha:
+#      - 0.01
+#      - 0.1
+#      - 1.0
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 5
+#      shuffle: True
+#      random_state: 37
