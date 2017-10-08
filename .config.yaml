@@ -380,3 +380,50 @@
 #      n_splits: 5
 #      shuffle: True
 #      random_state: 37
+
+
+
+#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
+#cv = histogram + std. scaler + var thr + ridge reg
+module: ml_project.model_selection
+class: GridSearchCV
+params:
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.feature_extraction
+      class: IntensityHistogram
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: ml_project.models.preprocessing
+      class: PrincipleComponentAnalysis
+    - module: sklearn.linear_model
+      class: Ridge
+  param_grid:
+    IntensityHistogram__bin_number:
+      - 80
+      - 100
+    IntensityHistogram__x_cell_number:
+      - 16
+    IntensityHistogram__y_cell_number:
+      - 16
+    IntensityHistogram__z_cell_number:
+      - 16
+    PrincipleComponentAnalysis__n_components:
+      - 1000
+      - 2000
+      - 5000
+      - 10000
+    Ridge__alpha:
+      - 0.01
+      - 0.02
+      - 0.05
+      - 0.1
+      - 0.3
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 5
+      shuffle: True
+      random_state: 37
