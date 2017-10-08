@@ -124,8 +124,16 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
 #                               self.imageDimY,
 #                               self.imageDimZ))
 #
+#         X_new = np.zeros((n_samples,
+#                          3,
+#                          self.imageDimX,
+#                          self.imageDimY,
+#                          self.imageDimZ))
+#
+#
+#
 #         for i in range(0, n_samples):
 #             image_3D = X_3D[i, :, :, :]
 #             image_gradient = np.gradient(image_3D)
 #
-#
+#             X_new[i, :, :, :] = image_gradient
