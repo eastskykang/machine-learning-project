@@ -65,11 +65,8 @@ class KernelEstimator(skl.base.BaseEstimator, skl.base.TransformerMixin):
 
 class MLPRegressor(MLPRegressor):
     """Multi-Layer Perceptron"""
-    def __init__(self, hidden_layer_sizes=(5000, 1000, 500, 100, 20), activation='relu', solver='adam', alpha=0.0001, batch_size='auto',
-                 learning_rate='constant', learning_rate_init=0.001, shuffle=True, random_state=None):
-        super(MLPRegressor, self).__init__(self, hidden_layer_sizes=hidden_layer_sizes, activation=activation, solver=solver,
-                                           alpha=0.0001, batch_size=batch_size, learning_rate=learning_rate,
-                                           learning_rate_init=learning_rate_init, shuffle=shuffle, random_state=random_state)
+    def __init__(self, hidden_layer_sizes=(5000, 1000, 500, 100, 20)):
+        super(MLPRegressor, self).__init__(hidden_layer_sizes=hidden_layer_sizes)
 
     def fit(self, X, y):
         super(MLPRegressor, self).fit(X, y)
