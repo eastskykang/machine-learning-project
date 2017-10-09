@@ -479,7 +479,7 @@ params:
       class: IntensityHistogram
     - module: ml_project.models.preprocessing
       class: StandardScaler
-    - module: sklearn.neural_network
+    - module: ml_project.models.regression
       class: MLPRegressor
   param_grid:
     IntensityHistogram__bin_number:
