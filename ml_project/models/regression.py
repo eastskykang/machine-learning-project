@@ -2,6 +2,7 @@ import sklearn as skl
 import numpy as np
 import pandas as pd
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from sklearn.neural_network import MLPRegressor
 from matplotlib import pyplot as plt
 
 
@@ -61,9 +62,17 @@ class KernelEstimator(skl.base.BaseEstimator, skl.base.TransformerMixin):
     def set_save_path(self, save_path):
         self.save_path = save_path
 
-# class MLPRegressor(MLPRegressor)
-#     """Multi-Layer Perceptron"""
-#     def __init__(self, hidden_layer_sizes=(100, ), activation=’relu’, solver=’adam’, alpha=0.0001, batch_size=’auto’,
-#                  learning_rate=’constant’, learning_rate_init=0.001, power_t=0.5, max_iter=200, shuffle=True,
-#                  random_state=None, tol=0.0001):
-#         super(self, MLPRegressor)
+class MLPRegressor(MLPRegressor):
+    """Multi-Layer Perceptron"""
+    def __init__(self, hidden_layer_sizes=(5000, 1000, 500, 100), activation='relu', solver='adam', alpha=0.0001, batch_size='auto',
+                 learning_rate='constant', learning_rate_init=0.001, shuffle=True, random_state=None):
+        super(MLPRegressor, self).__init__(self, hidden_layer_sizes=hidden_layer_sizes, activation=activation, solver=solver,
+                                           alpha=0.0001, batch_size=batch_size, learning_rate=learning_rate,
+                                           learning_rate_init=learning_rate_init, shuffle=shuffle, random_state=random_state)
+
+    def fit(self, X, y=None):
+        super(MLPRegressor, self).fit(X, y)
+
+    def transform(self, X, y=None):
+        super(MLPRegressor, self).transform(X, y)
+
