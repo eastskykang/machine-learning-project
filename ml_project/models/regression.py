@@ -62,17 +62,21 @@ class KernelEstimator(skl.base.BaseEstimator, skl.base.TransformerMixin):
     def set_save_path(self, save_path):
         self.save_path = save_path
 
+
 class MLPRegressor(MLPRegressor):
     """Multi-Layer Perceptron"""
-    def __init__(self, hidden_layer_sizes=(5000, 1000, 500, 100), activation='relu', solver='adam', alpha=0.0001, batch_size='auto',
+    def __init__(self, hidden_layer_sizes=(5000, 1000, 500, 100, 20), activation='relu', solver='adam', alpha=0.0001, batch_size='auto',
                  learning_rate='constant', learning_rate_init=0.001, shuffle=True, random_state=None):
         super(MLPRegressor, self).__init__(self, hidden_layer_sizes=hidden_layer_sizes, activation=activation, solver=solver,
                                            alpha=0.0001, batch_size=batch_size, learning_rate=learning_rate,
                                            learning_rate_init=learning_rate_init, shuffle=shuffle, random_state=random_state)
 
-    def fit(self, X, y=None):
+    def fit(self, X, y):
         super(MLPRegressor, self).fit(X, y)
+        return self
 
-    def transform(self, X, y=None):
-        super(MLPRegressor, self).transform(X, y)
+    def predict(self, X):
+        return super(MLPRegressor, self).predict(X)
 
+    def score(self, X, y, sample_weight=None):
+        return super(MLPRegressor, self).score(X, y, sample_weight=sample_weight)

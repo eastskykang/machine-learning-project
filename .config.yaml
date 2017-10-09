@@ -492,8 +492,8 @@ params:
       - 8
     IntensityHistogram__z_cell_number:
       - 8
-    MLPRegressor__hidden_layer_sizes:
-      - (5000, 1000, 500, 100, 20)
+#    MLPRegressor__hidden_layer_sizes:
+#      - (5000, 1000, 500, 100, 20)
   cv:
     module: sklearn.model_selection
     class: KFold
