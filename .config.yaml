@@ -419,55 +419,6 @@
 #      random_state: 37
 
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
-#cv = histogram + std. scaler + var thr
-#module: ml_project.model_selection
-#class: GridSearchCV
-#params:
-#  n_jobs: -1
-#  est_module: ml_project.pipeline
-#  est_class: Pipeline
-#  est_params:
-#    - module: ml_project.models.utils
-#      class: ImageDownSampling
-#    - module: ml_project.models.feature_extraction
-#      class: IntensityHistogram
-#    - module: ml_project.models.preprocessing
-#      class: StandardScaler
-#    - module: sklearn.linear_model
-#      class: Ridge
-#  param_grid:
-#    ImageDownSampling__scale:
-#      - 0.5
-#    IntensityHistogram__bin_number:
-#      - 20
-#      - 50
-#      - 100
-#      - 200
-##      - 500
-#    IntensityHistogram__x_cell_number:
-#      - 4
-#      - 8
-#    IntensityHistogram__y_cell_number:
-#      - 4
-#      - 8
-#    IntensityHistogram__z_cell_number:
-#      - 4
-#      - 8
-#    Ridge__alpha:
-#      - 0.05
-#      - 0.1
-#      - 0.2
-#      - 0.5
-#  cv:
-#    module: sklearn.model_selection
-#    class: KFold
-#    params:
-#      n_splits: 5
-#      shuffle: True
-#      random_state: 37
-
-
-
 module: ml_project.model_selection
 class: GridSearchCV
 params:
@@ -476,24 +427,28 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_extraction
-      class: IntensityHistogram
+      class: IntensityMean
     - module: ml_project.models.preprocessing
       class: StandardScaler
-    - module: ml_project.models.regression
-      class: MLPRegressor
+    - module: ml_project.models.feature_selection
+      class: VarianceThreshold
+    - module: sklearn.linear_model
+      class: Ridge
   param_grid:
-    IntensityHistogram__bin_number:
-      - 20
-      - 50
-      - 100
-    IntensityHistogram__x_cell_number:
+    IntensityMean__x_cell_number:
       - 8
-    IntensityHistogram__y_cell_number:
+      - 16
+    IntensityMean__y_cell_number:
       - 8
-    IntensityHistogram__z_cell_number:
+      - 16
+    IntensityMean__z_cell_number:
       - 8
-#    MLPRegressor__hidden_layer_sizes:
-#      - (5000, 1000, 500, 100, 20)
+      - 16
+    Ridge__alpha:
+      - 0.001
+      - 0.01
+      - 0.1
+      - 0.2
   cv:
     module: sklearn.model_selection
     class: KFold
