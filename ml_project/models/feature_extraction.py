@@ -318,8 +318,8 @@ class IntensityMeanAndMedian(BaseEstimator, TransformerMixin):
         return X_new
 
 
-class IntensityGradient(BaseEstimator, TransformerMixin):
-    """Gradient histogram for cells"""
+class MeanIntensityGradient(BaseEstimator, TransformerMixin):
+    """Mean Vector of Gradient for each cells"""
     # divide 3d image into cells and make histogram per cell
     def __init__(self,
                  x_cell_number=8,
@@ -382,14 +382,13 @@ class IntensityGradient(BaseEstimator, TransformerMixin):
                                    self.z_cell_number + 1,
                                    dtype=int)
 
-        # histograms
-        histogram = np.zeros((n_samples,
-                              self.x_cell_number,
-                              self.y_cell_number,
-                              self.z_cell_number,
-                              self.bin_number**3))
+        # gradient
+        gradient = np.zeros((n_samples,
+                             self.x_cell_number,
+                             self.y_cell_number,
+                             self.z_cell_number, 3))
 
-        histogram_bins = np.linspace(0, self.histBinMax, self.bin_number + 1);
+        histogram_bins = np.linspace(0, self.histBinMax, self.bin_number + 1)
 
         for i in range(0, n_samples):
             image_3D = X_3D[i, :, :, :]
@@ -403,13 +402,14 @@ class IntensityGradient(BaseEstimator, TransformerMixin):
                                       y_cell_edges[yi]:y_cell_edges[yi+1],
                                       z_cell_edges[zi]:z_cell_edges[zi+1]]
 
-                        # gradient
+                        # block gradient
                         image_gradient = np.gradient(image_block)
 
-                        # histogram
-                        histogram = np.histogramdd(image_gradient, bins=(histogram_bins, histogram_bins, histogram_bins))
+                        gradient[i, xi, yi, zi, 0] = np.mean(image_gradient[0])
+                        gradient[i, xi, yi, zi, 1] = np.mean(image_gradient[1])
+                        gradient[i, xi, yi, zi, 2] = np.mean(image_gradient[2])
 
-        X_new = np.reshape(histogram, (n_samples, -1))
+        X_new = np.reshape(gradient, (n_samples, -1))
 
         print("shape of X after transform : ")
         print(X_new.shape)
