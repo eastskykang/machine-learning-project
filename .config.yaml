@@ -391,10 +391,12 @@ params:
   est_params:
     - module: ml_project.models.utils
       class: ImageDownSampling
-    - module: ml_project.models.feature_extraction
-      class: IntensityHistogram
+#    - module: ml_project.models.feature_extraction
+#      class: IntensityHistogram
     - module: ml_project.models.preprocessing
       class: StandardScaler
+    - module: ml_project.models.feature_selection
+      class: VarianceThreshold
     - module: sklearn.linear_model
       class: Lasso
   param_grid:
@@ -402,17 +404,6 @@ params:
       - 0.25
       - 0.5
       - 1.0
-    IntensityHistogram__bin_number:
-      - 10
-      - 60
-      - 100
-      - 200
-    IntensityHistogram__x_cell_number:
-      - 8
-    IntensityHistogram__y_cell_number:
-      - 8
-    IntensityHistogram__z_cell_number:
-      - 8
     Lasso__alpha:
       - 0.001
       - 0.01
