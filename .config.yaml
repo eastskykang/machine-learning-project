@@ -382,41 +382,6 @@
 #      shuffle: True
 #      random_state: 37
 
-module: ml_project.model_selection
-class: GridSearchCV
-params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
-    - module: ml_project.models.utils
-      class: ImageDownSampling
-#    - module: ml_project.models.feature_extraction
-#      class: IntensityHistogram
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
-    - module: ml_project.models.feature_selection
-      class: VarianceThreshold
-    - module: sklearn.linear_model
-      class: Lasso
-  param_grid:
-    ImageDownSampling__scale:
-      - 0.25
-      - 0.5
-      - 1.0
-    Lasso__alpha:
-      - 0.001
-      - 0.01
-      - 0.1
-      - 0.3
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 3
-      shuffle: True
-      random_state: 37
-
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 #module: ml_project.model_selection
 #class: GridSearchCV
@@ -456,5 +421,45 @@ params:
 #      shuffle: True
 ##      random_state: 37
 
-#module: ml_project.models.feature_extraction
-#class: IntensityGradient
+#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
+module: ml_project.model_selection
+class: GridSearchCV
+params:
+  n_jobs: -1
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.feature_extraction
+      class: IntensityMedian
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: ml_project.models.feature_selection
+      class: VarianceThreshold
+    - module: sklearn.linear_model
+      class: Ridge
+  param_grid:
+    IntensityMean__x_cell_number:
+      - 8
+      - 16
+      - 32
+    IntensityMean__y_cell_number:
+      - 8
+      - 16
+      - 32
+    IntensityMean__z_cell_number:
+      - 8
+      - 16
+      - 32
+    Ridge__alpha:
+      - 0.001
+      - 0.01
+      - 0.1
+      - 0.2
+      - 0.5
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 3
+      shuffle: True
+#      random_state: 37
