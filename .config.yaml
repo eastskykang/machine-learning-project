@@ -422,7 +422,7 @@
 ##      random_state: 37
 
 ##smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
-#module: ml_project.model_selection
+module: ml_project.model_selection
 class: GridSearchCV
 params:
   n_jobs: -1
@@ -438,15 +438,15 @@ params:
     - module: sklearn.linear_model
       class: Ridge
   param_grid:
-    IntensityMedian__x_cell_number:
+    IntensityMeanAndMedian__x_cell_number:
       - 8
       - 16
       - 32
-    IntensityMedian__y_cell_number:
+    IntensityMeanAndMedian__y_cell_number:
       - 8
       - 16
       - 32
-    IntensityMedian__z_cell_number:
+    IntensityMeanAndMedian__z_cell_number:
       - 8
       - 16
       - 32
@@ -478,3 +478,5 @@ params:
 #      class: VarianceThreshold
 #    - module: ml_project.models.regression
 #      class: KernelEstimator
+
+#module: ml_project.models.feature_ex
