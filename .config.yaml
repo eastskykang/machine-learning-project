@@ -543,15 +543,15 @@ params:
     - module: sklearn.linear_model
       class: Ridge
   param_grid:
-    IntensityMeanAndMedian__x_cell_number:
+    MeanIntensityGradient__x_cell_number:
       - 8
       - 16
       - 32
-    IntensityMeanAndMedian__y_cell_number:
+    MeanIntensityGradient__y_cell_number:
       - 8
       - 16
       - 32
-    IntensityMeanAndMedian__z_cell_number:
+    MeanIntensityGradient__z_cell_number:
       - 8
       - 16
       - 32
