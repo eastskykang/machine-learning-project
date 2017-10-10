@@ -2,7 +2,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 from ml_project.models import utils
 import numpy as np
-import cv2
+
 
 class IntensityHistogram(BaseEstimator, TransformerMixin):
     """Feature from intensity histogram of 3D images"""
@@ -264,6 +264,8 @@ class IntensityMedian(BaseEstimator, TransformerMixin):
         print(X_new.shape)
 
         return X_new
+
+
 
 
 # class IntensityGradient(BaseEstimator, TransformerMixin):
