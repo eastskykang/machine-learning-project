@@ -382,6 +382,51 @@
 #      shuffle: True
 #      random_state: 37
 
+module: ml_project.model_selection
+class: GridSearchCV
+params:
+  n_jobs: -1
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.utils
+      class: ImageDownSampling
+    - module: ml_project.models.feature_extraction
+      class: IntensityHistogram
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: sklearn.linear_model
+      class: Lasso
+  param_grid:
+    ImageDownSampling__scale:
+      - 0.25
+      - 0.5
+      - 1.0
+    IntensityHistogram__bin_number:
+      - 10
+      - 60
+      - 100
+      - 200
+    IntensityHistogram__x_cell_number:
+      - 8
+    IntensityHistogram__y_cell_number:
+      - 8
+    IntensityHistogram__z_cell_number:
+      - 8
+    Lasso__alpha:
+      - 0.001
+      - 0.01
+      - 0.1
+      - 0.3
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 3
+      shuffle: True
+      random_state: 37
+
+#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 #module: ml_project.model_selection
 #class: GridSearchCV
 #params:
@@ -390,69 +435,35 @@
 #  est_class: Pipeline
 #  est_params:
 #    - module: ml_project.models.feature_extraction
-#      class: IntensityHistogram
+#      class: IntensityMean
 #    - module: ml_project.models.preprocessing
 #      class: StandardScaler
+#    - module: ml_project.models.feature_selection
+#      class: VarianceThreshold
 #    - module: sklearn.linear_model
 #      class: Ridge
 #  param_grid:
-#    IntensityHistogram__bin_number:
-#      - 10
-##      - 60
-##      - 100
-##      - 200
-#    IntensityHistogram__x_cell_number:
-#      - 4
-#    IntensityHistogram__y_cell_number:
-#      - 4
-#    IntensityHistogram__z_cell_number:
-#      - 4
+#    IntensityMean__x_cell_number:
+#      - 8
+#      - 16
+#    IntensityMean__y_cell_number:
+#      - 8
+#      - 16
+#    IntensityMean__z_cell_number:
+#      - 8
+#      - 16
 #    Ridge__alpha:
+#      - 0.001
+#      - 0.01
 #      - 0.1
 #      - 0.2
 #  cv:
 #    module: sklearn.model_selection
 #    class: KFold
 #    params:
-#      n_splits: 5
+#      n_splits: 3
 #      shuffle: True
-#      random_state: 37
+##      random_state: 37
 
-#smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
-module: ml_project.model_selection
-class: GridSearchCV
-params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
-    - module: ml_project.models.feature_extraction
-      class: IntensityMean
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
-    - module: ml_project.models.feature_selection
-      class: VarianceThreshold
-    - module: sklearn.linear_model
-      class: Ridge
-  param_grid:
-    IntensityMean__x_cell_number:
-      - 8
-      - 16
-    IntensityMean__y_cell_number:
-      - 8
-      - 16
-    IntensityMean__z_cell_number:
-      - 8
-      - 16
-    Ridge__alpha:
-      - 0.001
-      - 0.01
-      - 0.1
-      - 0.2
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 3
-      shuffle: True
-#      random_state: 37
+#module: ml_project.models.feature_extraction
+#class: IntensityGradient

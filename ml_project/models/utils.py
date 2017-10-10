@@ -10,6 +10,7 @@ class Constants:
     IMAGE_DIM_Y = 208
     IMAGE_DIM_Z = 176
     IMAGE_VALUE_MAX = 4500
+    IMAGE_FULL_FEATURE = 6443008
 
 
 class ImageDownSampling(BaseEstimator, TransformerMixin):
@@ -34,7 +35,7 @@ class ImageDownSampling(BaseEstimator, TransformerMixin):
         n_samples, n_features = np.shape(X)
 
         print("------------------------------------")
-        print("ImageDownSampling fit")
+        print("ImageDownSampling transform")
         print("resize scale = {}".format(self.scale))
 
         X_3D = np.reshape(X, (-1,
