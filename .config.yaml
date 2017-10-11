@@ -582,12 +582,21 @@ params:
       class: SiftDetectorXY
     - module: ml_project.models.preprocessing
       class: StandardScaler
+    - module: ml_project.models.preprocessing
+      class: PrincipleComponentAnalysis
     - module: ml_project.models.feature_selection
       class: VarianceThreshold
     - module: sklearn.linear_model
       class: Ridge
   param_grid:
+    PrincipleComponentAnalysis__n_components:
+      - 1000
+      - 2000
+      - 5000
+      - 10000
     Ridge__alpha:
+      - 0.01
+      - 0.05
       - 0.1
       - 0.2
   cv:
