@@ -1,7 +1,8 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from scipy.ndimage import zoom
-import numpy as np
 from sklearn.utils.validation import check_array
+import numpy as np
+import nibabel as nib
 
 
 class Constants:
@@ -59,3 +60,22 @@ class ImageDownSampling(BaseEstimator, TransformerMixin):
         print(X_new.shape)
 
         return X_new
+
+# class NiImage(BaseEstimator, TransformerMixin):
+#     def __init__(self):
+#
+#     def fit(self, X, y=None):
+#
+#     def transform(self, X, y=None):
+#
+#         X = check_array(X)
+#         n_samples, n_features = np.shape(X)
+#
+#         X_3D = np.reshape(X, (-1,
+#                               Constants.IMAGE_DIM_X,
+#                               Constants.IMAGE_DIM_Y,
+#                               Constants.IMAGE_DIM_Z))
+#
+#         for i in range(0, n_samples):
+#             image_3D = X_3D[i, :, :, :]
+#             nibImg = nib.Nifti1Image(image_3D)
