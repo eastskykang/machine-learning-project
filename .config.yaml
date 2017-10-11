@@ -571,6 +571,17 @@
 ##      random_state: 37
 
 
-
-module: ml_project.models.feature_extraction
-class: SiftDetectorXY
+module: ml_project.pipeline
+class: Pipeline
+params:
+  class_list:
+    - module: ml_project.models.feature_extraction
+      class: SiftDetectorXY
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: ml_project.models.feature_selection
+      class: VarianceThreshold
+    - module: sklearn.linear_model
+      class: Ridge
+      params:
+        alpha: 0.2
