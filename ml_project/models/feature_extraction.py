@@ -427,16 +427,10 @@ class SiftDetectorXY(BaseEstimator, TransformerMixin):
         self.imageDimX = utils.Constants.IMAGE_DIM_X
         self.imageDimY = utils.Constants.IMAGE_DIM_Y
         self.imageDimZ = utils.Constants.IMAGE_DIM_Z
-
-        # sift
-        self.sift = cv2.xfeatures2d.SIFT_create()
         self.featureNumPerLayer = featureNumPerLayer
 
 
     def fit(self, X, y=None):
-        X = check_array(X)
-        n_samples, n_features = np.shape(X)
-
         print("------------------------------------")
         print("SiftDetector fit")
         print("shape of X before transform : ")
@@ -456,6 +450,9 @@ class SiftDetectorXY(BaseEstimator, TransformerMixin):
         print("SiftDetector transform")
         print("shape of X before transform : ")
         print(X.shape)
+
+        # sift
+        sift = cv2.xfeatures2d.SIFT_create()
 
         X_3D = np.reshape(X, (-1,
                               self.imageDimX,
@@ -480,8 +477,8 @@ class SiftDetectorXY(BaseEstimator, TransformerMixin):
                 image_block = np.array(image_block * 255,
                                        dtype=np.uint8)
 
-                kp = self.sift.detect(image_block, None)
-                # kp, des = self.sift.detectAndCalculate(image_block, None)
+                kp = sift.detect(image_block, None)
+                # kp, des = sift.detectAndCalculate(image_block, None)
 
                 if len(kp) > self.featureNumPerLayer:
                     X_new[i, zi, 0:self.featureNumPerLayer, :] = \
