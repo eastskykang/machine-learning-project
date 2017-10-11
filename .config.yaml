@@ -571,10 +571,13 @@
 ##      random_state: 37
 
 
-module: ml_project.pipeline
-class: Pipeline
+module: ml_project.model_selection
+class: GridSearchCV
 params:
-  class_list:
+  n_jobs: -1
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
     - module: ml_project.models.feature_extraction
       class: SiftDetectorXY
     - module: ml_project.models.preprocessing
@@ -583,5 +586,15 @@ params:
       class: VarianceThreshold
     - module: sklearn.linear_model
       class: Ridge
-      params:
-        alpha: 0.2
+  param_grid:
+    Ridge__alpha:
+      - 0.1
+      - 0.2
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 3
+      shuffle: True
+#      random_state: 37
+
