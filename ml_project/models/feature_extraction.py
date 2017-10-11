@@ -2,7 +2,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 from ml_project.models import utils
 import numpy as np
-
+import cv2
 
 class IntensityHistogram(BaseEstimator, TransformerMixin):
     """Feature from intensity histogram of 3D images"""
@@ -342,7 +342,7 @@ class MeanIntensityGradient(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
 
         print("------------------------------------")
-        print("IntensityGradient fit")
+        print("MeanIntensityGradient fit")
         print("cell numbers = {}x{}x{}".format(self.x_cell_number,
                                                self.y_cell_number,
                                                self.z_cell_number))
@@ -359,7 +359,7 @@ class MeanIntensityGradient(BaseEstimator, TransformerMixin):
         n_samples, n_features = np.shape(X)
 
         print("------------------------------------")
-        print("IntensityHistogram transform")
+        print("MeanIntensityGradient transform")
         print("shape of X before transform : ")
         print(X.shape)
 
@@ -415,3 +415,84 @@ class MeanIntensityGradient(BaseEstimator, TransformerMixin):
         print(X_new.shape)
 
         return X_new
+
+
+class SiftDetectorXY(BaseEstimator, TransformerMixin):
+    """Sift feature for each cut (plane // XY)"""
+
+    # divide 3d image into cells and make histogram per cell
+    def __init__(self, featureNumPerLayer=50):
+
+        # image dimension
+        self.imageDimX = utils.Constants.IMAGE_DIM_X
+        self.imageDimY = utils.Constants.IMAGE_DIM_Y
+        self.imageDimZ = utils.Constants.IMAGE_DIM_Z
+
+        # sift
+        self.sift = cv2.xfeatures2d.SIFT_create()
+        self.featureNumPerLayer = featureNumPerLayer
+
+
+    def fit(self, X, y=None):
+        X = check_array(X)
+        n_samples, n_features = np.shape(X)
+
+        print("------------------------------------")
+        print("SiftDetector fit")
+        print("shape of X before transform : ")
+        print(X.shape)
+
+        # no internal variable
+        X = check_array(X)
+
+        return self
+
+    def transform(self, X, y=None):
+
+        X = check_array(X)
+        n_samples, n_features = np.shape(X)
+
+        print("------------------------------------")
+        print("SiftDetector transform")
+        print("shape of X before transform : ")
+        print(X.shape)
+
+        X_3D = np.reshape(X, (-1,
+                              self.imageDimX,
+                              self.imageDimY,
+                              self.imageDimZ))
+
+        X_new = np.zeros((n_samples,
+                          self.imageDimZ,
+                          self.featureNumPerLayer,
+                          2))
+
+        for i in range(0, n_samples):
+            image_3D = X_3D[i, :, :, :]
+
+            for zi in range(0, self.imageDimZ):
+                # image block for histogram
+                image_block = image_3D[:,:,zi]
+
+                # normalize for feature
+                image_block = image_block / \
+                              utils.Constants.IMAGE_VALUE_MAX
+                image_block = np.array(image_block * 255,
+                                       dtype=np.uint8)
+
+                kp = self.sift.detect(image_block, None)
+                # kp, des = self.sift.detectAndCalculate(image_block, None)
+
+                if len(kp) > self.featureNumPerLayer:
+                    X_new[i, zi, 0:self.featureNumPerLayer, :] = \
+                        np.array([keyPoint.pt for keyPoint in kp[0:self.featureNumPerLayer]])
+                elif len(kp) > 0:
+                    X_new[i, zi, 0:len(kp), :] = \
+                        np.array([keyPoint.pt for keyPoint in kp])
+
+        print("shape of X after transform : ")
+        print(X_new.shape)
+
+        return X_new
+
+
