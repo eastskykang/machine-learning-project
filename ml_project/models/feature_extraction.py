@@ -490,6 +490,8 @@ class SiftDetectorXY(BaseEstimator, TransformerMixin):
                     X_new[i, zi, 0:len(kp), :] = \
                         np.array([keyPoint.pt for keyPoint in kp])
 
+        X_new = np.reshape(X_new, (n_samples, -1))
+
         print("shape of X after transform : ")
         print(X_new.shape)
 
