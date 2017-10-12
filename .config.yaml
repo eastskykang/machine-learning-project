@@ -579,7 +579,7 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_extraction
-      class: SiftDetector
+      class: SiftAllAxis
     - module: ml_project.models.preprocessing
       class: StandardScaler
 #    - module: ml_project.models.preprocessing
@@ -606,8 +606,3 @@ params:
       n_splits: 3
       shuffle: True
 #      random_state: 37
-#
-#module: ml_project.models.feature_extraction
-#class: SiftDetector
-#params:
-#  verbosity: 2
