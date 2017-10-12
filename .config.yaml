@@ -579,21 +579,21 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_extraction
-      class: SiftDetectorXY
+      class: SiftDetector
     - module: ml_project.models.preprocessing
       class: StandardScaler
-    - module: ml_project.models.preprocessing
-      class: PrincipleComponentAnalysis
+#    - module: ml_project.models.preprocessing
+#      class: PrincipleComponentAnalysis
     - module: ml_project.models.feature_selection
       class: VarianceThreshold
     - module: sklearn.linear_model
       class: Ridge
   param_grid:
-    PrincipleComponentAnalysis__n_components:
-      - 1000
-      - 2000
-      - 5000
-      - 10000
+#    PrincipleComponentAnalysis__n_components:
+#      - 1000
+#      - 2000
+#      - 5000
+#      - 10000
     Ridge__alpha:
       - 0.01
       - 0.05
