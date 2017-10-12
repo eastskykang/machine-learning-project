@@ -417,24 +417,31 @@ class MeanIntensityGradient(BaseEstimator, TransformerMixin):
         return X_new
 
 
-class SiftDetectorXY(BaseEstimator, TransformerMixin):
+class SiftDetector(BaseEstimator, TransformerMixin):
     """Sift feature for each cut (plane // XY)"""
 
     # divide 3d image into cells and make histogram per cell
-    def __init__(self, featureNumPerLayer=50):
+    def __init__(self, split_number_axis0=8, split_number_axis1=8,
+                 axis='z', verbosity=0):
 
         # image dimension
-        self.imageDimX = utils.Constants.IMAGE_DIM_X
-        self.imageDimY = utils.Constants.IMAGE_DIM_Y
-        self.imageDimZ = utils.Constants.IMAGE_DIM_Z
-        self.featureNumPerLayer = featureNumPerLayer
+        self.image_dimension_x = utils.Constants.IMAGE_DIM_X
+        self.image_dimension_y = utils.Constants.IMAGE_DIM_Y
+        self.image_dimension_z = utils.Constants.IMAGE_DIM_Z
 
+        self.split_number_axis0 = split_number_axis0
+        self.split_number_axis1 = split_number_axis1
+
+        self.axis = axis
+        self.verbosity = verbosity
 
     def fit(self, X, y=None):
-        print("------------------------------------")
-        print("SiftDetector fit")
-        print("shape of X before transform : ")
-        print(X.shape)
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("SiftDetector fit with axis={}".format(self.axis))
+            print("shape of X before transform : ")
+            print(X.shape)
 
         # no internal variable
         X = check_array(X)
@@ -446,51 +453,102 @@ class SiftDetectorXY(BaseEstimator, TransformerMixin):
         X = check_array(X)
         n_samples, n_features = np.shape(X)
 
-        print("------------------------------------")
-        print("SiftDetector transform")
-        print("shape of X before transform : ")
-        print(X.shape)
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("SiftDetector transform with axis={}".format(self.axis))
+            print("shape of X before transform : ")
+            print(X.shape)
 
         # sift
         sift = cv2.xfeatures2d.SIFT_create()
 
         X_3D = np.reshape(X, (-1,
-                              self.imageDimX,
-                              self.imageDimY,
-                              self.imageDimZ))
+                              self.image_dimension_x,
+                              self.image_dimension_y,
+                              self.image_dimension_z))
+
+        # cell (contains index of voxels) as bin edge
+        if self.axis == 'z':
+            # xy plane
+            dimension_axis0 = self.image_dimension_x
+            dimension_axis1 = self.image_dimension_y
+            number_image_plane = self.image_dimension_z
+        elif self.aixs == 'y':
+            # xz plane
+            dimension_axis0 = self.image_dimension_x
+            dimension_axis1 = self.image_dimension_z
+            number_image_plane = self.image_dimension_y
+        else:
+            # yz plane
+            dimension_axis0 = self.image_dimension_y
+            dimension_axis1 = self.image_dimension_z
+            number_image_plane = self.image_dimension_x
+
+        # cell edges
+        cell_edges1 = np.linspace(0,
+                                  dimension_axis0,
+                                  self.split_number_axis0 + 1,
+                                  dtype=int)
+        cell_edges2 = np.linspace(0,
+                                  dimension_axis1,
+                                  self.split_number_axis1 + 1,
+                                  dtype=int)
 
         X_new = np.zeros((n_samples,
-                          self.imageDimZ,
-                          self.featureNumPerLayer,
+                          number_image_plane,
+                          self.split_number_axis0,
+                          self.split_number_axis1,
                           2))
 
         for i in range(0, n_samples):
             image_3D = X_3D[i, :, :, :]
 
-            for zi in range(0, self.imageDimZ):
-                # image block for histogram
-                image_block = image_3D[:,:,zi]
+            if self.verbosity > 1:
+                print("processing {}th image".format(str(i)))
 
-                # normalize for feature
-                image_block = image_block / \
-                              utils.Constants.IMAGE_VALUE_MAX
-                image_block = np.array(image_block * 255,
-                                       dtype=np.uint8)
+            # cutting axis
+            for zi in range(0, number_image_plane):
+                # axis1
+                for xi in range(0, cell_edges1.size - 1):
+                    # axis2
+                    for yi in range(0, cell_edges2.size - 1):
+                        # image block for histogram
 
-                kp = sift.detect(image_block, None)
-                # kp, des = sift.detectAndCalculate(image_block, None)
+                        if self.axis == 'z':
+                            # xy planes
+                            image_block = image_3D[
+                                          cell_edges1[xi]:cell_edges1[xi + 1],
+                                          cell_edges2[yi]:cell_edges2[yi + 1],
+                                          zi]
+                        elif self.axis == 'y':
+                            # xz planes
+                            image_block = image_3D[
+                                          cell_edges1[xi]:cell_edges1[xi + 1],
+                                          zi,
+                                          cell_edges2[yi]:cell_edges2[yi + 1]]
+                        elif self.axis == 'x':
+                            # yz planes
+                            image_block = image_3D[
+                                          zi,
+                                          cell_edges1[xi]:cell_edges1[xi + 1],
+                                          cell_edges2[yi]:cell_edges2[yi + 1]]
 
-                if len(kp) > self.featureNumPerLayer:
-                    X_new[i, zi, 0:self.featureNumPerLayer, :] = \
-                        np.array([keyPoint.pt for keyPoint in kp[0:self.featureNumPerLayer]])
-                elif len(kp) > 0:
-                    X_new[i, zi, 0:len(kp), :] = \
-                        np.array([keyPoint.pt for keyPoint in kp])
+                        # normalize for feature
+                        image_block = image_block / \
+                                      utils.Constants.IMAGE_VALUE_MAX
+                        image_block = np.array(image_block * 255,
+                                               dtype=np.uint8)
+
+                        kp = sift.detect(image_block, None)
+
+                        if len(kp) > 0:
+                            X_new[i, zi, xi, yi, :] = np.array(kp[0].pt)
 
         X_new = np.reshape(X_new, (n_samples, -1))
 
-        print("shape of X after transform : ")
-        print(X_new.shape)
+        if self.verbosity > 0:
+            print("shape of X after transform : ")
+            print(X_new.shape)
 
         return X_new
 
