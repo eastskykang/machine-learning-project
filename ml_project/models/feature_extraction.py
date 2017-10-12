@@ -553,3 +553,59 @@ class SiftDetector(BaseEstimator, TransformerMixin):
         return X_new
 
 
+class SiftAllAxis(BaseEstimator, TransformerMixin):
+    """Sift feature for each cut (plane // XY, YZ, ZX)"""
+    def __init__(self, split_number_axis0=8,
+                 split_number_axis1=8, verbosity=0):
+        # image dimension
+        self.image_dimension_x = utils.Constants.IMAGE_DIM_X
+        self.image_dimension_y = utils.Constants.IMAGE_DIM_Y
+        self.image_dimension_z = utils.Constants.IMAGE_DIM_Z
+
+        self.split_number_axis0 = split_number_axis0
+        self.split_number_axis1 = split_number_axis1
+
+        self.verbosity = verbosity
+        self.sift1 = SiftDetector(split_number_axis0=split_number_axis0,
+                                  split_number_axis1=split_number_axis1,
+                                  axis='z', verbosity=verbosity)
+        self.sift2 = SiftDetector(split_number_axis0=split_number_axis0,
+                                  split_number_axis1=split_number_axis1,
+                                  axis='y', verbosity=verbosity)
+        self.sift3 = SiftDetector(split_number_axis0=split_number_axis0,
+                                  split_number_axis1=split_number_axis1,
+                                  axis='x', verbosity=verbosity)
+
+    def fit(self, X, y=None):
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("SiftAllAxis fit ")
+            print("shape of X before transform : ")
+            print(X.shape)
+
+        # no internal variable
+        X = check_array(X)
+
+        return self
+
+    def transform(self, X, y=None):
+
+        X = check_array(X)
+        n_samples, n_features = np.shape(X)
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("SiftAllAxis transform")
+            print("shape of X before transform : ")
+            print(X.shape)
+
+        X_new = np.hstack((self.sift1.transform(X, y),
+                           self.sift2.transform(X, y),
+                           self.sift3.transform(X, y)))
+
+        if self.verbosity > 0:
+            print("shape of X after transform : ")
+            print(X_new.shape)
+
+        return X_new
