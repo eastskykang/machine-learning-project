@@ -591,10 +591,8 @@ params:
   param_grid:
     SiftAllAxis__split_number_axis0:
       - 8
-      - 16
     SiftAllAxis__split_number_axis1:
       - 8
-      - 16
   cv:
     module: sklearn.model_selection
     class: KFold
