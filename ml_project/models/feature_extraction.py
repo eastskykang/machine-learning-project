@@ -473,12 +473,12 @@ class SiftDetector(BaseEstimator, TransformerMixin):
             dimension_axis0 = self.image_dimension_x
             dimension_axis1 = self.image_dimension_y
             number_image_plane = self.image_dimension_z
-        elif self.aixs == 'y':
+        elif self.axis == 'y':
             # xz plane
             dimension_axis0 = self.image_dimension_x
             dimension_axis1 = self.image_dimension_z
             number_image_plane = self.image_dimension_y
-        else:
+        elif self.axis == 'x':
             # yz plane
             dimension_axis0 = self.image_dimension_y
             dimension_axis1 = self.image_dimension_z
