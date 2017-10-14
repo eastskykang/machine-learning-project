@@ -580,10 +580,10 @@ params:
   est_params:
     - module: ml_project.models.feature_extraction
       class: SiftAllAxis
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
     - module: sklearn.feature_selection
       class: f_regression
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
     - module: ml_project.models.preprocessing
       class: PrincipleComponentAnalysis
     - module: sklearn.kernel_ridge
