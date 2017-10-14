@@ -4,6 +4,7 @@ from ml_project.models import utils
 import numpy as np
 import cv2
 
+
 class IntensityHistogram(BaseEstimator, TransformerMixin):
     """Feature from intensity histogram of 3D images"""
 
@@ -84,13 +85,17 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
                     for zi in range(0, z_cell_edges.size - 1):
 
                         # image block for histogram
-                        image_block = image_3D[x_cell_edges[xi]:x_cell_edges[xi+1],
+                        image_block = image_3D[
+                                      x_cell_edges[xi]:x_cell_edges[xi+1],
                                       y_cell_edges[yi]:y_cell_edges[yi+1],
                                       z_cell_edges[zi]:z_cell_edges[zi+1]]
 
                         # histogram
                         histogram[i, xi, yi, zi, :], bins = \
-                            np.histogram(image_block, bins=np.linspace(0, self.histBinMax, self.bin_number + 1))
+                            np.histogram(image_block,
+                                         bins=np.linspace(0,
+                                                          self.histBinMax,
+                                                          self.bin_number + 1))
 
         X_new = np.reshape(histogram, (n_samples, -1))
 
@@ -167,7 +172,8 @@ class IntensityMean(BaseEstimator, TransformerMixin):
                     for zi in range(0, z_cell_edges.size - 1):
 
                         # image block for histogram
-                        image_block = image_3D[x_cell_edges[xi]:x_cell_edges[xi+1],
+                        image_block = image_3D[
+                                      x_cell_edges[xi]:x_cell_edges[xi+1],
                                       y_cell_edges[yi]:y_cell_edges[yi+1],
                                       z_cell_edges[zi]:z_cell_edges[zi+1]]
 
@@ -398,7 +404,8 @@ class MeanIntensityGradient(BaseEstimator, TransformerMixin):
                     for zi in range(0, z_cell_edges.size - 1):
 
                         # image block for histogram
-                        image_block = image_3D[x_cell_edges[xi]:x_cell_edges[xi+1],
+                        image_block = image_3D[
+                                      x_cell_edges[xi]:x_cell_edges[xi+1],
                                       y_cell_edges[yi]:y_cell_edges[yi+1],
                                       z_cell_edges[zi]:z_cell_edges[zi+1]]
 

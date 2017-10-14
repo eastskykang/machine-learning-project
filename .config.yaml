@@ -582,21 +582,31 @@ params:
       class: SiftAllAxis
     - module: ml_project.models.preprocessing
       class: StandardScaler
-#    - module: ml_project.models.preprocessing
-#      class: PrincipleComponentAnalysis
-    - module: ml_project.models.feature_selection
-      class: VarianceThreshold
-    - module: ml_project.models.regression
-      class: MLPRegressor
+    - module: sklearn.feature_selection
+      class: f_regression¶
+    - module: ml_project.models.preprocessing
+      class: PrincipleComponentAnalysis
+    - module: sklearn.kernel_ridge
+      class: KernelRidge
   param_grid:
     SiftAllAxis__split_number_axis0:
       - 8
     SiftAllAxis__split_number_axis1:
       - 8
+    PrincipleComponentAnalysis__n_components:
+      - 1000
+      - 2000
+      - 5000
+      - 10000
+    Ridge__alpha:
+      - 0.001
+      - 0.01
+      - 0.1
+      - 0.2
   cv:
     module: sklearn.model_selection
     class: KFold
     params:
-      n_splits: 3
+      n_splits: 5
       shuffle: True
 #      random_state: 37
