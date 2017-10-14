@@ -583,7 +583,7 @@ params:
     - module: ml_project.models.preprocessing
       class: StandardScaler
     - module: sklearn.feature_selection
-      class: f_regression¶
+      class: f_regression
     - module: ml_project.models.preprocessing
       class: PrincipleComponentAnalysis
     - module: sklearn.kernel_ridge
