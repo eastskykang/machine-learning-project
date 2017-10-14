@@ -580,25 +580,20 @@ params:
   est_params:
     - module: ml_project.models.feature_extraction
       class: SiftAllAxis
-    - module: sklearn.feature_selection
-      class: f_regression
+#    - module: sklearn.feature_selection
+#      class: f_regression
     - module: ml_project.models.preprocessing
       class: StandardScaler
-    - module: ml_project.models.preprocessing
-      class: PrincipleComponentAnalysis
-    - module: sklearn.kernel_ridge
-      class: KernelRidge
+#    - module: ml_project.models.preprocessing
+#     class: PrincipleComponentAnalysis
+    - module: sklearn.linear_model
+      class: Lasso
   param_grid:
     SiftAllAxis__split_number_axis0:
       - 8
     SiftAllAxis__split_number_axis1:
       - 8
-    PrincipleComponentAnalysis__n_components:
-      - 1000
-      - 2000
-      - 5000
-      - 10000
-    Ridge__alpha:
+    Lasso__alpha:
       - 0.001
       - 0.01
       - 0.1
