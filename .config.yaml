@@ -580,42 +580,41 @@ params:
 ##      random_state: 37
 
 
-<<<<<<< HEAD
-module: ml_project.model_selection
-class: GridSearchCV
-params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
-    - module: ml_project.models.feature_extraction
-      class: SiftAllAxis
-#    - module: sklearn.feature_selection
-#      class: f_regression
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  n_jobs: -1
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_extraction
+#      class: SiftAllAxis
+##    - module: sklearn.feature_selection
+##      class: f_regression
 #    - module: ml_project.models.preprocessing
-#     class: PrincipleComponentAnalysis
-    - module: sklearn.linear_model
-      class: Lasso
-  param_grid:
-    SiftAllAxis__split_number_axis0:
-      - 8
-    SiftAllAxis__split_number_axis1:
-      - 8
-    Lasso__alpha:
-      - 0.001
-      - 0.01
-      - 0.1
-      - 0.2
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 5
-      shuffle: True
-#      random_state: 37
-=======
+#      class: StandardScaler
+##    - module: ml_project.models.preprocessing
+##     class: PrincipleComponentAnalysis
+#    - module: sklearn.linear_model
+#      class: Lasso
+#  param_grid:
+#    SiftAllAxis__split_number_axis0:
+#      - 8
+#    SiftAllAxis__split_number_axis1:
+#      - 8
+#    Lasso__alpha:
+#      - 0.001
+#      - 0.01
+#      - 0.1
+#      - 0.2
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 5
+#      shuffle: True
+##      random_state: 37
+
 #module: ml_project.model_selection
 #class: GridSearchCV
 #params:
@@ -655,4 +654,3 @@ params:
 #      n_splits: 5
 #      shuffle: True
 ##      random_state: 37
->>>>>>> 280375135ee4641f21826486cc221611cc73017e
