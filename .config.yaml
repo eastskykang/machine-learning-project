@@ -216,46 +216,55 @@
 
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 #cv = hisogram + std. scaler + var thr + ridge reg
-#module: ml_project.model_selection
-#class: GridSearchCV
-#params:
-#  n_jobs: -1
-#  est_module: ml_project.pipeline
-#  est_class: Pipeline
-#  est_params:
-#    - module: ml_project.models.feature_extraction
-#      class: IntensityHistogram
-#    - module: ml_project.models.preprocessing
-#      class: StandardScaler
-#    - module: ml_project.models.feature_selection
-#      class: VarianceThreshold
-#    - module: sklearn.linear_model
-#      class: Ridge
-#  param_grid:
-#    VarianceThreshold__threshold:
-#      - 0
-#    IntensityHistogram__bin_number:
-#      - 10
-#      - 60
-#      - 100
-#      - 200
-#    IntensityHistogram__x_cell_number:
-#      - 16
-#    IntensityHistogram__y_cell_number:
-#      - 16
-#    IntensityHistogram__z_cell_number:
-#      - 16
-#    Ridge__alpha:
-#      - 0.01
-#      - 0.1
-#      - 1.0
-#  cv:
-#    module: sklearn.model_selection
-#    class: KFold
-#    params:
-#      n_splits: 5
-#      shuffle: True
-#      random_state: 37
+module: ml_project.model_selection
+class: GridSearchCV
+params:
+  n_jobs: -1
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.feature_extraction
+      class: IntensityHistogram
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: ml_project.models.feature_selection
+      class: VarianceThreshold
+    - module: sklearn.linear_model
+      class: Lasso
+  param_grid:
+    VarianceThreshold__threshold:
+      - 0
+      - 0.05
+      - 0.1
+    IntensityHistogram__bin_number:
+      - 10
+      - 60
+      - 100
+      - 200
+    IntensityHistogram__x_cell_number:
+      - 8
+      - 9
+      - 16
+    IntensityHistogram__y_cell_number:
+      - 8
+      - 9
+      - 16
+    IntensityHistogram__z_cell_number:
+      - 8
+      - 9
+      - 16
+    Lasso__alpha:
+      - 0.001
+      - 0.01
+      - 0.1
+      - 1.0
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 5
+      shuffle: True
+      random_state: 37
 
 
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
@@ -571,42 +580,42 @@
 ##      random_state: 37
 
 
-module: ml_project.model_selection
-class: GridSearchCV
-params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
-    - module: ml_project.models.feature_extraction
-      class: SiftAllAxis
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
-    - module: sklearn.feature_selection
-      class: f_regression¶
-    - module: ml_project.models.preprocessing
-      class: PrincipleComponentAnalysis
-    - module: sklearn.kernel_ridge
-      class: KernelRidge
-  param_grid:
-    SiftAllAxis__split_number_axis0:
-      - 8
-    SiftAllAxis__split_number_axis1:
-      - 8
-    PrincipleComponentAnalysis__n_components:
-      - 1000
-      - 2000
-      - 5000
-      - 10000
-    Ridge__alpha:
-      - 0.001
-      - 0.01
-      - 0.1
-      - 0.2
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 5
-      shuffle: True
-#      random_state: 37
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  n_jobs: -1
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_extraction
+#      class: SiftAllAxis
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: sklearn.feature_selection
+#      class: f_regression¶
+#    - module: ml_project.models.preprocessing
+#      class: PrincipleComponentAnalysis
+#    - module: sklearn.kernel_ridge
+#      class: KernelRidge
+#  param_grid:
+#    SiftAllAxis__split_number_axis0:
+#      - 8
+#    SiftAllAxis__split_number_axis1:
+#      - 8
+#    PrincipleComponentAnalysis__n_components:
+#      - 1000
+#      - 2000
+#      - 5000
+#      - 10000
+#    Ridge__alpha:
+#      - 0.001
+#      - 0.01
+#      - 0.1
+#      - 0.2
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 5
+#      shuffle: True
+##      random_state: 37
