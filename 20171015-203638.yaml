@@ -1,0 +1,22 @@
+class: GridSearchCV
+module: ml_project.model_selection
+params:
+  cv:
+    class: KFold
+    module: sklearn.model_selection
+    params: {n_splits: 5, random_state: 37, shuffle: true}
+  est_class: Pipeline
+  est_module: ml_project.pipeline
+  est_params:
+  - {class: IntensityHistogram, module: ml_project.models.feature_extraction}
+  - {class: StandardScaler, module: ml_project.models.preprocessing}
+  - {class: VarianceThreshold, module: ml_project.models.feature_selection}
+  - {class: Lasso, module: sklearn.linear_model}
+  n_jobs: -1
+  param_grid:
+    IntensityHistogram__bin_number: [10, 50, 100, 200, 400, 1000]
+    IntensityHistogram__x_cell_number: [8, 9, 16]
+    IntensityHistogram__y_cell_number: [8, 9, 16]
+    IntensityHistogram__z_cell_number: [8, 9, 16]
+    Lasso__alpha: [0.001, 0.01, 0.1, 1.0]
+    VarianceThreshold__threshold: [0, 0.05, 0.1]
