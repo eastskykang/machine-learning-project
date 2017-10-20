@@ -670,7 +670,7 @@ params:
     - module: ml_project.models.feature_selection
       class: VarianceThreshold
     - module: sklearn.linear_model
-      class: Lasso
+      class: Ridge
   param_grid:
     VarianceThreshold__threshold:
       - 0
@@ -688,7 +688,7 @@ params:
     IntensityHistogram__z_cell_number:
       - 8
       - 9
-    Lasso__alpha:
+    Ridge__alpha:
       - 0.001
       - 0.01
       - 0.1
