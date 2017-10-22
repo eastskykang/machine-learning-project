@@ -394,8 +394,6 @@ class MeanIntensityGradient(BaseEstimator, TransformerMixin):
                              self.y_cell_number,
                              self.z_cell_number, 3))
 
-        histogram_bins = np.linspace(0, self.histBinMax, self.bin_number + 1)
-
         for i in range(0, n_samples):
             image_3D = X_3D[i, :, :, :]
 
@@ -541,8 +539,8 @@ class SiftDetector(BaseEstimator, TransformerMixin):
                                           cell_edges2[yi]:cell_edges2[yi + 1]]
 
                         # normalize for feature
-                        image_block = image_block / \
-                                      utils.Constants.IMAGE_VALUE_MAX
+                        image_block\
+                            = image_block / utils.Constants.IMAGE_VALUE_MAX
                         image_block = np.array(image_block * 255,
                                                dtype=np.uint8)
 
