@@ -1,4 +1,4 @@
 flake8:
-  stage: python27
+  stage: test
   script:
     - flake8
