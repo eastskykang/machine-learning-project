@@ -13,3 +13,5 @@ dependencies:
     - pyyaml==3.12
     - kaggle-cli
     - opencv-contrib-python
+    - kli
+    - tensorflow
