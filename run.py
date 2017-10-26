@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 import pandas as pd
+import csv
 
 from sklearn.externals import joblib
 from abc import ABC
@@ -11,6 +12,7 @@ from abc import abstractmethod
 from ml_project import configparse
 from pprint import pprint
 from os.path import normpath
+from inspect import getfullargspec
 
 
 class Action(ABC):
@@ -72,6 +74,13 @@ class Action(ABC):
         else:
             return None
 
+    def transform(self):
+        if "y" in getfullargspec(self.model.transform).args:
+            self.X_new = self.model.transform(self.X, self.y)
+        else:
+            self.X_new = self.model.transform(self.X)
+        self._X_new_set = True
+
 
 class ConfigAction(Action):
     """Class to handle config file actions
@@ -89,10 +98,6 @@ class ConfigAction(Action):
 
     def fit(self):
         self.model.fit(self.X, self.y)
-
-    def transform(self):
-        self.X_new = self.model.transform(self.X, self.y)
-        self._X_new_set = True
 
     def fit_transform(self):
         self.fit()
@@ -140,12 +145,12 @@ class ModelAction(Action):
         super(ModelAction, self).__init__(args)
         self.act()
 
-    def transform(self):
-        self.X_new = self.model.transform(self.X, self.y)
-        self._X_new_set = True
-
     def predict(self):
         self.y_new = self.model.predict(self.X)
+        self._y_new_set = True
+
+    def predict_proba(self):
+        self.y_new = self.model.predict_proba(self.X)
         self._y_new_set = True
 
     def score(self):
@@ -154,14 +159,23 @@ class ModelAction(Action):
     def _save(self):
         y_path = normpath(self.save_path+"y_"+self.args.smt_label+".csv")
         X_path = normpath(self.save_path+"X_new.npy")
-
         if self._X_new_set:
             np.save(X_path, self.X_new)
-        if self._y_new_set:
+        if self._y_new_set and self.args.action == "predict":
             df = pd.DataFrame({"Prediction": self.y_new})
             df.index += 1
             df.index.name = "ID"
             df.to_csv(y_path)
+        elif self._y_new_set and self.args.action == "predict_proba":
+            with open(y_path, "w") as csvfile:
+                writer = csv.writer(csvfile, delimiter=',')
+                writer.writerow(["ID", "Prediction"])
+                n = 1
+                for prediction in self.y_new:
+                    prediction = np.round(prediction, decimals=4)
+                    prediction = " ".join(prediction.astype("str"))
+                    writer.writerow([n, prediction])
+                    n += 1
 
     def _load_model(self):
         model = joblib.load(self.args.model)
@@ -170,9 +184,9 @@ class ModelAction(Action):
         return model
 
     def _check_action(self, action):
-        if action not in ["transform", "predict", "score"]:
-            raise RuntimeError("Can only run transform, predict or score from"
-                               "model, got {}.".format(action))
+        if action not in ["transform", "predict", "score", "predict_proba"]:
+            raise RuntimeError("Can only run transform, predict, predict_proba"
+                               " or score from model, got {}.".format(action))
 
 
 if __name__ == '__main__':
@@ -186,7 +200,7 @@ if __name__ == '__main__':
     arg_parser.add_argument("-y", help="Input labels")
 
     arg_parser.add_argument("-a", "--action", choices=["transform", "predict",
-                            "fit", "fit_transform", "score"],
+                            "fit", "fit_transform", "score", "predict_proba"],
                             help="Action to perform.",
                             required=True)
 
