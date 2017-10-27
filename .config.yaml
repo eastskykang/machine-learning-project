@@ -318,31 +318,6 @@
 # =============================================================================
 
 # simple test for debugging
-#module: ml_project.model_selection
-#class: GridSearchCV
-#params:
-#  n_jobs: -1
-#  est_module: ml_project.pipeline
-#  est_class: Pipeline
-#  est_params:
-#    - module: ml_project.models.feature_selection
-#      class: RandomSelection
-#    - module: ml_project.models.preprocessing
-#      class: StandardScaler
-#    - module: ml_project.models.classification
-#      class: LogisticRegression
-#  param_grid:
-#      RandomSelection__n_components:
-#        - 100
-#  cv:
-#    module: sklearn.model_selection
-#    class: KFold
-#    params:
-#      n_splits: 5
-#      shuffle: True
-#      random_state: 37
-
-# smt run --config .config.yaml -X data/X_train.npy -y data/train_labels_new.csv -a fit_transform
 module: ml_project.model_selection
 class: GridSearchCV
 params:
@@ -350,35 +325,60 @@ params:
   est_module: ml_project.pipeline
   est_class: Pipeline
   est_params:
-    - module: ml_project.models.feature_extraction
-      class: IntensityHistogram
+    - module: ml_project.models.feature_selection
+      class: RandomSelection
     - module: ml_project.models.preprocessing
       class: StandardScaler
     - module: ml_project.models.classification
       class: LogisticRegression
   param_grid:
-    IntensityHistogram__bin_number:
-      - 60
-      - 80
-    IntensityHistogram__x_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__y_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__y_cell_number:
-      - 8
-      - 9
-    LogisticRegression__C:
-      - 100
-      - 10
-      - 1
-      - 0.1
-      - 0.01
+      RandomSelection__n_components:
+        - 100
   cv:
     module: sklearn.model_selection
     class: KFold
     params:
-      n_splits: 5
+      n_splits: 3
       shuffle: True
       random_state: 37
+
+# smt run --config .config.yaml -X data/X_train.npy -y data/train_labels_new.csv -a fit_transform
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  n_jobs: -1
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_extraction
+#      class: IntensityHistogram
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: ml_project.models.classification
+#      class: LogisticRegression
+#  param_grid:
+#    IntensityHistogram__bin_number:
+#      - 60
+#      - 80
+#    IntensityHistogram__x_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__y_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__y_cell_number:
+#      - 8
+#      - 9
+#    LogisticRegression__C:
+#      - 100
+#      - 10
+#      - 1
+#      - 0.1
+#      - 0.01
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 5
+#      shuffle: True
+#      random_state: 37
