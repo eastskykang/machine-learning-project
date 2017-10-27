@@ -25,19 +25,24 @@ class LogisticRegressionWithLabelAssignment(LogisticRegression):
             multi_class=multi_class)
 
     def fit(self, X, y, sample_weight=None):
-        X, y = check_X_y(X, y)
-
         # assign label by argmax
         y_assigned = np.argmax(y, axis=1)
+        X, y_assigned = check_X_y(X, y_assigned)
 
         super(LogisticRegressionWithLabelAssignment, self)\
             .fit(X, y_assigned, sample_weight)
         return self
 
     def score(self, X, y, sample_weight=None):
-        X, y = check_X_y(X, y)
-        score = spearmanr(y, self.predict_proba(X))
-        return score
+        P_predicted = self.predict_proba(X)
+        n_samples, n_labels = np.shape(P_predicted)
+
+        score = np.zeros(n_samples)
+
+        for i in range(0, n_samples):
+            score[i] = spearmanr(y[i, :], P_predicted[i, :])
+
+        return np.mean(score)
 
     def predict_proba(self, X):
         return super(LogisticRegressionWithLabelAssignment, self)\
