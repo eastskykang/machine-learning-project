@@ -343,6 +343,26 @@
 #      shuffle: True
 #      random_state: 37
 
+
+# simple test for debugging
+#smt run --config .config.yaml -X data/X_train.npy -a fit_transform
+#module: ml_project.pipeline
+#class: Pipeline
+#params:
+#  class_list:
+#    - module: ml_project.models.feature_selection
+#      class: RandomSelection
+#      params:
+#        random_state: 37
+#        n_components: 100
+#    - module: ml_project.models.feature_extraction
+#      class: AutoEncoder
+#      params:
+#        dims: [5,6]
+#        activations: ['relu', 'relu']
+#        epoch: [10000, 5000]
+
+
 # smt run --config .config.yaml -X data/X_train.npy -y data/train_labels_new.csv -a fit_transform
 module: ml_project.model_selection
 class: GridSearchCV
@@ -352,24 +372,24 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_extraction
-      class: IntensityHistogram
+      class: ImageHistogramAndSift
     - module: ml_project.models.preprocessing
       class: StandardScaler
     - module: ml_project.models.classification
       class: LogisticRegression
   param_grid:
-    IntensityHistogram__bin_number:
-      - 60
-      - 80
-    IntensityHistogram__x_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__y_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__y_cell_number:
-      - 8
-      - 9
+#    IntensityHistogram__bin_number:
+#      - 60
+#      - 80
+#    IntensityHistogram__x_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__y_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__z_cell_number:
+#      - 8
+#      - 9
     LogisticRegression__C:
       - 100
       - 10
@@ -383,3 +403,4 @@ params:
       n_splits: 5
       shuffle: True
       random_state: 37
+

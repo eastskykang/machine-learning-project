@@ -76,27 +76,3 @@ class VarianceThreshold(VarianceThreshold):
         print(X_new.shape)
 
         return X_new
-
-
-class EliminateZeroColumns(BaseEstimator, TransformerMixin):
-    """Eliminate all zero columns"""
-    def __init__(self):
-        self.components = None
-
-    def fit(self, X, y=None):
-        print("------------------------------------")
-        print("ElininateZeroColumn fit")
-        X = check_array(X)
-        return self
-
-    def transform(self, X, y=None):
-        print("ElininateZeroColumn transform")
-        X = check_array(X)
-        print("shape before eliminate all zero columns: ")
-        print(np.shape(X))
-
-        X_new = X[:, np.any(X, axis=0)]
-        print("shape after eliminate all zero columns: ")
-        print(np.shape(X_new))
-
-        return X_new
