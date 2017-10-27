@@ -17,19 +17,22 @@ class MeanPredictor(BaseEstimator, TransformerMixin):
         return np.tile(self.mean, (n_samples, 1))
 
 
-class LogisticRegressionWithLabelAssignment(LogisticRegression):
+class LogisticRegression(LogisticRegression):
     """Logistic Regression"""
-    def __init__(self, solver='lbfgs', multi_class='multinomial'):
-        super(LogisticRegressionWithLabelAssignment, self).__init__(
+    def __init__(self, solver='lbfgs', multi_class='multinomial', C=1):
+        super(LogisticRegression, self).__init__(
+            penalty='l2',
             solver=solver,
-            multi_class=multi_class)
+            C=c,
+            multi_class=multi_class,
+            n_jobs=-1)
 
     def fit(self, X, y, sample_weight=None):
         # assign label by argmax
         y_assigned = np.argmax(y, axis=1)
         X, y_assigned = check_X_y(X, y_assigned)
 
-        super(LogisticRegressionWithLabelAssignment, self)\
+        super(LogisticRegression, self)\
             .fit(X, y_assigned, sample_weight)
         return self
 
@@ -45,5 +48,5 @@ class LogisticRegressionWithLabelAssignment(LogisticRegression):
         return np.mean(score)
 
     def predict_proba(self, X):
-        return super(LogisticRegressionWithLabelAssignment, self)\
+        return super(LogisticRegression, self)\
             .predict_proba(X)
