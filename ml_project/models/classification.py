@@ -40,7 +40,7 @@ class LogisticRegressionWithLabelAssignment(LogisticRegression):
         score = np.zeros(n_samples)
 
         for i in range(0, n_samples):
-            score[i] = spearmanr(y[i, :], P_predicted[i, :])
+            score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
 
         return np.mean(score)
 
