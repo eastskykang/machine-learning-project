@@ -13,3 +13,4 @@ data/
 # TODO FOR SUBMISSION
 # smt add
 # .config.yaml remove from git
+.smt/project

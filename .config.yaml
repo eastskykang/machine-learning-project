@@ -59,6 +59,8 @@
 #      random_state: 37
 
 # =============================================================================
+# PROJECT 1
+# =============================================================================
 
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
 #cv = elim zero columns + std. scaler + var thr + lin reg
@@ -310,3 +312,35 @@
 #      n_splits: 5
 #      shuffle: True
 ##      random_state: 37
+
+# =============================================================================
+# PROJECT 2
+# =============================================================================
+
+module: ml_project.model_selection
+class: GridSearchCV
+params:
+  n_jobs: -1
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.feature_extraction
+      class: IntensityHistogram
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: ml_project.models.classification
+      class: LogisticRegressionWithLabelAssignment
+  param_grid:
+    IntensityHistogram__bin_number:
+      - 60
+    IntensityHistogram__x_cell_number:
+      - 8
+    IntensityHistogram__y_cell_number:
+      - 8
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 5
+      shuffle: True
+      random_state: 37

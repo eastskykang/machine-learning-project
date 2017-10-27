@@ -13,7 +13,8 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
                  x_cell_number=8,
                  y_cell_number=8,
                  z_cell_number=8,
-                 bin_number=45):
+                 bin_number=45,
+                 verbosity=1):
 
         # image dimension
         self.imageDimX = utils.Constants.IMAGE_DIM_X
@@ -27,14 +28,17 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         self.z_cell_number = z_cell_number
         self.bin_number = bin_number
 
-    def fit(self, X, y=None):
+        # verbosity
+        self.verbosity = verbosity
 
-        print("------------------------------------")
-        print("IntensityHistogram fit")
-        print("cell numbers = {}x{}x{}".format(self.x_cell_number,
-                                               self.y_cell_number,
-                                               self.z_cell_number))
-        print("bin numbers = {}".format(self.bin_number))
+    def fit(self, X, y=None):
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("IntensityHistogram fit")
+            print("cell numbers = {}x{}x{}".format(self.x_cell_number,
+                                                   self.y_cell_number,
+                                                   self.z_cell_number))
+            print("bin numbers = {}".format(self.bin_number))
 
         # no internal variable
         X = check_array(X)
@@ -46,10 +50,11 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
         X = check_array(X)
         n_samples, n_features = np.shape(X)
 
-        print("------------------------------------")
-        print("IntensityHistogram transform")
-        print("shape of X before transform : ")
-        print(X.shape)
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("IntensityHistogram transform")
+            print("shape of X before transform : ")
+            print(X.shape)
 
         X_3D = np.reshape(X, (-1,
                               self.imageDimX,
@@ -99,8 +104,9 @@ class IntensityHistogram(BaseEstimator, TransformerMixin):
 
         X_new = np.reshape(histogram, (n_samples, -1))
 
-        print("shape of X after transform : ")
-        print(X_new.shape)
+        if self.verbosity > 0:
+            print("shape of X after transform : ")
+            print(X_new.shape)
 
         return X_new
 
