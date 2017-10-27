@@ -23,7 +23,7 @@ class LogisticRegression(LogisticRegression):
         super(LogisticRegression, self).__init__(
             penalty='l2',
             solver=solver,
-            C=c,
+            C=C,
             multi_class=multi_class,
             n_jobs=-1)
 
