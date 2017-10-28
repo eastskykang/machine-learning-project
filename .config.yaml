@@ -394,7 +394,7 @@
 #        epoch: [10000, 5000]
 
 
-# smt run --config .config.yaml -X data/X_train.npy -y data/train_labels_new.csv -a fit_transform
+# smt run --config .config.yaml -X data/X_train.npy -y data/train_labels_new.csv -a fit
 #module: ml_project.model_selection
 #class: GridSearchCV
 #params:
