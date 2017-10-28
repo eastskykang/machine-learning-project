@@ -378,18 +378,6 @@ params:
     - module: ml_project.models.classification
       class: LogisticRegression
   param_grid:
-#    IntensityHistogram__bin_number:
-#      - 60
-#      - 80
-#    IntensityHistogram__x_cell_number:
-#      - 8
-#      - 9
-#    IntensityHistogram__y_cell_number:
-#      - 8
-#      - 9
-#    IntensityHistogram__z_cell_number:
-#      - 8
-#      - 9
     LogisticRegression__C:
       - 100
       - 10
@@ -403,4 +391,3 @@ params:
       n_splits: 5
       shuffle: True
       random_state: 37
-
