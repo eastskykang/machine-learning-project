@@ -5,32 +5,39 @@ from sklearn.utils.validation import check_array
 
 class StandardScaler(StandardScaler):
     """standardize data"""
-    def __init__(self):
+    def __init__(self, verbosity=0):
         super(StandardScaler, self).__init__()
+        self.verbosity = verbosity
 
     def fit(self, X, y=None):
-        print("------------------------------------")
-        print("StandardScaler fit")
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("StandardScaler fit")
+
         super(StandardScaler, self).fit(X)
 
-        print("before standardized: ")
-        print("mean = ")
-        print(self.mean_)
-        print("variance = ")
-        print(self.var_)
+        if self.verbosity > 0:
+            print("before standardized: ")
+            print("mean = ")
+            print(self.mean_)
+            print("variance = ")
+            print(self.var_)
 
         return self
 
     def transform(self, X, y='deprecated', copy=None):
-        print("------------------------------------")
-        print("StandardScaler transform")
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("StandardScaler transform")
+
         X_new = super(StandardScaler, self).transform(X)
 
-        print("after standardized: ")
-        print("mean = ")
-        print(X_new.mean(axis=0))
-        print("variance = ")
-        print(X_new.std(axis=0))
+        if self.verbosity > 0:
+            print("after standardized: ")
+            print("mean = ")
+            print(X_new.mean(axis=0))
+            print("variance = ")
+            print(X_new.std(axis=0))
 
         return X_new
 
