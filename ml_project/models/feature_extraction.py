@@ -345,7 +345,6 @@ class ImageHistogramAndSift(BaseEstimator, TransformerMixin):
 
         return self
 
-
     def transform(self, X, y=None):
         X = check_array(X)
         n_samples, n_features = np.shape(X)

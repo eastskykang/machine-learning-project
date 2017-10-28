@@ -55,7 +55,7 @@ class LogisticRegression(LogisticRegression):
 
 class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
 
-    def __init__(self, learning_rate=0.01, epoch=1000, C=1, verbosity=1):
+    def __init__(self, learning_rate=0.01, epoch=10000, C=1, verbosity=1):
         self.learning_rate = learning_rate
         self.epoch = epoch
         self.verbosity = verbosity
