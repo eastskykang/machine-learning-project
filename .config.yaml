@@ -442,21 +442,21 @@ params:
     IntensityHistogram__bin_number:
       - 60
       - 80
-    IntensityHistogram__x_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__y_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__z_cell_number:
-      - 8
-      - 9
+#    IntensityHistogram__x_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__y_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__z_cell_number:
+#      - 8
+#      - 9
     LogisticRegressionWithProbability__C:
-      - 100
-      - 10
+#      - 100
+#      - 10
       - 1
-      - 0.1
-      - 0.01
+#      - 0.1
+#      - 0.01
   cv:
     module: sklearn.model_selection
     class: KFold
