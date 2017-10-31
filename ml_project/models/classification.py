@@ -3,6 +3,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
 from scipy.stats import spearmanr
+from tensorflow.contrib.layers import fully_connected, batch_norm, dropout, \
+    l1_regularizer, l2_regularizer, flatten
 import tensorflow as tf
 
 class MeanPredictor(BaseEstimator, TransformerMixin):
@@ -142,3 +144,244 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
             P_predicted = sess.run(P, feed_dict={logits: logits_val})
 
         return P_predicted
+
+
+class NeuralNetClassifier(BaseEstimator, TransformerMixin):
+
+    def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
+                 regularizer_scale=1.0, batch_normalization=True,
+                 batch_size=64, dropout=True, dropout_rate=0.3,
+                 optimizer='Adam', learning_rate=0.01, num_epoch=300,
+                 save_path=None):
+
+        self.hidden_layers = hidden_layers
+        self.activations = activations
+        self.dropout = dropout
+        self.dropout_rate = dropout_rate
+        self.num_epochs = num_epoch
+        self.regularizer = regularizer
+        self.regularizer_scale = regularizer_scale
+        self.batch_normalization = batch_normalization
+        self.batch_size = batch_size
+        self.optimizer = optimizer
+        self.learning_rate = learning_rate
+        self.save_path = save_path
+
+        # tensorflow session, network and variables
+        self.session_tf = None
+        self.network_tf = None
+        self.X_tf = None
+        self.y_tf = None
+        self.is_training_tf = None
+
+        # network structure
+        if hidden_layers is None:
+            self.hidden_layers = [100]
+        if activations is None:
+            self.activations = ["relu"]
+
+        # exceptions
+        if len(self.hidden_layers) != len(self.activations):
+            assert "length of hidden layers and activation is not same."
+        if optimizer != "Adam" and optimizer != "GradientDescent":
+            assert "invalid optimizer"
+
+    def model(self, X_train, y_train):
+        n_samples, n_features = np.shape(X_train)
+        _, n_classes = np.shape(y_train)
+
+        with tf.variable_scope("network"):
+            # input
+            self.X_tf = tf.placeholder(tf.float32,
+                                       shape=[None, n_features],
+                                       name='X')
+            self.y_tf = tf.placeholder(tf.float32,
+                                       shape=[None, n_classes],
+                                       name='y')
+            self.is_training_tf = tf.placeholder(tf.bool,
+                                                 name='is_training')
+
+            # build graph
+            net = self.X_tf
+            for i, (hidden_layer, activation) \
+                    in enumerate(zip(self.hidden_layers, self.activations)):
+                with tf.variable_scope('layer{}'.format(i)):
+                    # xavier initialization for variables
+                    xavier_initializer = tf.contrib.layers.xavier_initializer()
+
+                    # activation function
+                    if activation == 'relu':
+                        activation_fn = tf.nn.relu
+                    elif activation == 'sigmoid':
+                        activation_fn = tf.nn.sigmoid
+                    elif activation == 'elu':
+                        activation_fn = tf.nn.elu
+                    else:
+                        activation_fn = tf.nn.relu
+
+                    # regularizer
+                    if self.regularizer == 'l1':
+                        regularizer = l1_regularizer(self.regularizer_scale)
+                    elif self.regularizer == 'l2':
+                        regularizer = l2_regularizer(self.regularizer_scale)
+                    else:
+                        regularizer = l2_regularizer(self.regularizer_scale)
+
+                    # fully connected graph
+                    net = fully_connected(
+                        net, hidden_layer,
+                        activation_fn=activation_fn,
+                        biases_initializer=xavier_initializer,
+                        weights_initializer=xavier_initializer,
+                        weights_regularizer=regularizer)
+
+                    # batch normalization
+                    if self.batch_normalization:
+                        net = tf.layers.\
+                            batch_normalization(net,
+                                                training=self.is_training_tf)
+
+                    # dropout
+                    if self.dropout:
+                        net = dropout(net,
+                                      keep_prob=1-self.dropout_rate,
+                                      is_training=self.is_training_tf)
+
+            # end of build graph
+            net = flatten(net)
+            net = tf.layers.dense(net, n_classes)
+
+        # save model
+        return net
+
+    def batches(self, X_train, y_train):
+        # size
+        n_samples, _ = np.shape(X_train)
+        batch_size = self.batch_size
+
+        # batchs
+        batches = []
+
+        random_mask = list(np.random.permutation(n_samples))
+        random_X = X_train[random_mask, :]
+        random_Y = y_train[random_mask, :]
+
+        num_batches = n_samples // batch_size
+        for i in range(0, num_batches):
+            batch_X = random_X[batch_size * i:batch_size * i + batch_size, :]
+            batch_Y = random_Y[batch_size * i:batch_size * i + batch_size, :]
+            batch = (batch_X, batch_Y)
+            batches.append(batch)
+
+        if n_samples % batch_size != 0:
+            batch_X = random_X[num_batches * batch_size:n_samples, :]
+            batch_Y = random_Y[num_batches * batch_size:n_samples, :]
+            batch = (batch_X, batch_Y)
+            batches.append(batch)
+
+        return batches
+
+    def fit(self, X, y, sample_weight=None):
+
+        print("------------------------------------")
+        print("NeuralNetClassifier fit")
+
+        # size
+        n_samples, n_features = np.shape(X)
+        _, n_classes = np.shape(y)
+
+        # generate batches
+        batches = self.batches(X_train=X, y_train=y)
+
+        # build neural net
+        self.network_tf = self.model(X, y)
+
+        # cost (loss)
+        loss = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits(labels=self.y_tf,
+                                                    logits=self.network_tf))
+
+        # optimizer
+        if self.optimizer == 'Adam':
+            optimizer = \
+                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+        elif self.optimizer == 'GradientDescent':
+            optimizer = \
+                tf.train.GradientDescentOptimizer(
+                    learning_rate=self.learning_rate)
+        else:
+            optimizer = \
+                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+
+        # When using the batchnormalization layers,
+        # it is necessary to manually add the update operations
+        # because the moving averages are not included in the graph
+        update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope="network")
+
+        with tf.control_dependencies(update_op):
+            train_op = optimizer.minimize(loss)
+
+        init_op = tf.global_variables_initializer()
+        # saver = tf.train.Saver()
+
+        # tensorflow seesion
+        with tf.Session() as sess:
+            self.session_tf = sess
+
+            # initialization
+            self.session_tf.run(init_op)
+
+            for epoch in range(self.num_epochs):
+                for batch in batches:
+                    batch_X, batch_y = batch
+
+                    feed = {
+                        self.X_tf: batch_X,
+                        self.y_tf: batch_y,
+                        self.is_training_tf: True
+                    }
+
+                    _, loss_val = self.session_tf.run([train_op, loss],
+                                                  feed_dict=feed)
+
+                    if (epoch % 100) == 0:
+                        print(epoch, loss_val)
+
+            # if self.save_path is not None:
+            #     save_path = saver.save(sess, self.save_path)
+            #     print("fitted model save: {}".format(save_path))
+
+        return self
+
+    def predict_proba(self, X):
+
+        print("------------------------------------")
+        print("NeuralNetClassifier predict_proba")
+
+        # saver = tf.train.Saver()
+
+        # tensorflow seesion
+        # with tf.Session() as sess:
+        #     saver.restore(sess, self.save_path)
+        #     print("model restored.")
+
+        feed = {
+            self.X_tf: X,
+            self.is_training_tf: False
+        }
+
+        predict_op = tf.nn.softmax(self.network_tf, name='softmax')
+        P_predicted = self.session_tf.run(predict_op, feed_dict=feed)
+
+        return P_predicted
+
+    def score(self, X, y, sample_weight=None):
+        P_predicted = self.predict_proba(X)
+        n_samples, n_labels = np.shape(P_predicted)
+
+        score = np.zeros(n_samples)
+
+        for i in range(0, n_samples):
+            score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
+
+        return np.mean(score)
