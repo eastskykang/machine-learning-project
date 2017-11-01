@@ -15,4 +15,3 @@ dependencies:
     - opencv-contrib-python
     - kli
     - tensorflow
-    - git+https://github.com/rajarsheem/libsdae.git

@@ -5,6 +5,8 @@ from sklearn.linear_model import LogisticRegression
 from scipy.stats import spearmanr
 from tensorflow.contrib.layers import fully_connected, batch_norm, dropout, \
     l1_regularizer, l2_regularizer, flatten
+from datetime import datetime
+from pathlib import Path
 import tensorflow as tf
 
 class MeanPredictor(BaseEstimator, TransformerMixin):
@@ -35,7 +37,7 @@ class LogisticRegression(LogisticRegression):
         y_assigned = np.argmax(y, axis=1)
         X, y_assigned = check_X_y(X, y_assigned)
 
-        super(LogisticRegression, self)\
+        super(LogisticRegression, self) \
             .fit(X, y_assigned, sample_weight)
         return self
 
@@ -51,7 +53,7 @@ class LogisticRegression(LogisticRegression):
         return np.mean(score)
 
     def predict_proba(self, X):
-        return super(LogisticRegression, self)\
+        return super(LogisticRegression, self) \
             .predict_proba(X)
 
 
@@ -96,7 +98,7 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
         regularizer = tf.nn.l2_loss(W)
         cost = C * cost + regularizer
 
-        train = tf.train.\
+        train = tf.train. \
             GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(cost)
 
         # train
@@ -166,13 +168,12 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.optimizer = optimizer
         self.learning_rate = learning_rate
         self.save_path = save_path
+        self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
 
-        # tensorflow session, network and variables
-        self.session_tf = None
-        self.network_tf = None
-        self.X_tf = None
-        self.y_tf = None
-        self.is_training_tf = None
+        if save_path is not None:
+            while Path(self.save_path + '/'
+                               + self.model_name + '.ckpt').exists():
+                self.model_name = self.model_name + "_"
 
         # network structure
         if hidden_layers is None:
@@ -186,23 +187,27 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         if optimizer != "Adam" and optimizer != "GradientDescent":
             assert "invalid optimizer"
 
-    def model(self, X_train, y_train):
+    def model(self, X_train, y_train=None):
         n_samples, n_features = np.shape(X_train)
         _, n_classes = np.shape(y_train)
 
+        if y_train is None:
+            # TODO
+            n_classes = 4
+
         with tf.variable_scope("network"):
             # input
-            self.X_tf = tf.placeholder(tf.float32,
-                                       shape=[None, n_features],
-                                       name='X')
-            self.y_tf = tf.placeholder(tf.float32,
-                                       shape=[None, n_classes],
-                                       name='y')
-            self.is_training_tf = tf.placeholder(tf.bool,
-                                                 name='is_training')
+            X_tf = tf.placeholder(tf.float32,
+                                  shape=[None, n_features],
+                                  name='X')
+            y_tf = tf.placeholder(tf.float32,
+                                  shape=[None, n_classes],
+                                  name='y')
+            is_training_tf = tf.placeholder(tf.bool,
+                                            name='is_training')
 
             # build graph
-            net = self.X_tf
+            net = X_tf
             for i, (hidden_layer, activation) \
                     in enumerate(zip(self.hidden_layers, self.activations)):
                 with tf.variable_scope('layer{}'.format(i)):
@@ -237,22 +242,21 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                     # batch normalization
                     if self.batch_normalization:
-                        net = tf.layers.\
+                        net = tf.layers. \
                             batch_normalization(net,
-                                                training=self.is_training_tf)
+                                                training=is_training_tf)
 
                     # dropout
                     if self.dropout:
                         net = dropout(net,
                                       keep_prob=1-self.dropout_rate,
-                                      is_training=self.is_training_tf)
+                                      is_training=is_training_tf)
 
             # end of build graph
             net = flatten(net)
             net = tf.layers.dense(net, n_classes)
 
-        # save model
-        return net
+        return net, X_tf, y_tf, is_training_tf
 
     def batches(self, X_train, y_train):
         # size
@@ -294,12 +298,12 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         batches = self.batches(X_train=X, y_train=y)
 
         # build neural net
-        self.network_tf = self.model(X, y)
+        network, X_tf, y_tf, is_training_tf = self.model(X, y)
 
         # cost (loss)
         loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(labels=self.y_tf,
-                                                    logits=self.network_tf))
+            tf.nn.softmax_cross_entropy_with_logits(labels=y_tf,
+                                                    logits=network))
 
         # optimizer
         if self.optimizer == 'Adam':
@@ -322,34 +326,35 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
             train_op = optimizer.minimize(loss)
 
         init_op = tf.global_variables_initializer()
-        # saver = tf.train.Saver()
+        saver = tf.train.Saver()
 
         # tensorflow seesion
         with tf.Session() as sess:
-            self.session_tf = sess
 
             # initialization
-            self.session_tf.run(init_op)
+            sess.run(init_op)
 
             for epoch in range(self.num_epochs):
                 for batch in batches:
                     batch_X, batch_y = batch
 
                     feed = {
-                        self.X_tf: batch_X,
-                        self.y_tf: batch_y,
-                        self.is_training_tf: True
+                        X_tf: batch_X,
+                        y_tf: batch_y,
+                        is_training_tf: True
                     }
 
-                    _, loss_val = self.session_tf.run([train_op, loss],
-                                                  feed_dict=feed)
+                    _, loss_val = sess.run([train_op, loss],
+                                           feed_dict=feed)
 
                     if (epoch % 100) == 0:
                         print(epoch, loss_val)
 
-            # if self.save_path is not None:
-            #     save_path = saver.save(sess, self.save_path)
-            #     print("fitted model save: {}".format(save_path))
+            if self.save_path is not None and self.model_name is not None:
+                save_path = self.save_path + '/' \
+                            + self.model_name + '.cpkl'
+                saved_path = saver.save(sess, save_path)
+                print("fitted model save: {}".format(saved_path))
 
         return self
 
@@ -358,20 +363,29 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         print("------------------------------------")
         print("NeuralNetClassifier predict_proba")
 
-        # saver = tf.train.Saver()
+        # size
+        n_samples, n_features = np.shape(X)
+        n_classes = 4 # TODO
+
+        # build neural net
+        network, X_tf, _, is_training_tf = self.model(X)
 
         # tensorflow seesion
-        # with tf.Session() as sess:
-        #     saver.restore(sess, self.save_path)
-        #     print("model restored.")
+        saver = tf.train.Saver()
 
-        feed = {
-            self.X_tf: X,
-            self.is_training_tf: False
-        }
+        with tf.Session() as sess:
+            save_path = self.save_path + '/' \
+                        + self.model_name + '.cpkl'
+            saver.restore(sess, save_path)
+            print("fitted model restored: {}".format(save_path))
 
-        predict_op = tf.nn.softmax(self.network_tf, name='softmax')
-        P_predicted = self.session_tf.run(predict_op, feed_dict=feed)
+            feed = {
+                X_tf: X,
+                is_training_tf: False
+            }
+
+            predict_op = tf.nn.softmax(network, name='softmax')
+            P_predicted = sess.run(predict_op, feed_dict=feed)
 
         return P_predicted
 
