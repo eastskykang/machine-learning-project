@@ -350,10 +350,12 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
             if self.save_path is not None and self.model_name is not None:
 
                 # model path
-                while Path(self.save_path + self.model_name + '.ckpt').exists():
+                while Path(self.save_path + self.model_name).exists():
                     self.model_name = self.model_name + "_"
 
-                self.model_path = self.save_path + self.model_name + '.ckpt'
+                # create directory
+                Path(self.save_path + self.model_name).mkdir(exist_ok=False)
+                self.model_path = self.save_path + self.model_name + '/model.ckpt'
 
                 # save model
                 tf_save_path = self.model_path
