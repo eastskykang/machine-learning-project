@@ -377,7 +377,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         saver = tf.train.Saver()
 
         with tf.Session() as sess:
-            save_path = self.save_path + '/' \
+            save_path = self.save_path \
                         + self.model_name + '.ckpt'
             saver.restore(sess, save_path)
             print("fitted model restored: {}".format(save_path))
@@ -403,5 +403,5 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         return np.mean(score)
 
-    def set_save_path(self, save_path):
-        self.save_path = save_path
+    # def set_save_path(self, save_path):
+    #     self.save_path = save_path
