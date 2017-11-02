@@ -508,9 +508,9 @@ params:
       - 8
       - 9
     NeuralNetClassifier__regularizer_scale:
-      - 100
-      - 10
-      - 1
+      - 100.0
+      - 10.0
+      - 1.0
       - 0.1
       - 0.01
     NeuralNetClassifier__hidden_layers:
