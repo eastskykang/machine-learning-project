@@ -403,5 +403,5 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         return np.mean(score)
 
-    # def set_save_path(self, save_path):
-    #     self.save_path = save_path
+    def set_save_path(self, save_path):
+        self.save_path = save_path
