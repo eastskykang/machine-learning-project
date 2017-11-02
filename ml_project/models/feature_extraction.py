@@ -6,34 +6,6 @@ import numpy as np
 import cv2
 
 
-# class FeatureCombination(BaseEstimator, TransformerMixin):
-#     """FeatureCombination class for combine features from different class"""
-#     def __init__(self, features=None, params=None):
-#         self.feature_classes = []
-#         self.params = []
-#
-#         if features is None:
-#             pass
-#
-#         for feature in features:
-#             if feature == "ImageHistogram":
-#                 self.feature_classes.append()
-#             elif feature == "Sift":
-#                 self.feature_classes.append()
-#             elif feature == "AutoEncoder"
-#             else
-#                 assert
-#
-#
-#     def fit(self, X, y=None):
-#         # no internal variable
-#         X = check_array(X)
-#
-#     def transform(self, X, y=None):
-#         # no internal variable
-#         X = check_array(X)
-
-
 class IntensityHistogram(BaseEstimator, TransformerMixin):
     """Feature from intensity histogram of 3D images"""
 
