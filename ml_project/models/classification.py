@@ -150,10 +150,10 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
 
 class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
-    def __init__(self, save_path=None, hidden_layers=None, activations=None, regularizer='l2',
+    def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
                  regularizer_scale=1.0, batch_normalization=True,
                  batch_size=58, dropout=True, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.01, num_epoch=500):
+                 optimizer='Adam', learning_rate=0.01, num_epoch=500, save_path=None):
 
         self.hidden_layers = hidden_layers
         self.activations = activations
@@ -168,12 +168,6 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.learning_rate = learning_rate
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
-
-        # TODO bug (should goes to fit)
-        if self.save_path is not None:
-            while Path(self.save_path +
-                               '/' + self.model_name + '.ckpt').exists():
-                self.model_name = self.model_name + "_"
 
         # network structure
         if hidden_layers is None:
@@ -353,10 +347,17 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                         print(epoch, loss_val)
 
             if self.save_path is not None and self.model_name is not None:
-                save_path = self.save_path + '/' \
+
+                # model path
+                while Path(self.save_path +
+                                   '/' + self.model_name + '.ckpt').exists():
+                    self.model_name = self.model_name + "_"
+
+                # save model
+                tf_save_path = self.save_path + '/' \
                             + self.model_name + '.ckpt'
-                saved_path = saver.save(sess, save_path)
-                print("fitted model save: {}".format(saved_path))
+                tf_saved_path = saver.save(sess, tf_save_path)
+                print("fitted model save: {}".format(tf_saved_path))
 
         return self
 
