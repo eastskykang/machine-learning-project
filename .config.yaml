@@ -488,13 +488,17 @@ params:
   est_module: ml_project.pipeline
   est_class: Pipeline
   est_params:
-    - module: ml_project.models.feature_extraction
-      class: IntensityHistogram
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
+#    - module: ml_project.models.feature_extraction
+#      class: IntensityHistogram
+    - module: ml_project.models.feature_selection
+      class: RandomSelection
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
     - module: ml_project.models.classification
       class: NeuralNetClassifier
   param_grid:
+    RandomSelection__n_components:
+      - 50
     NeuralNetClassifier__hidden_layers:
       - [3000, 300, 30]
     NeuralNetClassifier__activations:
