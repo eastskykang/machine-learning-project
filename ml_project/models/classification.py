@@ -150,11 +150,10 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
 
 class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
-    def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
+    def __init__(self, save_path=None, hidden_layers=None, activations=None, regularizer='l2',
                  regularizer_scale=1.0, batch_normalization=True,
                  batch_size=58, dropout=True, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.01, num_epoch=500,
-                 save_path=None):
+                 optimizer='Adam', learning_rate=0.01, num_epoch=500):
 
         self.hidden_layers = hidden_layers
         self.activations = activations
@@ -171,12 +170,9 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
 
         if save_path is not None:
-            while Path(self.save_path + '/'
-                               + self.model_name + '.ckpt').exists():
+            while Path(self.save_path +
+                               '/' + self.model_name + '.ckpt').exists():
                 self.model_name = self.model_name + "_"
-
-        print(save_path)
-        print(self.model_name)
 
         # network structure
         if hidden_layers is None:
