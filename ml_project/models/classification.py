@@ -166,7 +166,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.batch_size = batch_size
         self.optimizer = optimizer
         self.learning_rate = learning_rate
-        self.save_path = save_path
+        self.save_path = save_path          # ex) /home/kangd/
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
 
