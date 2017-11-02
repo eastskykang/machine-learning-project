@@ -406,9 +406,6 @@ params:
         n_components: 100
     - module: ml_project.models.classification
       class: NeuralNetClassifier
-      params:
-        save_path: '/home/kangd/test'
-
 
 # smt run --config .config.yaml -X data/X_train.npy -y data/train_labels_new.csv -a fit
 #module: ml_project.model_selection
