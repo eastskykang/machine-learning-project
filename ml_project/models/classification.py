@@ -354,7 +354,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
             if self.save_path is not None and self.model_name is not None:
                 save_path = self.save_path + '/' \
-                            + self.model_name + '.cpkl'
+                            + self.model_name + '.ckpt'
                 saved_path = saver.save(sess, save_path)
                 print("fitted model save: {}".format(saved_path))
 
@@ -377,7 +377,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         with tf.Session() as sess:
             save_path = self.save_path + '/' \
-                        + self.model_name + '.cpkl'
+                        + self.model_name + '.ckpt'
             saver.restore(sess, save_path)
             print("fitted model restored: {}".format(save_path))
 
