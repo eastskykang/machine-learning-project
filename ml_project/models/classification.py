@@ -401,3 +401,6 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
             score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
 
         return np.mean(score)
+
+    def set_save_path(self, save_path):
+        self.save_path = save_path
