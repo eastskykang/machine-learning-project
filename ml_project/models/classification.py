@@ -169,7 +169,10 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
 
-        if save_path is not None:
+        print(self.save_path)
+        print(self.model_name)
+
+        if self.save_path is not None:
             while Path(self.save_path +
                                '/' + self.model_name + '.ckpt').exists():
                 self.model_name = self.model_name + "_"
