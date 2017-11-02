@@ -169,9 +169,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
 
-        print(self.save_path)
-        print(self.model_name)
-
+        # TODO bug (should goes to fit)
         if self.save_path is not None:
             while Path(self.save_path +
                                '/' + self.model_name + '.ckpt').exists():
@@ -191,11 +189,13 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
     def model(self, X_train, y_train=None):
         n_samples, n_features = np.shape(X_train)
-        _, n_classes = np.shape(y_train)
 
         if y_train is None:
             # TODO
             n_classes = 4
+        else:
+            _, n_classes = np.shape(y_train)
+
 
         with tf.variable_scope("network"):
             # input
