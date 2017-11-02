@@ -168,6 +168,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.learning_rate = learning_rate
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
+        self.model_path = None
 
         # network structure
         if hidden_layers is None:
@@ -353,6 +354,9 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                                    '/' + self.model_name + '.ckpt').exists():
                     self.model_name = self.model_name + "_"
 
+                self.model_path = self.save_path + \
+                                  '/' + self.model_name + '.ckpt'
+
                 # save model
                 tf_save_path = self.save_path + '/' \
                             + self.model_name + '.ckpt'
@@ -377,8 +381,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         saver = tf.train.Saver()
 
         with tf.Session() as sess:
-            save_path = self.save_path \
-                        + self.model_name + '.ckpt'
+            save_path = self.model_path
             saver.restore(sess, save_path)
             print("fitted model restored: {}".format(save_path))
 
