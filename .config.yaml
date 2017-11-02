@@ -495,24 +495,6 @@ params:
     - module: ml_project.models.classification
       class: NeuralNetClassifier
   param_grid:
-    IntensityHistogram__bin_number:
-      - 60
-      - 80
-    IntensityHistogram__x_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__y_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__z_cell_number:
-      - 8
-      - 9
-    NeuralNetClassifier__regularizer_scale:
-      - 100.0
-      - 10.0
-      - 1.0
-      - 0.1
-      - 0.01
     NeuralNetClassifier__hidden_layers:
       - [3000, 300, 30]
     NeuralNetClassifier__activations:
