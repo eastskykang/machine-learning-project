@@ -153,7 +153,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
     def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
                  regularizer_scale=1.0, batch_normalization=True,
                  batch_size=58, dropout=True, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.01, num_epoch=500, save_path=None):
+                 optimizer='Adam', learning_rate=0.01, num_epoch=500, save_path='/tmp/'):
 
         self.hidden_layers = hidden_layers
         self.activations = activations
@@ -166,7 +166,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.batch_size = batch_size
         self.optimizer = optimizer
         self.learning_rate = learning_rate
-        self.save_path = save_path          # ex) /home/kangd/
+        self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
 
@@ -377,10 +377,6 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         # tensorflow seesion
         saver = tf.train.Saver()
-
-        print(self.save_path)
-        print(self.model_name)
-        print(self.model_path)
 
         with tf.Session() as sess:
             save_path = self.model_path
