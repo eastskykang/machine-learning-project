@@ -490,34 +490,36 @@ params:
   est_params:
     - module: ml_project.models.feature_extraction
       class: IntensityHistogram
-    - module: ml_project.models.feature_selection
-      class: RandomSelection
     - module: ml_project.models.preprocessing
       class: StandardScaler
     - module: ml_project.models.classification
       class: NeuralNetClassifier
   param_grid:
-    IntensityHistogram__bin_number:
-      - 60
-      - 80
-    IntensityHistogram__x_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__y_cell_number:
-      - 8
-      - 9
-    IntensityHistogram__z_cell_number:
-      - 8
-      - 9
-    NeuralNetClassifier__regularizer_scale:
-      - 10.0
-      - 1.0
-      - 0.1
-      - 0.01
+    RandomSelection__n_components:
+      - 10
+#    IntensityHistogram__bin_number:
+#      - 60
+#      - 80
+#    IntensityHistogram__x_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__y_cell_number:
+#      - 8
+#      - 9
+#    IntensityHistogram__z_cell_number:
+#      - 8
+#      - 9
+#    NeuralNetClassifier__regularizer_scale:
+#      - 10.0
+#      - 1.0
+#      - 0.1
+#      - 0.01
     NeuralNetClassifier__hidden_layers:
-      - [3000, 300, 30]
+      - [300]
+#      - [3000, 300, 30]
     NeuralNetClassifier__activations:
-      - ['relu', 'relu', 'relu']
+      - ['relu']
+#      - ['relu', 'relu', 'relu']
     NeuralNetClassifier__batch_size:
       - 29
   cv:
