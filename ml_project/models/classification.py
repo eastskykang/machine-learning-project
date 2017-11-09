@@ -378,6 +378,10 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         # tensorflow seesion
         saver = tf.train.Saver()
 
+        print(self.save_path)
+        print(self.model_name)
+        print(self.model_path)
+
         with tf.Session() as sess:
             save_path = self.model_path
             saver.restore(sess, save_path)
