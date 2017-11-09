@@ -186,12 +186,11 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         n_samples, n_features = np.shape(X_train)
 
         if y_train is None:
-            # TODO
             n_classes = 4
         else:
             _, n_classes = np.shape(y_train)
 
-
+        tf.reset_default_graph()
         with tf.variable_scope("network"):
             # input
             X_tf = tf.placeholder(tf.float32,
