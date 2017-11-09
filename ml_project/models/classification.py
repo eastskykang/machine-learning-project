@@ -153,7 +153,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
     def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
                  regularizer_scale=1.0, batch_normalization=True,
                  batch_size=58, dropout=True, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.01, num_epoch=500, save_path='/tmp/'):
+                 optimizer='Adam', learning_rate=0.01, num_epoch=500, save_path=None):
 
         self.hidden_layers = hidden_layers
         self.activations = activations
@@ -346,20 +346,22 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                     if (epoch % 100) == 0:
                         print(epoch, loss_val)
 
-            if self.save_path is not None and self.model_name is not None:
+            # save tensorflow model
+            if self.save_path is None:
+                self.save_path = 'data/tmp/'
 
-                # model path
-                while Path(self.save_path + self.model_name).exists():
-                    self.model_name = self.model_name + "_"
+            # model path
+            while Path(self.save_path + self.model_name).exists():
+                self.model_name = self.model_name + "_"
 
-                # create directory
-                Path(self.save_path + self.model_name).mkdir(exist_ok=False)
-                self.model_path = self.save_path + self.model_name + '/model.ckpt'
+            # create directory
+            Path(self.save_path + self.model_name).mkdir(exist_ok=False, parents=True)
+            self.model_path = self.save_path + self.model_name + '/model.ckpt'
 
-                # save model
-                tf_save_path = self.model_path
-                tf_saved_path = saver.save(sess, tf_save_path)
-                print("fitted model save: {}".format(tf_saved_path))
+            # save model
+            tf_save_path = self.model_path
+            tf_saved_path = saver.save(sess, tf_save_path)
+            print("fitted model save: {}".format(tf_saved_path))
 
         return self
 
