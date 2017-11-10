@@ -14,4 +14,4 @@ dependencies:
     - kaggle-cli
     - opencv-contrib-python
     - kli
-    - tensorflow-gpu
+    - tensorflow
