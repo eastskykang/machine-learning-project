@@ -1,7 +1,6 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 from ml_project.models import utils
-from deepautoencoder import StackedAutoEncoder
 import numpy as np
 import cv2
 
@@ -323,49 +322,5 @@ class ImageHistogramAndSift(BaseEstimator, TransformerMixin):
 
         X_new = np.hstack((self.sift.transform(X, y),
                            self.image_hist.transform(X, y)))
-
-        return X_new
-
-
-class AutoEncoder(BaseEstimator, TransformerMixin):
-    """AutoEncoder"""
-    def __init__(self, dims=None, activations=None, epoch=None,
-                 loss='rmse', lr=0.007, batch_size=50, print_step=50,
-                 verbosity=0):
-
-        self.model = StackedAutoEncoder(dims=dims,
-                                        activations=activations,
-                                        epoch=epoch,
-                                        loss=loss,
-                                        lr=lr,
-                                        batch_size=batch_size,
-                                        print_step=print_step)
-        self.verbosity = verbosity
-
-    def fit(self, X, y=None):
-
-        if self.verbosity > 0:
-            print("------------------------------------")
-            print("AutoEncoder fit ")
-            print("shape of X before transform : ")
-            print(X.shape)
-
-        X = check_array(X)
-        self.model.fit(X)
-        return self
-
-    def transform(self, X, y=None):
-
-        if self.verbosity > 0:
-            print("------------------------------------")
-            print("AutoEncoder transform")
-            print("shape of X before transform : ")
-            print(X.shape)
-
-        X_new = self.model.transform(X)
-
-        if self.verbosity > 0:
-                print("shape of X after transform : ")
-                print(X_new.shape)
 
         return X_new
