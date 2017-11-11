@@ -119,7 +119,9 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
                  x_cell_number=8,
                  y_cell_number=8,
                  z_cell_number=8,
-                 bin_number=60,
+                 x_bin_number=10,
+                 y_bin_number=10,
+                 z_bin_number=10,
                  verbosity=1):
 
         # image dimension
@@ -132,7 +134,9 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
         self.x_cell_number = x_cell_number
         self.y_cell_number = y_cell_number
         self.z_cell_number = z_cell_number
-        self.bin_number = bin_number
+        self.x_bin_number = x_bin_number
+        self.y_bin_number = y_bin_number
+        self.z_bin_number = z_bin_number
 
         # verbosity
         self.verbosity = verbosity
@@ -144,7 +148,9 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
             print("cell numbers = {}x{}x{}".format(self.x_cell_number,
                                                    self.y_cell_number,
                                                    self.z_cell_number))
-            print("bin numbers = {}".format(self.bin_number))
+            print("bin numbers = {}x{}x{}".format(self.x_bin_number,
+                                                  self.y_bin_number,
+                                                  self.z_bin_number))
 
         # no internal variable
         X = check_array(X)
@@ -186,27 +192,46 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
                               self.x_cell_number,
                               self.y_cell_number,
                               self.z_cell_number,
-                              self.bin_number))
+                              self.x_bin_number,
+                              self.y_bin_number,
+                              self.z_bin_number))
 
         for i in range(0, n_samples):
             image_3D = X_3D[i, :, :, :]
+            gradient = np.gradient(image_3D)
+
+            # normalize
+            norm = np.linalg.norm(gradient, axis=0)
+            gradient = [np.where(norm == 0, 0, i / norm) for i in gradient]
 
             for xi in range(0, x_cell_edges.size - 1):
                 for yi in range(0, y_cell_edges.size - 1):
                     for zi in range(0, z_cell_edges.size - 1):
 
                         # image block for histogram
-                        image_block = image_3D[
-                                      x_cell_edges[xi]:x_cell_edges[xi+1],
-                                      y_cell_edges[yi]:y_cell_edges[yi+1],
-                                      z_cell_edges[zi]:z_cell_edges[zi+1]]
+                        gradient_block_x = gradient[0][
+                                           x_cell_edges[xi]:x_cell_edges[xi+1],
+                                           y_cell_edges[yi]:y_cell_edges[yi+1],
+                                           z_cell_edges[zi]:z_cell_edges[zi+1]]
+                        gradient_block_y = gradient[1][
+                                           x_cell_edges[xi]:x_cell_edges[xi+1],
+                                           y_cell_edges[yi]:y_cell_edges[yi+1],
+                                           z_cell_edges[zi]:z_cell_edges[zi+1]]
+                        gradient_block_z = gradient[2][
+                                           x_cell_edges[xi]:x_cell_edges[xi+1],
+                                           y_cell_edges[yi]:y_cell_edges[yi+1],
+                                           z_cell_edges[zi]:z_cell_edges[zi+1]]
+
+                        gradient_block_x = gradient_block_x.flatten()
+                        gradient_block_y = gradient_block_y.flatten()
+                        gradient_block_z = gradient_block_z.flatten()
 
                         # histogram
-                        histogram[i, xi, yi, zi, :], bins = \
-                            np.histogram(image_block,
-                                         bins=np.linspace(0,
-                                                          self.histBinMax,
-                                                          self.bin_number + 1))
+                        histogram[i, xi, yi, zi, :, :, :], bins = \
+                            np.histogramdd((gradient_block_x, gradient_block_y, gradient_block_z),
+                                           bins=(np.linspace(0, 1, self.x_bin_number + 1),
+                                                 np.linspace(0, 1, self.y_bin_number + 1),
+                                                 np.linspace(0, 1, self.z_bin_number + 1)))
 
         X_new = np.reshape(histogram, (n_samples, -1))
 

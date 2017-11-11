@@ -381,18 +381,8 @@
 #class: Pipeline
 #params:
 #  class_list:
-#    - module: ml_project.models.feature_selection
-#      class: RandomSelection
-#      params:
-#        random_state: 37
-#        n_components: 100
 #    - module: ml_project.models.feature_extraction
-#      class: AutoEncoder
-#      params:
-#        dims: [5,6]
-#        activations: ['relu', 'relu']
-#        epoch: [10000, 5000]
-
+#      class: GradientHistogram
 
 # simple test for debugging
 #module: ml_project.pipeline
@@ -481,6 +471,45 @@
 
 
 # smt run --config .config.yaml -X data/X_train.npy -y data/train_labels_new.csv -a fit
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  n_jobs: 4
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_extraction
+#      class: IntensityHistogram
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: ml_project.models.classification
+#      class: NeuralNetClassifier
+#  param_grid:
+#    IntensityHistogram__bin_number:
+#      - 60
+#    IntensityHistogram__x_cell_number:
+#      - 8
+#    IntensityHistogram__y_cell_number:
+#      - 8
+#    IntensityHistogram__z_cell_number:
+#      - 8
+#    NeuralNetClassifier__regularizer_scale:
+#      - 1.0
+#    NeuralNetClassifier__hidden_layers:
+#      - [3000, 300, 30]
+#    NeuralNetClassifier__activations:
+#      - ['relu', 'relu', 'relu']
+#    NeuralNetClassifier__batch_size:
+#      - 29
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 5
+#      shuffle: True
+#      random_state: 37
+
+
 module: ml_project.model_selection
 class: GridSearchCV
 params:
@@ -489,20 +518,14 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_extraction
-      class: IntensityHistogram
+      class: GradientHistogram
     - module: ml_project.models.preprocessing
       class: StandardScaler
+    - module: ml_project.models.features_selection
+      class: VarianceThreshold
     - module: ml_project.models.classification
       class: NeuralNetClassifier
   param_grid:
-    IntensityHistogram__bin_number:
-      - 60
-    IntensityHistogram__x_cell_number:
-      - 8
-    IntensityHistogram__y_cell_number:
-      - 8
-    IntensityHistogram__z_cell_number:
-      - 8
     NeuralNetClassifier__regularizer_scale:
       - 1.0
     NeuralNetClassifier__hidden_layers:
