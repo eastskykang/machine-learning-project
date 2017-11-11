@@ -504,7 +504,7 @@ params:
     IntensityHistogram__z_cell_number:
       - 8
     NeuralNetClassifier__regularizer_scale:
-      - 1.0
+      - 0.1
     NeuralNetClassifier__hidden_layers:
       - [3000, 300, 30]
     NeuralNetClassifier__activations:
