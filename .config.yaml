@@ -521,7 +521,7 @@ params:
       class: GradientHistogram
     - module: ml_project.models.preprocessing
       class: StandardScaler
-    - module: ml_project.models.features_selection
+    - module: ml_project.models.feature_selection
       class: VarianceThreshold
     - module: ml_project.models.classification
       class: NeuralNetClassifier
