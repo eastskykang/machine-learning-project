@@ -518,7 +518,7 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_extraction
-      class: GradientHistogram
+      class: IntensityAndGradient
     - module: ml_project.models.preprocessing
       class: StandardScaler
     - module: ml_project.models.feature_selection
@@ -529,7 +529,7 @@ params:
     NeuralNetClassifier__regularizer_scale:
       - 0.1
     NeuralNetClassifier__hidden_layers:
-      - [3000, 300, 30]
+      - [5000, 500]
     NeuralNetClassifier__activations:
       - ['relu', 'relu', 'relu']
     NeuralNetClassifier__batch_size:

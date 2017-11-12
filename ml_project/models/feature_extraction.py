@@ -358,7 +358,7 @@ class SiftDetector(BaseEstimator, TransformerMixin):
                                           cell_edges2[yi]:cell_edges2[yi + 1]]
 
                         # normalize for feature
-                        image_block\
+                        image_block \
                             = image_block / utils.Constants.IMAGE_VALUE_MAX
                         image_block = np.array(image_block * 255,
                                                dtype=np.uint8)
@@ -376,6 +376,10 @@ class SiftDetector(BaseEstimator, TransformerMixin):
 
         return X_new
 
+
+# =============================================================================
+# Feature combinations
+# =============================================================================
 
 class SiftAllAxis(BaseEstimator, TransformerMixin):
     """Sift feature for each cut (plane // XY, YZ, ZX)"""
@@ -452,5 +456,50 @@ class ImageHistogramAndSift(BaseEstimator, TransformerMixin):
 
         X_new = np.hstack((self.sift.transform(X, y),
                            self.image_hist.transform(X, y)))
+
+        return X_new
+
+
+class IntensityAndGradient(BaseEstimator, TransformerMixin):
+    def __init__(self, verbosity=1):
+        self.image_hist = IntensityHistogram(x_cell_number = 9,
+                                             y_cell_number = 9,
+                                             z_cell_number = 8,
+                                             bin_number=60)
+        self.gradient_hist = GradientHistogram(x_cell_number = 9,
+                                               y_cell_number = 9,
+                                               z_cell_number = 8)
+        self.verbosity = verbosity
+
+    def fit(self, X, y=None):
+        # no internal variable
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("IntensityAndGradient fit ")
+            print("shape of X before transform : ")
+            print(X.shape)
+
+        X = check_array(X)
+
+        return self
+
+    def transform(self, X, y=None):
+        X = check_array(X)
+        n_samples, n_features = np.shape(X)
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("IntensityAndGradient transform")
+            print("shape of X before transform : ")
+            print(X.shape)
+
+        X_new = np.hstack((self.image_hist.transform(X, y),
+                           self.gradient_hist.transform(X, y)))
+
+
+        if self.verbosity > 0:
+            print("shape of X after transform : ")
+            print(X_new.shape)
 
         return X_new
