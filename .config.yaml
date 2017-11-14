@@ -383,6 +383,8 @@
 #  class_list:
 #    - module: ml_project.models.feature_extraction
 #      class: GradientHistogram
+#      params:
+#        save_path: 'data/img/'
 
 # simple test for debugging
 #module: ml_project.pipeline
