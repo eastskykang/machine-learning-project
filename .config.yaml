@@ -515,7 +515,7 @@
 module: ml_project.model_selection
 class: GridSearchCV
 params:
-  n_jobs: 2
+  n_jobs: 4
   est_module: ml_project.pipeline
   est_class: Pipeline
   est_params:
@@ -535,7 +535,7 @@ params:
     NeuralNetClassifier__activations:
       - ['relu']
     NeuralNetClassifier__batch_size:
-      - 29
+      - 58
   cv:
     module: sklearn.model_selection
     class: KFold
