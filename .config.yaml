@@ -531,9 +531,9 @@ params:
     NeuralNetClassifier__regularizer_scale:
       - 1.0
     NeuralNetClassifier__hidden_layers:
-      - [5000, 500]
+      - [500]
     NeuralNetClassifier__activations:
-      - ['relu', 'relu', 'relu']
+      - ['relu']
     NeuralNetClassifier__batch_size:
       - 29
   cv:

@@ -245,12 +245,12 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
                                            bins=(np.linspace(-180, 180, self.theta_bin_number + 1),
                                                  np.linspace(0, 180, self.phi_bin_number + 1)))
 
-                        if i is 0 and self.save_path is not None:
-                            # for debugging
-                            fig = plt.figure(figsize=(7, 3))
-                            plt.hist2d(theta_block, phi_block, bins=[theta_edge, phi_edge])
-                            fig.savefig(self.save_path +
-                                        '{}_{}_{}'.format(xi, yi, zi))
+                        # if i is 0 and self.save_path is not None:
+                        #     # for debugging
+                        #     fig = plt.figure(figsize=(7, 3))
+                        #     plt.hist2d(theta_block, phi_block, bins=[theta_edge, phi_edge])
+                        #     fig.savefig(self.save_path +
+                        #                 '{}_{}_{}'.format(xi, yi, zi))
 
         X_new = np.reshape(histogram, (n_samples, -1))
 
