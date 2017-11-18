@@ -3,11 +3,12 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
 from scipy.stats import spearmanr
-from tensorflow.contrib.layers import fully_connected, batch_norm, dropout, \
+from tensorflow.contrib.layers import fully_connected, dropout, \
     l1_regularizer, l2_regularizer, flatten
 from datetime import datetime
 from pathlib import Path
 import tensorflow as tf
+
 
 class MeanPredictor(BaseEstimator, TransformerMixin):
     """docstring for MeanPredictor"""
@@ -99,7 +100,8 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
         cost = C * cost + regularizer
 
         train = tf.train. \
-            GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(cost)
+            GradientDescentOptimizer(learning_rate=self.learning_rate).\
+            minimize(cost)
 
         # train
         with tf.Session() as sess:
@@ -153,7 +155,8 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
     def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
                  regularizer_scale=1.0, batch_normalization=True,
                  batch_size=58, dropout=True, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.01, num_epoch=500, save_path=None):
+                 optimizer='Adam', learning_rate=0.01, num_epoch=500,
+                 save_path=None):
 
         self.hidden_layers = hidden_layers
         self.activations = activations
@@ -245,7 +248,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                     # dropout
                     if self.dropout:
                         net = dropout(net,
-                                      keep_prob=1-self.dropout_rate,
+                                      keep_prob=(1-self.dropout_rate),
                                       is_training=is_training_tf)
 
             # end of build graph
@@ -300,7 +303,6 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(labels=y_tf,
                                                     logits=network))
-
         # optimizer
         if self.optimizer == 'Adam':
             optimizer = \
@@ -355,8 +357,10 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                 self.model_name = self.model_name + "_"
 
             # create directory
-            Path(self.save_path + self.model_name).mkdir(exist_ok=False, parents=True)
-            self.model_path = self.save_path + self.model_name + '/model.ckpt'
+            Path(self.save_path + self.model_name).\
+                mkdir(exist_ok=False, parents=True)
+            self.model_path = \
+                self.save_path + self.model_name + '/model.ckpt'
 
             # save model
             tf_save_path = self.model_path
@@ -369,10 +373,6 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         print("------------------------------------")
         print("NeuralNetClassifier predict_proba")
-
-        # size
-        n_samples, n_features = np.shape(X)
-        n_classes = 4 # TODO
 
         # build neural net
         network, X_tf, _, is_training_tf = self.model(X)

@@ -3,7 +3,6 @@ from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_array, check_is_fitted
 from sklearn.utils.random import sample_without_replacement
 from sklearn.feature_selection import VarianceThreshold
-import numpy as np
 
 
 class NonZeroSelection(BaseEstimator, TransformerMixin):

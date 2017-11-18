@@ -490,13 +490,13 @@
 #    IntensityHistogram__bin_number:
 #      - 60
 #    IntensityHistogram__x_cell_number:
-#      - 8
+#      - 9
 #    IntensityHistogram__y_cell_number:
-#      - 8
+#      - 9
 #    IntensityHistogram__z_cell_number:
 #      - 8
 #    NeuralNetClassifier__regularizer_scale:
-#      - 1.0
+#      - 0.1
 #    NeuralNetClassifier__hidden_layers:
 #      - [3000, 300, 30]
 #    NeuralNetClassifier__activations:
@@ -515,7 +515,7 @@
 module: ml_project.model_selection
 class: GridSearchCV
 params:
-  n_jobs: 4
+  n_jobs: -1
   est_module: ml_project.pipeline
   est_class: Pipeline
   est_params:
@@ -531,9 +531,9 @@ params:
     NeuralNetClassifier__regularizer_scale:
       - 1.0
     NeuralNetClassifier__hidden_layers:
-      - [500]
+      - [20000, 10000, 5000, 1000, 500, 100]
     NeuralNetClassifier__activations:
-      - ['relu']
+      - ['relu', 'relu', 'relu', 'relu', 'relu', 'relu']
     NeuralNetClassifier__batch_size:
       - 58
   cv:

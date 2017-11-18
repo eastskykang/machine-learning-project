@@ -2,7 +2,6 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 from ml_project.models import utils
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 
 
@@ -122,7 +121,7 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
                  z_cell_number=8,
                  theta_bin_number=18,
                  phi_bin_number=9,
-                 save_path = None,
+                 save_path=None,
                  verbosity=1):
 
         # image dimension
@@ -138,6 +137,8 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
         self.theta_bin_number = theta_bin_number
         self.phi_bin_number = phi_bin_number
         self.save_path = save_path
+
+        self.max_gradient = None
 
         # verbosity
         self.verbosity = verbosity
@@ -174,26 +175,26 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
                               self.imageDimZ))
 
         # cell (contains index of voxels) as bin edge
-        x_cell_edges = np.linspace(0,
-                                   self.imageDimX,
-                                   self.x_cell_number + 1,
-                                   dtype=int)
-        y_cell_edges = np.linspace(0,
-                                   self.imageDimY,
-                                   self.y_cell_number + 1,
-                                   dtype=int)
-        z_cell_edges = np.linspace(0,
-                                   self.imageDimZ,
-                                   self.z_cell_number + 1,
-                                   dtype=int)
+        x_edges = np.linspace(0,
+                              self.imageDimX,
+                              self.x_cell_number + 1,
+                              dtype=int)
+        y_edges = np.linspace(0,
+                              self.imageDimY,
+                              self.y_cell_number + 1,
+                              dtype=int)
+        z_edges = np.linspace(0,
+                              self.imageDimZ,
+                              self.z_cell_number + 1,
+                              dtype=int)
 
         # histograms
-        histogram = np.zeros((n_samples,
-                              self.x_cell_number,
-                              self.y_cell_number,
-                              self.z_cell_number,
-                              self.theta_bin_number,
-                              self.phi_bin_number))
+        hist = np.zeros((n_samples,
+                         self.x_cell_number,
+                         self.y_cell_number,
+                         self.z_cell_number,
+                         self.theta_bin_number,
+                         self.phi_bin_number))
 
         for i in range(0, n_samples):
             image_3D = X_3D[i, :, :, :]
@@ -203,62 +204,58 @@ class GradientHistogram(BaseEstimator, TransformerMixin):
             norm = np.linalg.norm(gradient, axis=0)
             gradient = [np.where(norm == 0, 0, i / norm) for i in gradient]
 
-            for xi in range(0, x_cell_edges.size - 1):
-                for yi in range(0, y_cell_edges.size - 1):
-                    for zi in range(0, z_cell_edges.size - 1):
+            for xi in range(0, x_edges.size - 1):
+                for yi in range(0, y_edges.size - 1):
+                    for zi in range(0, z_edges.size - 1):
 
-                        gradient_block_x = gradient[0][
-                                           x_cell_edges[xi]:x_cell_edges[xi+1],
-                                           y_cell_edges[yi]:y_cell_edges[yi+1],
-                                           z_cell_edges[zi]:z_cell_edges[zi+1]]
-                        gradient_block_y = gradient[1][
-                                           x_cell_edges[xi]:x_cell_edges[xi+1],
-                                           y_cell_edges[yi]:y_cell_edges[yi+1],
-                                           z_cell_edges[zi]:z_cell_edges[zi+1]]
-                        gradient_block_z = gradient[2][
-                                           x_cell_edges[xi]:x_cell_edges[xi+1],
-                                           y_cell_edges[yi]:y_cell_edges[yi+1],
-                                           z_cell_edges[zi]:z_cell_edges[zi+1]]
-                        gradient_block_mag = norm[
-                                           x_cell_edges[xi]:x_cell_edges[xi+1],
-                                           y_cell_edges[yi]:y_cell_edges[yi+1],
-                                           z_cell_edges[zi]:z_cell_edges[zi+1]]
+                        block_x = gradient[0][
+                                  x_edges[xi]:x_edges[xi+1],
+                                  y_edges[yi]:y_edges[yi+1],
+                                  z_edges[zi]:z_edges[zi+1]]
+                        block_y = gradient[1][
+                                  x_edges[xi]:x_edges[xi+1],
+                                  y_edges[yi]:y_edges[yi+1],
+                                  z_edges[zi]:z_edges[zi+1]]
+                        block_z = gradient[2][
+                                  x_edges[xi]:x_edges[xi+1],
+                                  y_edges[yi]:y_edges[yi+1],
+                                  z_edges[zi]:z_edges[zi+1]]
+                        block_mag = norm[
+                                    x_edges[xi]:x_edges[xi+1],
+                                    y_edges[yi]:y_edges[yi+1],
+                                    z_edges[zi]:z_edges[zi+1]]
 
-                        gradient_block_x = gradient_block_x.flatten()
-                        gradient_block_y = gradient_block_y.flatten()
-                        gradient_block_z = gradient_block_z.flatten()
-                        gradient_block_mag = gradient_block_mag.flatten()
+                        block_x = block_x.flatten()
+                        block_y = block_y.flatten()
+                        block_z = block_z.flatten()
+                        block_mag = block_mag.flatten()
 
-                        gradient_block_x = gradient_block_x[gradient_block_mag > 0.8]
-                        gradient_block_y = gradient_block_y[gradient_block_mag > 0.8]
-                        gradient_block_z = gradient_block_z[gradient_block_mag > 0.8]
+                        block_x = block_x[block_mag > 0.8]
+                        block_y = block_y[block_mag > 0.8]
+                        block_z = block_z[block_mag > 0.8]
 
                         # theta and phi
-                        theta_block = np.arctan2(gradient_block_y,
-                                                 gradient_block_x) * 180.0 / np.pi
-                        phi_block = np.arccos(gradient_block_z) * 180.0 / np.pi
+                        theta_block = np.arctan2(block_y,
+                                                 block_x) * 180.0 / np.pi
+                        phi_block = np.arccos(block_z) * 180.0 / np.pi
+
+                        bins = (np.linspace(-180, 180,
+                                            self.theta_bin_number + 1),
+                                np.linspace(0, 180,
+                                            self.phi_bin_number + 1))
 
                         # histogram
-                        histogram[i, xi, yi, zi, :, :], theta_edge, phi_edge = \
-                            np.histogram2d(theta_block,
-                                           phi_block,
-                                           bins=(np.linspace(-180, 180, self.theta_bin_number + 1),
-                                                 np.linspace(0, 180, self.phi_bin_number + 1)))
+                        hist[i, xi, yi, zi, :, :], theta_edge, phi_edge = \
+                            np.histogram2d(theta_block, phi_block, bins=bins)
 
-                        # if i is 0 and self.save_path is not None:
-                        #     # for debugging
-                        #     fig = plt.figure(figsize=(7, 3))
-                        #     plt.hist2d(theta_block, phi_block, bins=[theta_edge, phi_edge])
-                        #     fig.savefig(self.save_path +
-                        #                 '{}_{}_{}'.format(xi, yi, zi))
-
-        X_new = np.reshape(histogram, (n_samples, -1))
+        X_new = np.reshape(hist, (n_samples, -1))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")
             print(X_new.shape)
 
         return X_new
+
 
 class SiftDetector(BaseEstimator, TransformerMixin):
     """Sift feature for each cut (plane // XY)"""
@@ -481,9 +478,9 @@ class ImageHistogramAndSift(BaseEstimator, TransformerMixin):
 
 class IntensityAndGradient(BaseEstimator, TransformerMixin):
     def __init__(self, verbosity=1):
-        self.image_hist = IntensityHistogram(x_cell_number = 9,
-                                             y_cell_number = 9,
-                                             z_cell_number = 8,
+        self.image_hist = IntensityHistogram(x_cell_number=9,
+                                             y_cell_number=9,
+                                             z_cell_number=8,
                                              bin_number=60)
         self.gradient_hist = GradientHistogram()
         self.verbosity = verbosity
@@ -513,7 +510,6 @@ class IntensityAndGradient(BaseEstimator, TransformerMixin):
 
         X_new = np.hstack((self.image_hist.transform(X, y),
                            self.gradient_hist.transform(X, y)))
-
 
         if self.verbosity > 0:
             print("shape of X after transform : ")
