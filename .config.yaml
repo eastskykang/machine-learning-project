@@ -512,13 +512,10 @@
 #      random_state: 37
 
 
-module: ml_project.model_selection
-class: GridSearchCV
+module: ml_project.pipeline
+class: Pipelien
 params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
+  class_list:
     - module: ml_project.models.feature_extraction
       class: IntensityAndGradient
     - module: ml_project.models.preprocessing
@@ -527,19 +524,8 @@ params:
       class: VarianceThreshold
     - module: ml_project.models.classification
       class: NeuralNetClassifier
-  param_grid:
-    NeuralNetClassifier__regularizer_scale:
-      - 1.0
-    NeuralNetClassifier__hidden_layers:
-      - [20000, 10000, 5000, 1000, 500, 100]
-    NeuralNetClassifier__activations:
-      - ['relu', 'relu', 'relu', 'relu', 'relu', 'relu']
-    NeuralNetClassifier__batch_size:
-      - 58
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 5
-      shuffle: True
-      random_state: 37
+      params:
+        regularizer_scale: 1.0
+    	hidden_layers: [20000, 10000, 5000, 1000, 500, 100]
+    	activations: ['relu', 'relu', 'relu', 'relu', 'relu', 'relu']
+    	batch_size: 58
