@@ -513,7 +513,7 @@
 
 
 module: ml_project.pipeline
-class: Pipelien
+class: Pipeline
 params:
   class_list:
     - module: ml_project.models.feature_extraction
@@ -526,6 +526,6 @@ params:
       class: NeuralNetClassifier
       params:
         regularizer_scale: 1.0
-    	hidden_layers: [20000, 10000, 5000, 1000, 500, 100]
-    	activations: ['relu', 'relu', 'relu', 'relu', 'relu', 'relu']
-    	batch_size: 58
+        hidden_layers: [20000, 10000, 5000, 1000, 500, 100]
+        activations: ['relu', 'relu', 'relu', 'relu', 'relu', 'relu']
+        batch_size: 58
