@@ -4,13 +4,13 @@
 __pycache__/
 .kaggle-cli/
 data/
-#.config.yaml
+.config.yaml
 
 # added by donghokang
 .swp
 .idea/
 
 # TODO FOR SUBMISSION
-# smt add
+.smt/
 # .config.yaml remove from git
 #.smt/project
