@@ -1,0 +1,42 @@
+{
+  "input_datastore": {
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
+    "root": "/home/kangd/git/ml-project/data"
+  },
+  "default_launch_mode": {
+    "type": "sumatra.launch.SerialLaunchMode",
+    "working_directory": "/home/kangd/git/ml-project",
+    "options": null
+  },
+  "allow_command_line_parameters": true,
+  "_most_recent": "20171109-114841",
+  "default_main_file": "run.py",
+  "label_generator": "timestamp",
+  "default_repository": {
+    "type": "sumatra.versioncontrol._git.GitRepository",
+    "upstream": "https://github.com/EastskyKang/machine-learning-project.git",
+    "url": "/home/kangd/git/ml-project"
+  },
+  "name": "ml_project",
+  "description": "",
+  "default_executable": {
+    "type": "sumatra.programs.PythonExecutable",
+    "path": "/home/kangd/miniconda2/envs/ml_project/bin/python",
+    "name": "Python",
+    "options": "",
+    "version": "3.5.3"
+  },
+  "timestamp_format": "%Y%m%d-%H%M%S",
+  "on_changed": "error",
+  "data_label": "cmdline",
+  "record_store": {
+    "type": "sumatra.recordstore.django_store.DjangoRecordStore",
+    "db_file": "/home/kangd/git/ml-project/.smt/records"
+  },
+  "data_store": {
+    "type": "sumatra.datastore.filesystem.FileSystemDataStore",
+    "root": "/home/kangd/git/ml-project/data"
+  },
+  "plugins": [],
+  "sumatra_version": "0.8dev"
+}
