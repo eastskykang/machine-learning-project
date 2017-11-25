@@ -1,13 +1,15 @@
 import numpy as np
+import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
+from sklearn.preprocessing import LabelBinarizer
 from scipy.stats import spearmanr
-from tensorflow.contrib.layers import fully_connected, dropout, \
-    l1_regularizer, l2_regularizer, flatten
 from datetime import datetime
 from pathlib import Path
-import tensorflow as tf
+from keras.models import Sequential, load_model
+from keras.layers import Dense, Dropout, LSTM
 
 
 class MeanPredictor(BaseEstimator, TransformerMixin):
@@ -151,7 +153,7 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
 
 
 class NeuralNetClassifier(BaseEstimator, TransformerMixin):
-
+    """Neural Net Classifier"""
     def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
                  regularizer_scale=1.0, batch_normalization=True,
                  batch_size=58, dropout=True, dropout_rate=0.3,
@@ -225,14 +227,14 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                     # regularizer
                     if self.regularizer == 'l1':
-                        regularizer = l1_regularizer(self.regularizer_scale)
+                        regularizer = tf.contrib.layers.l1_regularizer(self.regularizer_scale)
                     elif self.regularizer == 'l2':
-                        regularizer = l2_regularizer(self.regularizer_scale)
+                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
                     else:
-                        regularizer = l2_regularizer(self.regularizer_scale)
+                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
 
                     # fully connected graph
-                    net = fully_connected(
+                    net = tf.contrib.layers.fully_connected(
                         net, hidden_layer,
                         activation_fn=activation_fn,
                         biases_initializer=xavier_initializer,
@@ -247,12 +249,12 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                     # dropout
                     if self.dropout:
-                        net = dropout(net,
+                        net = tf.contrib.layers.dropout(net,
                                       keep_prob=(1-self.dropout_rate),
                                       is_training=is_training_tf)
 
             # end of build graph
-            net = flatten(net)
+            net = tf.contrib.layers.flatten(net)
             net = tf.layers.dense(net, n_classes)
 
         return net, X_tf, y_tf, is_training_tf
@@ -408,3 +410,99 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
     def set_save_path(self, save_path):
         self.save_path = save_path
+
+
+class LSTMClassifier(BaseEstimator, TransformerMixin):
+    """LSTM Classifier for sequential data"""
+    def __init__(self, dropout_rate=0.3, save_path=None,
+                 lstm_unit=1024, batch_size=379, num_epoch=500):
+
+        self.dropout_rate = dropout_rate
+        # self.hidden_layer_unit = hidden_layer_unit
+        self.lstm_unit = lstm_unit
+        self.batch_size = batch_size
+        self.num_epoch = num_epoch
+        self.save_path = save_path
+
+        self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
+        self.model_path = None
+
+    def model(self, timestep):
+
+        # model
+        model = Sequential()
+        # lstm
+        model.add(LSTM(self.lstm_unit, input_shape=(timestep, 1)))
+        model.add(Dropout(1 - self.dropout_rate))
+        # output
+        model.add(Dense(4, activation='softmax'))
+        model.compile(loss='categorical_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
+
+        print("LSTMClassifier model")
+        print(model.summary())
+
+        return model
+
+    def fit(self, X, y, sample_weight=None):
+
+        print("------------------------------------")
+        print("RNNClassifier fit")
+
+        # shape of X
+        n_samples, n_features = np.shape(X)
+        X = np.reshape(X, (n_samples, n_features, 1))
+
+        # one hot encoding
+        one_hot_encoder = LabelBinarizer()
+        one_hot_encoder.fit(y)
+        y = one_hot_encoder.transform(y)
+
+        # model
+        net = self.model(n_features)
+        net.fit(X.astype(float), y, epochs=self.num_epoch, batch_size=self.batch_size, verbose=2)
+
+        # model path
+        if self.save_path is None:
+            self.save_path = 'data/tmp/'
+
+        while Path(self.save_path + self.model_name).exists():
+            self.model_name = self.model_name + "_"
+
+        # create directory
+        Path(self.save_path + self.model_name). \
+            mkdir(exist_ok=False, parents=True)
+        self.model_path = \
+            self.save_path + self.model_name + '/model.h5'
+
+        # save model
+        net.save(self.model_path)
+        print("fitted model save: {}".format(self.model_path))
+        del net
+
+        return self
+
+    def predict_proba(self, X):
+        print("------------------------------------")
+        print("LSTMClassifier predict_proba")
+
+        # load model
+        net = load_model(self.model_path)
+
+        # shape of X
+        n_samples, n_features = np.shape(X)
+        X = np.reshape(X, (n_samples, n_features, 1))
+
+        return net.predict(X)
+
+    def predict(self, X):
+        print("------------------------------------")
+        print("LSTMClassifier predict")
+
+        P_predicted = self.predict_proba(X)
+        return np.argmax(P_predicted, axis=1)
+
+    def score(self, X, y, sample_weight=None):
+        y_predicted = self.predict(X)
+        return f1_score(y, y_predicted)

@@ -2,6 +2,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from scipy.ndimage import zoom
 from sklearn.utils.validation import check_array
 import numpy as np
+import os
 
 
 class Constants:
@@ -59,3 +60,22 @@ class ImageDownSampling(BaseEstimator, TransformerMixin):
         print(X_new.shape)
 
         return X_new
+
+
+class DataReader:
+
+    def main(self):
+        X = np.load('data/train_data.npy')
+        y = np.loadtxt('data/train_labels.csv')
+        n_samples, n_features = np.shape(X)
+
+        print("shape of X = {} x {}".format(n_samples, n_features))
+        print("X = ")
+        print(X)
+
+        print("y = ")
+        print(y)
+
+
+if __name__ == '__main__':
+    DataReader().main()

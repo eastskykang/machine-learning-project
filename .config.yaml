@@ -512,20 +512,13 @@
 #      random_state: 37
 
 
+# =============================================================================
+# PROJECT 3
+# =============================================================================
+
 module: ml_project.pipeline
 class: Pipeline
 params:
   class_list:
-    - module: ml_project.models.feature_extraction
-      class: IntensityAndGradient
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
-    - module: ml_project.models.feature_selection
-      class: VarianceThreshold
     - module: ml_project.models.classification
-      class: NeuralNetClassifier
-      params:
-        regularizer_scale: 1.0
-        hidden_layers: [20000, 10000, 5000, 1000, 500, 100]
-        activations: ['relu', 'relu', 'relu', 'relu', 'relu', 'relu']
-        batch_size: 58
+      class: RNNClassifier
