@@ -16,6 +16,7 @@ ETH Machine Learning Projects
 .. _kaggle: https://inclass.kaggle.com/c/ml-project-1
 .. _`Kaggle Project 1`: https://inclass.kaggle.com/c/ml-project-1
 .. _`Kaggle Project 2`: https://www.kaggle.com/c/ml-project-2
+.. _`Kaggle Project 3`: https://www.kaggle.com/c/ml-project-3
 .. _runner: run.py
 .. _regression: ml_project/models/regression.py
 .. _`feature selection`: ml_project/models/feature_selection.py
@@ -24,6 +25,7 @@ ETH Machine Learning Projects
 .. _`request access`: https://docs.gitlab.com/ee/user/project/members/index.html#request-access-to-a-project
 .. _`invite link 1`: https://www.kaggle.com/t/4e959a86df6a450ea3dad585f71f67d1
 .. _`invite link 2`: https://www.kaggle.com/t/db8d6e93b6ff4efba65481d4d9b53297
+.. _`invite link 3`: https://www.kaggle.com/t/57279fcae94e437a9e857a9bf28becca
 .. _`More information`: https://drive.google.com/open?id=1UM_osCot4MomlPQu-G83LHt721nSyIJG5t6rO_yLOZU
 .. _`General Project Information`: https://drive.google.com/open?id=1NvAqcPzgnTIflpG6BzeAt3dSUlu1JlYJ_2BsQVab6pI
 
@@ -39,6 +41,7 @@ The project description and result submission are hosted by Kaggle:
 - `General Project Information`_
 - `Kaggle Project 1`_ (`invite link 1`_)
 - `Kaggle Project 2`_ (`invite link 2`_)
+- `Kaggle Project 3`_ (`invite link 3`_)
 
 .. contents::
 
@@ -106,7 +109,7 @@ Having installed miniconda, clone the repository and run the setup script:
 
 .. code-block:: shell
 
-    git clone https://gitlab.vis.ethz.ch/vwegmayr/ml-project.git
+    git clone https://gitlab.vis.ethz.ch/vwegmayr/ml-project.git --single-branch
     cd ml-project
     python setup.py
 
@@ -295,6 +298,8 @@ Next, create and push a new branch which is named :code:`legi-number/ml-project-
     git push origin 17-123-456/ml-project-1
 
 The first part has to be your Legi-Number, the number in the second part identifies the project.
+
+**Note: The checks described in the following parapgraph have been temporarliy disabled on gitlab (and will instead be run from another machine during the automatic grading checks), i.e. you can ignore the warning of failed flags on gitlab and skip the below paragraph!** Make sure to pass flake8 locally on your machine and that your code branch appears on gitlab. A selfcheck csv file will be uploaded after the project deadlines and after the checker completed.
 
 This repository runs an automatic quality check, when you push your branch.
 Additionally, the timestamp of the push is checked.
