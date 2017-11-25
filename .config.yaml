@@ -521,4 +521,4 @@ class: Pipeline
 params:
   class_list:
     - module: ml_project.models.classification
-      class: RNNClassifier
+      class: LSTMClassifier
