@@ -1,0 +1,5 @@
+class: Pipeline
+module: ml_project.pipeline
+params:
+  class_list:
+  - {class: LSTMClassifier, module: ml_project.models.classification}
