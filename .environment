@@ -16,3 +16,4 @@ dependencies:
     - kli
     - tensorflow-gpu
     - keras
+    - h5py

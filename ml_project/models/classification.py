@@ -415,7 +415,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 class LSTMClassifier(BaseEstimator, TransformerMixin):
     """LSTM Classifier for sequential data"""
     def __init__(self, dropout_rate=0.3, save_path=None,
-                 lstm_unit=8, batch_size=100, num_epoch=10):
+                 lstm_unit=8, batch_size=100, num_epoch=1):
 
         self.dropout_rate = dropout_rate
         # self.hidden_layer_unit = hidden_layer_unit

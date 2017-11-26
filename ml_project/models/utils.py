@@ -62,6 +62,30 @@ class ImageDownSampling(BaseEstimator, TransformerMixin):
         return X_new
 
 
+class SequenceCutter:
+    """Sequence Cutter for LSTM"""
+    def __init__(self, result_length):
+        self.result_length = result_length
+
+    def cut(self, X, y):
+        n_samples, n_features = np.shape(X)
+
+        n_features_new = self.result_length
+        n_seq = n_features / n_features_new
+        n_samples_new = n_samples * n_seq
+
+        # truncate matrix
+        X = np.delete(X, range(0, n_seq * n_features_new))
+
+        # reshape
+        X_new = np.reshape(X, (n_samples_new, n_features_new))
+
+        # TODO
+        y_new = np.zeros((n_samples_new, 1))
+
+        return X_new, y_new
+
+
 class DataReader:
 
     def main(self):
