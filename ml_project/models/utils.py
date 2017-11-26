@@ -100,6 +100,17 @@ class DataReader:
         print("y = ")
         print(y)
 
+        idx = np.zeros(n_samples)
+
+        # find end of sequence
+        for i in range(0, n_samples):
+            for j in range(0, n_features):
+                if np.all(X[i, j:n_features-1] == 0):
+                    idx[i] = j-1
+                    break
+
+        print(idx)
+
 
 if __name__ == '__main__':
     DataReader().main()

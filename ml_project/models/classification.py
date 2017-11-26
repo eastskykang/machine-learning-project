@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, LSTM
+from keras.preprocessing import sequence
 
 
 class MeanPredictor(BaseEstimator, TransformerMixin):
@@ -415,7 +416,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 class LSTMClassifier(BaseEstimator, TransformerMixin):
     """LSTM Classifier for sequential data"""
     def __init__(self, dropout_rate=0.3, save_path=None,
-                 lstm_unit=8, batch_size=100, num_epoch=1):
+                 lstm_unit=8, batch_size=100, num_epoch=1, max_len=500):
 
         self.dropout_rate = dropout_rate
         # self.hidden_layer_unit = hidden_layer_unit
@@ -423,6 +424,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         self.batch_size = batch_size
         self.num_epoch = num_epoch
         self.save_path = save_path
+        self.max_len = max_len
 
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
@@ -450,7 +452,8 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         print("------------------------------------")
         print("RNNClassifier fit")
 
-        # shape of X
+        # truncate X
+        X = sequence.pad_sequences(X, maxlen=self.max_len, truncating="post")
         n_samples, n_features = np.shape(X)
         X = np.reshape(X, (n_samples, n_features, 1))
 
@@ -491,6 +494,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         net = load_model(self.model_path)
 
         # shape of X
+        X = sequence.pad_sequences(X, maxlen=self.max_len, truncating="post")
         n_samples, n_features = np.shape(X)
         X = np.reshape(X, (n_samples, n_features, 1))
 
