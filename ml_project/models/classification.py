@@ -462,6 +462,8 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         timestep = int(n_timestep / self.n_feature)
         X = np.reshape(X, (n_samples, timestep, self.n_feature))
 
+        print("input shape = {}".format(np.shape(X)))
+
         # one hot encoding
         one_hot_encoder = LabelBinarizer()
         one_hot_encoder.fit(y)
