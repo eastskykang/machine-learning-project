@@ -12,7 +12,6 @@ from keras.callbacks import EarlyStopping
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, LSTM
 from keras.preprocessing import sequence
-from ml_project.models.utils import F1Score
 
 
 class MeanPredictor(BaseEstimator, TransformerMixin):
@@ -432,9 +431,6 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
 
-    # custom f1 score for keras
-
-
     def model(self, timestep, n_feature):
 
         # model
@@ -446,8 +442,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         model.add(Dense(4, activation='softmax'))
         model.compile(loss='categorical_crossentropy',
                       optimizer='adam',
-                      metrics=['accuracy',
-                               F1Score.f1_score])
+                      metrics=['accuracy'])
 
         print("LSTMClassifier model")
         print(model.summary())
