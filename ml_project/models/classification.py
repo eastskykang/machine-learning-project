@@ -417,11 +417,10 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 class LSTMClassifier(BaseEstimator, TransformerMixin):
     """LSTM Classifier for sequential data"""
     def __init__(self, dropout_rate=0.3, save_path=None,
-                 lstm_unit=8, batch_size=100, num_epoch=300, max_len=500, n_feature=1):
+                 lstm_layers=None, batch_size=100, num_epoch=300, max_len=500, n_feature=1):
 
         self.dropout_rate = dropout_rate
-        # self.hidden_layer_unit = hidden_layer_unit
-        self.lstm_unit = lstm_unit
+        self.lstm_layers = lstm_layers
         self.batch_size = batch_size
         self.num_epoch = num_epoch
         self.save_path = save_path
@@ -431,13 +430,31 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
 
+        # network structure
+        if lstm_layers is None:
+            self.lstm_layers = [8]
+
     def model(self, timestep, n_feature):
 
         # model
         model = Sequential()
+
         # lstm
-        model.add(LSTM(self.lstm_unit, input_shape=(timestep, n_feature)))
-        model.add(Dropout(1 - self.dropout_rate))
+        for i, lstm_layer in enumerate(self.lstm_layers):
+            if i is 0 and i is len(self.lstm_layers) - 1:
+                # first layer also last layer
+                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature)))
+            elif i is 0 and i is not len(self.lstm_layers) - 1:
+                # first layer
+                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), return_sequences=True))
+            elif i is len(self.lstm_layers) - 1:
+                # last layer
+                model.add(LSTM(lstm_layer))
+            else:
+                model.add(LSTM(lstm_layer), return_sequences=True)
+
+            model.add(Dropout(1 - self.dropout_rate))
+
         # output
         model.add(Dense(4, activation='softmax'))
         model.compile(loss='categorical_crossentropy',
@@ -452,7 +469,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
     def fit(self, X, y, sample_weight=None):
 
         print("------------------------------------")
-        print("RNNClassifier fit")
+        print("LSTMClassifier fit")
 
         # truncate X
         X = sequence.pad_sequences(X, maxlen=self.max_len * self.n_feature, truncating="post")
