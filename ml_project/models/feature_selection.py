@@ -46,6 +46,41 @@ class RandomSelection(BaseEstimator, TransformerMixin):
         return X_new
 
 
+class RandomSequentialSelection(BaseEstimator, TransformerMixin):
+    """Random Selection of features but sort in ascending order"""
+    def __init__(self, n_components=1000, random_state=None, max_len=9000):
+        self.n_components = n_components
+        self.random_state = random_state
+        self.max_len = max_len
+        self.components = None
+
+    def fit(self, X, y=None):
+        X = check_array(X)
+        n_samples, n_features = X.shape
+
+        random_state = check_random_state(self.random_state)
+
+        if n_features > self.max_len:
+            n_features = self.max_len
+
+        self.components = sample_without_replacement(
+            n_features,
+            self.n_components,
+            random_state=random_state)
+
+        self.components = sorted(self.components)
+
+        return self
+
+    def transform(self, X, y=None):
+        check_is_fitted(self, ["components"])
+        X = check_array(X)
+        n_samples, n_features = X.shape
+        X_new = X[:, self.components]
+
+        return X_new
+
+
 class VarianceThreshold(VarianceThreshold):
     """VarianceThreshold"""
     def __init__(self, threshold=0.0):

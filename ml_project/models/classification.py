@@ -8,9 +8,11 @@ from sklearn.preprocessing import LabelBinarizer
 from scipy.stats import spearmanr
 from datetime import datetime
 from pathlib import Path
+from keras.callbacks import EarlyStopping
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, LSTM
 from keras.preprocessing import sequence
+from ml_project.models.utils import F1Score
 
 
 class MeanPredictor(BaseEstimator, TransformerMixin):
@@ -416,7 +418,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 class LSTMClassifier(BaseEstimator, TransformerMixin):
     """LSTM Classifier for sequential data"""
     def __init__(self, dropout_rate=0.3, save_path=None,
-                 lstm_unit=8, batch_size=100, num_epoch=300, max_len=500):
+                 lstm_unit=8, batch_size=100, num_epoch=300, max_len=500, n_feature=1):
 
         self.dropout_rate = dropout_rate
         # self.hidden_layer_unit = hidden_layer_unit
@@ -425,22 +427,27 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         self.num_epoch = num_epoch
         self.save_path = save_path
         self.max_len = max_len
+        self.n_feature = n_feature
 
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
 
-    def model(self, timestep):
+    # custom f1 score for keras
+
+
+    def model(self, timestep, n_feature):
 
         # model
         model = Sequential()
         # lstm
-        model.add(LSTM(self.lstm_unit, input_shape=(timestep, 1)))
+        model.add(LSTM(self.lstm_unit, input_shape=(timestep, n_feature)))
         model.add(Dropout(1 - self.dropout_rate))
         # output
         model.add(Dense(4, activation='softmax'))
         model.compile(loss='categorical_crossentropy',
                       optimizer='adam',
-                      metrics=['accuracy'])
+                      metrics=['accuracy',
+                               F1Score.f1_score])
 
         print("LSTMClassifier model")
         print(model.summary())
@@ -453,9 +460,12 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         print("RNNClassifier fit")
 
         # truncate X
-        X = sequence.pad_sequences(X, maxlen=self.max_len, truncating="post")
-        n_samples, n_features = np.shape(X)
-        X = np.reshape(X, (n_samples, n_features, 1))
+        X = sequence.pad_sequences(X, maxlen=self.max_len * self.n_feature, truncating="post")
+        n_samples, n_timestep = np.shape(X)
+
+        # kth order (feature)
+        timestep = int(n_timestep / self.n_feature)
+        X = np.reshape(X, (n_samples, timestep, self.n_feature))
 
         # one hot encoding
         one_hot_encoder = LabelBinarizer()
@@ -463,8 +473,18 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         y = one_hot_encoder.transform(y)
 
         # model
-        net = self.model(n_features)
-        net.fit(X.astype(float), y, epochs=self.num_epoch, batch_size=self.batch_size, verbose=2)
+        # call back for early stopping
+        callback = [
+            EarlyStopping(monitor='loss', min_delta= 1e-3, verbose=1)
+        ]
+
+        # network
+        net = self.model(timestep, self.n_feature)
+        net.fit(X.astype(float), y,
+                epochs=self.num_epoch,
+                batch_size=self.batch_size,
+                callbacks=callback,
+                verbose=2)
 
         # model path
         if self.save_path is None:
@@ -493,10 +513,14 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         # load model
         net = load_model(self.model_path)
 
-        # shape of X
-        X = sequence.pad_sequences(X, maxlen=self.max_len, truncating="post")
-        n_samples, n_features = np.shape(X)
-        X = np.reshape(X, (n_samples, n_features, 1))
+        # truncate X
+        X = sequence.pad_sequences(X, maxlen=self.max_len * self.n_feature,
+                                   truncating="post")
+        n_samples, n_timestep = np.shape(X)
+
+        # kth order (feature)
+        timestep = int(n_timestep / self.n_feature)
+        X = np.reshape(X, (n_samples, timestep, self.n_feature))
 
         return net.predict(X)
 

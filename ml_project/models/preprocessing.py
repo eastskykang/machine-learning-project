@@ -75,3 +75,4 @@ class PrincipleComponentAnalysis(PCA):
         print(X_new.shape)
 
         return X_new
+
