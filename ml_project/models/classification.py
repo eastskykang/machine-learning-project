@@ -417,8 +417,9 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
 class LSTMClassifier(BaseEstimator, TransformerMixin):
     """LSTM Classifier for sequential data"""
-    def __init__(self, dropout_rate=0.3, save_path=None,
-                 lstm_layers=None, batch_size=100, num_epoch=300, max_len=500, n_feature=1):
+    def __init__(self, dropout_rate=0.3, save_path=None, lstm_layers=None,
+                 batch_size=100, num_epoch=300, max_len=500, n_feature=1,
+                 optimizer='adam'):
 
         self.dropout_rate = dropout_rate
         self.lstm_layers = lstm_layers
@@ -427,6 +428,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         self.save_path = save_path
         self.max_len = max_len
         self.n_feature = n_feature
+        self.optimizer = optimizer
 
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
@@ -457,7 +459,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         # output
         model.add(Dense(4, activation='softmax'))
         model.compile(loss='categorical_crossentropy',
-                      optimizer='adam',
+                      optimizer=self.optimizer,
                       metrics=['accuracy'])
 
         print("LSTMClassifier model")

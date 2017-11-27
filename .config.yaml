@@ -551,6 +551,7 @@ params:
     - module: ml_project.models.classification
       class: LSTMClassifier
       params:
+        optimizer: 'rmsprop'
         lstm_layers: [4]
         num_epoch: 100
         max_len: 9000
