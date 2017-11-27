@@ -5,7 +5,7 @@ from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import LabelBinarizer
-from sklearn.utils.class_weight import compute_class_weight
+from sklearn.utils.class_weight import compute_sample_weight, compute_class_weight
 from scipy.stats import spearmanr
 from datetime import datetime
 from pathlib import Path
@@ -444,17 +444,15 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         for i, lstm_layer in enumerate(self.lstm_layers):
             if i is 0 and i is len(self.lstm_layers) - 1:
                 # first layer also last layer
-                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature)))
+                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), dropout=1-self.dropout_rate))
             elif i is 0 and i is not len(self.lstm_layers) - 1:
                 # first layer
-                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), return_sequences=True))
+                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), return_sequences=True, dropout=1-self.dropout_rate))
             elif i is len(self.lstm_layers) - 1:
                 # last layer
-                model.add(LSTM(lstm_layer))
+                model.add(LSTM(lstm_layer), dropout=1-self.dropout_rate)
             else:
-                model.add(LSTM(lstm_layer), return_sequences=True)
-
-            model.add(Dropout(1 - self.dropout_rate))
+                model.add(LSTM(lstm_layer), return_sequences=True, dropout=1-self.dropout_rate)
 
         # output
         model.add(Dense(4, activation='softmax'))
@@ -484,6 +482,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
 
         # class weight (for imbalance data)
         class_weight = compute_class_weight('balanced', np.unique(y), y)
+        sample_weight = compute_sample_weight('balanced', y)
 
         # one hot encoding
         one_hot_encoder = LabelBinarizer()
@@ -493,7 +492,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         # model
         # call back for early stopping
         callback = [
-            EarlyStopping(monitor='loss', min_delta= 1e-3, verbose=1)
+            EarlyStopping(monitor='loss', min_delta= 1e-4, verbose=1)
         ]
 
         # network
@@ -502,7 +501,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
                 epochs=self.num_epoch,
                 batch_size=self.batch_size,
                 callbacks=callback,
-                class_weight=class_weight,
+                sample_weight=sample_weight,
                 verbose=2)
 
         # model path

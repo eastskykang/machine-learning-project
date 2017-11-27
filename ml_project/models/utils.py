@@ -93,6 +93,7 @@ class DataReader:
 
     def main(self):
         X = np.load('data/train_data.npy')
+        X_test = np.load('data/test_data.npy')
         y = np.loadtxt('data/train_labels.csv')
         n_samples, n_features = np.shape(X)
 
