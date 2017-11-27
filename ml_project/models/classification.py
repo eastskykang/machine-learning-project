@@ -5,6 +5,7 @@ from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import LabelBinarizer
+from sklearn.utils.class_weight import compute_class_weight
 from scipy.stats import spearmanr
 from datetime import datetime
 from pathlib import Path
@@ -481,6 +482,9 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
 
         print("input shape = {}".format(np.shape(X)))
 
+        # class weight (for imbalance data)
+        class_weight = compute_class_weight('balanced', np.unique(y), y)
+
         # one hot encoding
         one_hot_encoder = LabelBinarizer()
         one_hot_encoder.fit(y)
@@ -498,6 +502,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
                 epochs=self.num_epoch,
                 batch_size=self.batch_size,
                 callbacks=callback,
+                class_weight=class_weight,
                 verbose=2)
 
         # model path
@@ -536,7 +541,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         timestep = int(n_timestep / self.n_feature)
         X = np.reshape(X, (n_samples, timestep, self.n_feature))
 
-        return net.predict(X)
+        return net.predict(X.astype(float))
 
     def predict(self, X):
         print("------------------------------------")
