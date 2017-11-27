@@ -444,15 +444,15 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         for i, lstm_layer in enumerate(self.lstm_layers):
             if i is 0 and i is len(self.lstm_layers) - 1:
                 # first layer also last layer
-                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), dropout=1-self.dropout_rate))
+                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), dropout=self.dropout_rate))
             elif i is 0 and i is not len(self.lstm_layers) - 1:
                 # first layer
-                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), return_sequences=True, dropout=1-self.dropout_rate))
+                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), return_sequences=True, dropout=self.dropout_rate))
             elif i is len(self.lstm_layers) - 1:
                 # last layer
-                model.add(LSTM(lstm_layer, dropout=1-self.dropout_rate))
+                model.add(LSTM(lstm_layer, dropout=self.dropout_rate))
             else:
-                model.add(LSTM(lstm_layer, return_sequences=True, dropout=1-self.dropout_rate))
+                model.add(LSTM(lstm_layer, return_sequences=True, dropout=self.dropout_rate))
 
         # output
         model.add(Dense(4, activation='softmax'))
@@ -492,7 +492,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         # model
         # call back for early stopping
         callback = [
-            EarlyStopping(monitor='loss', min_delta= 1e-4, verbose=1)
+            EarlyStopping(monitor='loss', min_delta=1e-4, verbose=1)
         ]
 
         # network
@@ -500,7 +500,7 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         net.fit(X.astype(float), y,
                 epochs=self.num_epoch,
                 batch_size=self.batch_size,
-                callbacks=callback,
+                # callbacks=callback,
                 sample_weight=sample_weight,
                 verbose=2)
 
