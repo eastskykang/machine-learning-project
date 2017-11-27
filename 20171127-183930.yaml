@@ -1,0 +1,11 @@
+class: Pipeline
+module: ml_project.pipeline
+params:
+  class_list:
+  - class: LSTMClassifier
+    module: ml_project.models.classification
+    params:
+      lstm_layers: [4, 16]
+      max_len: 9000
+      n_feature: 1
+      num_epoch: 100
