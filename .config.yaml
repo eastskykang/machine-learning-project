@@ -516,21 +516,21 @@
 # PROJECT 3
 # =============================================================================
 
-module: ml_project.pipeline
-class: Pipeline
-params:
-  class_list:
-    - module: ml_project.models.feature_selection
-      class: RandomSequentialSelection
-      params:
-        n_components: 500
-    - module: ml_project.models.classification
-      class: LSTMClassifier
-      params:
-        lstm_unit: 8
-        num_epoch: 100
-        max_len: 500
-        n_feature: 1
+#module: ml_project.pipeline
+#class: Pipeline
+#params:
+#  class_list:
+#    - module: ml_project.models.feature_selection
+#      class: RandomSequentialSelection
+#      params:
+#        n_components: 500
+#    - module: ml_project.models.classification
+#      class: LSTMClassifier
+#      params:
+#        lstm_unit: 8
+#        num_epoch: 100
+#        max_len: 500
+#        n_feature: 1
 
 #module: ml_project.pipeline
 #class: Pipeline
@@ -544,14 +544,14 @@ params:
 #        max_len: 500
 #        n_feature: 18
 
-#module: ml_project.pipeline
-#class: Pipeline
-#params:
-#  class_list:
-#    - module: ml_project.models.classification
-#      class: LSTMClassifier
-#      params:
-#        lstm_layers: [4, 16]
-#        num_epoch: 100
-#        max_len: 9000
-#        n_feature: 1
+module: ml_project.pipeline
+class: Pipeline
+params:
+  class_list:
+    - module: ml_project.models.classification
+      class: LSTMClassifier
+      params:
+        lstm_layers: [4, 16]
+        num_epoch: 100
+        max_len: 9000
+        n_feature: 1
