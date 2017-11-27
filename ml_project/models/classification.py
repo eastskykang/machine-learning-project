@@ -450,9 +450,9 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
                 model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), return_sequences=True, dropout=1-self.dropout_rate))
             elif i is len(self.lstm_layers) - 1:
                 # last layer
-                model.add(LSTM(lstm_layer), dropout=1-self.dropout_rate)
+                model.add(LSTM(lstm_layer, dropout=1-self.dropout_rate))
             else:
-                model.add(LSTM(lstm_layer), return_sequences=True, dropout=1-self.dropout_rate)
+                model.add(LSTM(lstm_layer, return_sequences=True, dropout=1-self.dropout_rate))
 
         # output
         model.add(Dense(4, activation='softmax'))
