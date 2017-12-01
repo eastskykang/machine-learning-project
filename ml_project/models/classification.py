@@ -431,15 +431,16 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         if self.score_metric is 'spearmanr':
             P_predicted = self.predict_proba(X)
             n_samples, n_labels = np.shape(P_predicted)
-
             score = np.zeros(n_samples)
 
             for i in range(0, n_samples):
                 score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
 
             score = np.mean(score)
-
         elif self.score_metric is 'f1':
+            y_predicted = self.predict(X)
+            score = f1_score(y, y_predicted)
+        else:
             y_predicted = self.predict(X)
             score = f1_score(y, y_predicted)
 
