@@ -161,6 +161,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                  regularizer_scale=1.0, batch_normalization=True,
                  batch_size=58, dropout=True, dropout_rate=0.3,
                  optimizer='Adam', learning_rate=0.01, num_epoch=500,
+                 score_metric='f1', one_hot_encoding=True, weighted_class=True,
                  save_path=None):
 
         self.hidden_layers = hidden_layers
@@ -172,11 +173,15 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.regularizer_scale = regularizer_scale
         self.batch_normalization = batch_normalization
         self.batch_size = batch_size
+        self.score_metric = score_metric
         self.optimizer = optimizer
         self.learning_rate = learning_rate
+        self.one_hot_encoding = one_hot_encoding
+        self.weighted_class = weighted_class
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
+        self.one_hot_encoder = None
 
         # network structure
         if hidden_layers is None:
@@ -201,10 +206,10 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         tf.reset_default_graph()
         with tf.variable_scope("network"):
             # input
-            X_tf = tf.placeholder(tf.float32,
+            X_tf = tf.placeholder(tf.float64,
                                   shape=[None, n_features],
                                   name='X')
-            y_tf = tf.placeholder(tf.float32,
+            y_tf = tf.placeholder(tf.float64,
                                   shape=[None, n_classes],
                                   name='y')
             is_training_tf = tf.placeholder(tf.bool,
@@ -296,6 +301,17 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         # size
         n_samples, n_features = np.shape(X)
+
+        # class weight
+        if self.weighted_class:
+            class_weight = compute_class_weight('balanced', np.unique(y), y)
+
+        # one hot encoder
+        if self.one_hot_encoding:
+            self.one_hot_encoder = LabelBinarizer()
+            self.one_hot_encoder.fit(y)
+            y = self.one_hot_encoder.transform(y)
+
         _, n_classes = np.shape(y)
 
         # generate batches
@@ -305,9 +321,13 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         network, X_tf, y_tf, is_training_tf = self.model(X, y)
 
         # cost (loss)
+        if self.weighted_class:
+            y_tf = tf.multiply(class_weight, y_tf)
+
         loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(labels=y_tf,
                                                     logits=network))
+
         # optimizer
         if self.optimizer == 'Adam':
             optimizer = \
@@ -400,16 +420,30 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         return P_predicted
 
-    def score(self, X, y, sample_weight=None):
+    def predict(self, X):
+        print("------------------------------------")
+        print("NeuralNetClassifier predict")
+
         P_predicted = self.predict_proba(X)
-        n_samples, n_labels = np.shape(P_predicted)
+        return np.argmax(P_predicted, axis=1)
 
-        score = np.zeros(n_samples)
+    def score(self, X, y, sample_weight=None):
+        if self.score_metric is 'spearmanr':
+            P_predicted = self.predict_proba(X)
+            n_samples, n_labels = np.shape(P_predicted)
 
-        for i in range(0, n_samples):
-            score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
+            score = np.zeros(n_samples)
 
-        return np.mean(score)
+            for i in range(0, n_samples):
+                score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
+
+            score = np.mean(score)
+
+        elif self.score_metric is 'f1':
+            y_predicted = self.predict(X)
+            score = f1_score(y, y_predicted)
+
+        return score
 
     def set_save_path(self, save_path):
         self.save_path = save_path

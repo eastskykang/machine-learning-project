@@ -3,6 +3,8 @@ from sklearn.utils.validation import check_array
 from ml_project.models import utils
 import numpy as np
 import cv2
+from biosppy.signals import ecg
+import pywt
 
 
 class IntensityHistogram(BaseEstimator, TransformerMixin):
@@ -510,6 +512,76 @@ class IntensityAndGradient(BaseEstimator, TransformerMixin):
 
         X_new = np.hstack((self.image_hist.transform(X, y),
                            self.gradient_hist.transform(X, y)))
+
+        if self.verbosity > 0:
+            print("shape of X after transform : ")
+            print(X_new.shape)
+
+        return X_new
+
+
+class Wavelet(BaseEstimator, TransformerMixin):
+    """Wavelet sym6 1-4"""
+
+    def __init__(self, sample_radius=100, sampling_rate=300, verbosity=1):
+        self.sample_radius = sample_radius
+        self.sampling_rate = sampling_rate
+        self.verbosity = verbosity
+        self.n_feature  = None
+
+    def fit(self, X, y=None):
+        X = check_array(X)
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("Wavelet fit ")
+            print("shape of X before transform : ")
+            print(X.shape)
+
+        result = ecg.ecg(X[0,:], sampling_rate=self.sampling_rate, show=False)
+        filtered_x = result[1]
+        r_peak = result[2]
+
+        # samples
+        filtered_x = filtered_x[
+                     r_peak[3] - (self.sample_radius - 1):r_peak[3] + (
+                     self.sample_radius + 1)]
+
+        # wavelet
+        cA4, cD4, cD3, _, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
+        features = np.concatenate((cA4, cD4, cD3))
+
+        # n_features
+        self.n_feature = np.shape(features)[0]
+        print("number of features : {}".format(self.n_feature))
+        return self
+
+    def transform(self, X, y=None):
+        X = check_array(X)
+        n_samples, n_features = np.shape(X)
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("Wavelet transform")
+            print("shape of X before transform : ")
+            print(X.shape)
+
+        X_new = np.zeros((n_samples, self.n_feature))
+
+        for i in range(0, n_samples):
+            x = X[i, :]
+
+            result = ecg.ecg(x, sampling_rate=self.sampling_rate, show=False)
+            filtered_x = result[1]
+            r_peak = result[2]
+
+            # samples
+            filtered_x = filtered_x[r_peak[3] - (self.sample_radius-1):r_peak[3] + (self.sample_radius+1)]
+            filtered_x = filtered_x - np.mean(filtered_x)
+
+            # wavelet
+            cA4, cD4, cD3, _, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
+            X_new[i,:] = np.concatenate((cA4, cD4, cD3))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")

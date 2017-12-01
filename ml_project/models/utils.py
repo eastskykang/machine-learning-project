@@ -5,7 +5,9 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from keras.callbacks import Callback
 import numpy as np
 import tensorflow as tf
-import os
+import matplotlib.pyplot as plt
+from biosppy.signals import ecg
+import pywt
 
 
 class Constants:
@@ -83,56 +85,6 @@ class SequenceCutter:
         # reshape
         X_new = np.reshape(X, (n_samples_new, n_features_new))
 
-        # TODO
         y_new = np.zeros((n_samples_new, 1))
 
         return X_new, y_new
-
-
-class DataReader:
-
-    def main(self):
-        X = np.load('data/train_data.npy')
-        X_test = np.load('data/test_data.npy')
-        y = np.loadtxt('data/train_labels.csv')
-        n_samples, n_features = np.shape(X)
-
-        print("shape of X = {} x {}".format(n_samples, n_features))
-        print("X = ")
-        print(X)
-
-        print("y = ")
-        print(y)
-
-        idx = np.zeros(n_samples)
-
-        # find end of sequence
-        for i in range(0, n_samples):
-            for j in range(0, n_features):
-                if np.all(X[i, j:n_features-1] == 0):
-                    idx[i] = j-1
-                    break
-
-        print(idx)
-
-
-class F1Score(Callback):
-    """Custom f1_score for Keras"""
-    @staticmethod
-    def f1_score(y_true, y_pred):
-        y_true = tf.cast(y_true, "int32")
-        y_pred = tf.cast(tf.round(y_pred),
-                         "int32")  # implicit 0.5 threshold via tf.round
-        y_correct = y_true * y_pred
-        sum_true = tf.reduce_sum(y_true, axis=1)
-        sum_pred = tf.reduce_sum(y_pred, axis=1)
-        sum_correct = tf.reduce_sum(y_correct, axis=1)
-        precision = sum_correct / sum_pred
-        recall = sum_correct / sum_true
-        f_score = 5 * precision * recall / (4 * precision + recall)
-        f_score = tf.where(tf.is_nan(f_score), tf.zeros_like(f_score), f_score)
-        return tf.reduce_mean(f_score)
-
-
-if __name__ == '__main__':
-    DataReader().main()
