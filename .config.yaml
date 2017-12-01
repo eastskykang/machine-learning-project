@@ -550,6 +550,8 @@ params:
   class_list:
     - module: ml_project.models.feature_extraction
       class: Wavelet
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
     - module: ml_project.models.classification
       class: NeuralNetClassifier
       params:

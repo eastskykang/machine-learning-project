@@ -524,9 +524,10 @@ class IntensityAndGradient(BaseEstimator, TransformerMixin):
 class Wavelet(BaseEstimator, TransformerMixin):
     """Wavelet sym6 1-4"""
 
-    def __init__(self, sample_radius=100, sampling_rate=300, verbosity=1):
+    def __init__(self, sample_radius=100, sampling_rate=300, n_peaks=5, verbosity=1):
         self.sample_radius = sample_radius
         self.sampling_rate = sampling_rate
+        self.n_peaks = n_peaks
         self.verbosity = verbosity
         self.n_feature  = None
 
@@ -567,7 +568,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
             print("shape of X before transform : ")
             print(X.shape)
 
-        X_new = np.zeros((n_samples, self.n_feature))
+        X_new = np.zeros((n_samples, self.n_feature * self.n_peaks))
 
         for i in range(0, n_samples):
             x = X[i, :]
@@ -577,12 +578,13 @@ class Wavelet(BaseEstimator, TransformerMixin):
             r_peak = result[2]
 
             # samples
-            filtered_x = filtered_x[r_peak[3] - (self.sample_radius-1):r_peak[3] + (self.sample_radius+1)]
-            filtered_x = detrend(filtered_x, type='linear')
+            for j in range(1, self.n_peaks + 1):
+                sample = filtered_x[r_peak[j] - (self.sample_radius-1):r_peak[j] + (self.sample_radius+1)]
+                sample = detrend(sample, type='constant')
 
-            # wavelet
-            cA4, cD4, cD3, _, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
-            X_new[i,:] = np.concatenate((cA4, cD4, cD3))
+                # wavelet
+                cA4, cD4, cD3, _, _ = pywt.wavedec(sample, wavelet='sym6', level=4)
+                X_new[i,(j-1)*self.n_feature:j*self.n_feature] = np.concatenate((cA4, cD4, cD3))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")
