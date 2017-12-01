@@ -1,9 +1,10 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 from ml_project.models import utils
+from biosppy.signals import ecg
+from scipy.signal import detrend
 import numpy as np
 import cv2
-from biosppy.signals import ecg
 import pywt
 
 
@@ -577,7 +578,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
 
             # samples
             filtered_x = filtered_x[r_peak[3] - (self.sample_radius-1):r_peak[3] + (self.sample_radius+1)]
-            filtered_x = filtered_x - np.mean(filtered_x)
+            filtered_x = detrend(filtered_x, type='linear')
 
             # wavelet
             cA4, cD4, cD3, _, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
