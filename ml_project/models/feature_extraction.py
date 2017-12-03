@@ -553,7 +553,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
         cA4, cD4, cD3, cD2, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
 
         # n_features
-        self.n_features = np.array([len(cA4), len(cD4), len(cD3), len(cD2)])
+        self.n_features = np.array([len(cA4), len(cD4), len(cD3)])
         print("number of features : {}".format(self.n_features))
         return self
 
@@ -570,8 +570,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
         X_new = np.zeros((n_samples,
                           self.n_features[0] +
                           self.n_features[1] +
-                          self.n_features[2] +
-                          self.n_features[3]))
+                          self.n_features[2]))
 
         for i in range(0, n_samples):
             x = X[i, :]
@@ -586,7 +585,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
             cA4s = np.zeros((n_peaks, self.n_features[0]))
             cD4s = np.zeros((n_peaks, self.n_features[1]))
             cD3s = np.zeros((n_peaks, self.n_features[2]))
-            cD2s = np.zeros((n_peaks, self.n_features[3]))
+            # cD2s = np.zeros((n_peaks, self.n_features[3]))
 
             # samples
             for j in range(1, n_peaks + 1):
@@ -599,7 +598,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
                 cA4s[j-1, :] = cA4
                 cD4s[j-1, :] = cD4
                 cD3s[j-1, :] = cD3
-                cD2s[j-1, :] = cD2
+                # cD2s[j-1, :] = cD2
 
             # plot coeffs for debugging
             # for i in range(0, n_peaks):
@@ -623,8 +622,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
             # new features
             X_new[i,:] = np.concatenate((np.mean(cA4s, axis=0),
                                          np.mean(cD4s, axis=0),
-                                         np.mean(cD3s, axis=0),
-                                         np.mean(cD2s, axis=0)))
+                                         np.mean(cD3s, axis=0)))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")

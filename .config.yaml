@@ -552,12 +552,16 @@ params:
       class: Wavelet
     - module: ml_project.models.preprocessing
       class: StandardScaler
+    - module: ml_project.models.preprocessing
+      class: PrincipleComponentAnalysis
+      params:
+        n_components: 32
     - module: ml_project.models.classification
       class: NeuralNetClassifier
       params:
         dropout: True
         regularizer_scale: 0.1
-        hidden_layers: [50, 15]
+        hidden_layers: [32, 16]
         activations: ['relu', 'relu']
         batch_size: 100
         num_epoch: 500
