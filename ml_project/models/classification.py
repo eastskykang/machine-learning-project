@@ -310,15 +310,15 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         if self.one_hot_encoding:
             self.one_hot_encoder = LabelBinarizer()
             self.one_hot_encoder.fit(y)
-            y = self.one_hot_encoder.transform(y)
+            y_onehot = self.one_hot_encoder.transform(y)
 
-        _, n_classes = np.shape(y)
+        _, n_classes = np.shape(y_onehot)
 
         # generate batches
-        batches = self.batches(X_train=X, y_train=y)
+        batches = self.batches(X_train=X, y_train=y_onehot)
 
         # build neural net
-        network, X_tf, y_tf, is_training_tf = self.model(X, y)
+        network, X_tf, y_tf, is_training_tf = self.model(X, y_onehot)
 
         # cost (loss)
         if self.weighted_class:
@@ -392,6 +392,9 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
             tf_saved_path = saver.save(sess, tf_save_path)
             print("fitted model save: {}".format(tf_saved_path))
 
+        if self.score_metric is 'f1':
+            print("f1 score: {}".format(self.score(X, y)))
+
         return self
 
     def predict_proba(self, X):
@@ -439,10 +442,10 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
             score = np.mean(score)
         elif self.score_metric is 'f1':
             y_predicted = self.predict(X)
-            score = f1_score(y, y_predicted)
+            score = f1_score(y, y_predicted, average="micro")
         else:
             y_predicted = self.predict(X)
-            score = f1_score(y, y_predicted)
+            score = f1_score(y, y_predicted, average="micro")
 
         return score
 

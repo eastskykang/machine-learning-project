@@ -544,51 +544,53 @@
 #        max_len: 500
 #        n_feature: 18
 
-#module: ml_project.pipeline
-#class: Pipeline
-#params:
-#  class_list:
-#    - module: ml_project.models.feature_extraction
-#      class: Wavelet
-#    - module: ml_project.models.preprocessing
-#      class: StandardScaler
-#    - module: ml_project.models.classification
-#      class: NeuralNetClassifier
-#      params:
-#        regularizer_scale: 0.1
-#        hidden_layers: [100, 30]
-#        activations: ['relu', 'relu']
-#        batch_size: 100
-
-
-module: ml_project.model_selection
-class: GridSearchCV
+module: ml_project.pipeline
+class: Pipeline
 params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
+  class_list:
     - module: ml_project.models.feature_extraction
       class: Wavelet
     - module: ml_project.models.preprocessing
       class: StandardScaler
     - module: ml_project.models.classification
       class: NeuralNetClassifier
-  param_grid:
-    NeuralNetClassifier__regularizer_scale:
-      - 0.5
-      - 0.1
-      - 0.01
-    NeuralNetClassifier__hidden_layers:
-      - [200, 100, 50]
-    NeuralNetClassifier__activations:
-      - ['relu', 'relu', 'relu']
-    NeuralNetClassifier__batch_size:
-      - 100
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 3
-      shuffle: True
-      random_state: 37
+      params:
+        dropout: False
+        regularizer_scale: 0.1
+        hidden_layers: [100, 30]
+        activations: ['relu', 'relu']
+        batch_size: 100
+        num_epoch: 300
+
+
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  n_jobs: -1
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_extraction
+#      class: Wavelet
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: ml_project.models.classification
+#      class: NeuralNetClassifier
+#  param_grid:
+#    NeuralNetClassifier__regularizer_scale:
+#      - 0.5
+#      - 0.1
+#      - 0.01
+#    NeuralNetClassifier__hidden_layers:
+#      - [200, 100, 50]
+#    NeuralNetClassifier__activations:
+#      - ['relu', 'relu', 'relu']
+#    NeuralNetClassifier__batch_size:
+#      - 100
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 3
+#      shuffle: True
+#      random_state: 37
