@@ -550,8 +550,8 @@ class Wavelet(BaseEstimator, TransformerMixin):
                      self.sample_radius + 1)]
 
         # wavelet
-        cA4, cD4, cD3, _, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
-        features = np.concatenate((cA4, cD4, cD3))
+        cA4, cD4, cD3, cD2, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
+        features = np.concatenate((cA4, cD4, cD3, cD2))
 
         # n_features
         self.n_feature = np.shape(features)[0]
@@ -583,8 +583,8 @@ class Wavelet(BaseEstimator, TransformerMixin):
                 sample = detrend(sample, type='constant')
 
                 # wavelet
-                cA4, cD4, cD3, _, _ = pywt.wavedec(sample, wavelet='sym6', level=4)
-                X_new[i,(j-1)*self.n_feature:j*self.n_feature] = np.concatenate((cA4, cD4, cD3))
+                cA4, cD4, cD3, cD2, _ = pywt.wavedec(sample, wavelet='sym6', level=4)
+                X_new[i,(j-1)*self.n_feature:j*self.n_feature] = np.concatenate((cA4, cD4, cD3, cD2))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")
