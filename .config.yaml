@@ -555,8 +555,8 @@ params:
     - module: ml_project.models.classification
       class: NeuralNetClassifier
       params:
-        dropout: False
-        regularizer_scale: 0.1
+        dropout: True
+        regularizer_scale: 10.0
         hidden_layers: [100, 30]
         activations: ['relu', 'relu']
         batch_size: 100
