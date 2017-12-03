@@ -556,11 +556,11 @@ params:
       class: NeuralNetClassifier
       params:
         dropout: True
-        regularizer_scale: 10.0
-        hidden_layers: [100, 30]
+        regularizer_scale: 0.1
+        hidden_layers: [50, 15]
         activations: ['relu', 'relu']
         batch_size: 100
-        num_epoch: 300
+        num_epoch: 500
 
 
 #module: ml_project.model_selection
