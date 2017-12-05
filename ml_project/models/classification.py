@@ -322,11 +322,20 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         # cost (loss)
         if self.weighted_class:
-            y_tf = tf.multiply(class_weight, y_tf)
+            weight_class = tf.reshape(class_weight, [4, 1])
+            weight_per_sample = tf.matmul(y_tf, weight_class)
 
-        loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(labels=y_tf,
-                                                    logits=network))
+            # cost (class weighted)
+            loss = tf.nn.softmax_cross_entropy_with_logits(
+                labels=y_tf,
+                logits=network)
+            loss = tf.multiply(weight_per_sample, loss)
+            loss = tf.reduce_mean(loss)
+
+        else:
+            loss = tf.reduce_mean(
+                tf.nn.softmax_cross_entropy_with_logits(labels=y_tf,
+                                                        logits=network))
 
         # optimizer
         if self.optimizer == 'Adam':
