@@ -239,7 +239,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 # dense layer 1
                 net = tf.layers.dense(
                     net,
-                    units=512,
+                    units=128,
                     activation=tf.nn.relu)
 
                 if self.dropout:
