@@ -576,11 +576,14 @@ params:
     - module: ml_project.models.classification
       class: ConvolutionalNeuralNetClassifier
       params:
-        dropout: True
+#        dropout: True
         dropout_rate: 0.3
         batch_size: 128
         num_epoch: 20
-  param_grid: {}
+  param_grid:
+    ConvolutionalNeuralNetClassifier__dropout:
+      - True
+      - False
   cv:
     module: sklearn.model_selection
     class: KFold
