@@ -158,9 +158,9 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
 class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Convolutional Neural Net Classifier"""
     def __init__(self, batch_normalization=True,
-                 batch_size=128, dropout=True, dropout_rate=0.3,
+                 batch_size=128, dropout=False, dropout_rate=0.3,
                  kernel_size=None,
-                 optimizer='Adam', learning_rate=0.0001, num_epoch=20,
+                 optimizer='Adam', learning_rate=0.0001, num_epoch=90,
                  one_hot_encoding=True, weighted_class=False,
                  save_path=None, verbosity=1):
 
@@ -218,15 +218,15 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                         net,
                         filters=64,
                         kernel_size=kernel_size,
-                        strides=int(kernel_size/16),
+                        strides=1,
                         padding="SAME",
                         activation=tf.nn.relu)
 
                     # max pooling
                     net = tf.layers.max_pooling1d(
                         net,
-                        pool_size=2,
-                        strides=2)
+                        pool_size=32,
+                        strides=32)
 
                     if self.dropout:
                         net = tf.layers.dropout(inputs=net,
@@ -240,17 +240,6 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 net = tf.layers.dense(
                     net,
                     units=512,
-                    activation=tf.nn.relu)
-
-                if self.dropout:
-                    net = tf.layers.dropout(inputs=net,
-                                            rate=self.dropout_rate,
-                                            training=is_training_tf)
-
-                # dense layer 2
-                net = tf.layers.dense(
-                    net,
-                    units=64,
                     activation=tf.nn.relu)
 
                 if self.dropout:
