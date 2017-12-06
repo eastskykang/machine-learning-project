@@ -544,27 +544,39 @@
 #        max_len: 500
 #        n_feature: 18
 
+#module: ml_project.pipeline
+#class: Pipeline
+#params:
+#  class_list:
+#    - module: ml_project.models.feature_extraction
+#      class: Wavelet
+#    - module: ml_project.models.preprocessing
+#      class: StandardScaler
+#    - module: ml_project.models.preprocessing
+#      class: PrincipleComponentAnalysis
+#      params:
+#        n_components: 32
+#    - module: ml_project.models.classification
+#      class: NeuralNetClassifier
+#      params:
+#        dropout: True
+#        regularizer_scale: 0.1
+#        hidden_layers: [64, 32, 16]
+#        activations: ['relu', 'relu', 'relu']
+#        batch_size: 100
+#        num_epoch: 500
+
 module: ml_project.pipeline
 class: Pipeline
 params:
   class_list:
-    - module: ml_project.models.feature_extraction
-      class: Wavelet
-    - module: ml_project.models.preprocessing
-      class: StandardScaler
-    - module: ml_project.models.preprocessing
-      class: PrincipleComponentAnalysis
-      params:
-        n_components: 32
     - module: ml_project.models.classification
-      class: NeuralNetClassifier
+      class: ConvolutionalNeuralNetClassifier
       params:
         dropout: True
-        regularizer_scale: 0.1
-        hidden_layers: [64, 32, 16]
-        activations: ['relu', 'relu', 'relu']
-        batch_size: 100
-        num_epoch: 500
+        batch_size: 128
+        num_epoch: 20
+
 
 
 #module: ml_project.model_selection

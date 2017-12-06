@@ -105,7 +105,7 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
         cost = C * cost + regularizer
 
         train = tf.train. \
-            GradientDescentOptimizer(learning_rate=self.learning_rate).\
+            GradientDescentOptimizer(learning_rate=self.learning_rate). \
             minimize(cost)
 
         # train
@@ -155,25 +155,19 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
         return P_predicted
 
 
-class NeuralNetClassifier(BaseEstimator, TransformerMixin):
-    """Neural Net Classifier"""
-    def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
-                 regularizer_scale=1.0, batch_normalization=True,
-                 batch_size=58, dropout=True, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.01, num_epoch=500,
-                 score_metric='f1', one_hot_encoding=True, weighted_class=True,
+class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
+    """Convolutional Neural Net Classifier"""
+    def __init__(self, batch_normalization=True,
+                 batch_size=128, dropout=True, dropout_rate=0.3,
+                 optimizer='Adam', learning_rate=0.0001, num_epoch=20,
+                 one_hot_encoding=True, weighted_class=True,
                  save_path=None):
 
-        self.hidden_layers = hidden_layers
-        self.activations = activations
         self.dropout = dropout
         self.dropout_rate = dropout_rate
         self.num_epochs = num_epoch
-        self.regularizer = regularizer
-        self.regularizer_scale = regularizer_scale
         self.batch_normalization = batch_normalization
         self.batch_size = batch_size
-        self.score_metric = score_metric
         self.optimizer = optimizer
         self.learning_rate = learning_rate
         self.one_hot_encoding = one_hot_encoding
@@ -183,15 +177,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.model_path = None
         self.one_hot_encoder = None
 
-        # network structure
-        if hidden_layers is None:
-            self.hidden_layers = [100]
-        if activations is None:
-            self.activations = ["relu"]
-
         # exceptions
-        if len(self.hidden_layers) != len(self.activations):
-            assert "length of hidden layers and activation is not same."
         if optimizer != "Adam" and optimizer != "GradientDescent":
             assert "invalid optimizer"
 
@@ -206,44 +192,73 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
         tf.reset_default_graph()
         with tf.variable_scope("network"):
             # input
-            X_tf = tf.placeholder(tf.float64,
+            X_tf = tf.placeholder(tf.float32,
                                   shape=[None, n_features],
                                   name='X')
-            y_tf = tf.placeholder(tf.float64,
+            y_tf = tf.placeholder(tf.float32,
                                   shape=[None, n_classes],
                                   name='y')
             is_training_tf = tf.placeholder(tf.bool,
                                             name='is_training')
 
             # build graph
+            X_tf = tf.expand_dims(X_tf, axis=-1)
+
             net = X_tf
-            with tf.variable_scope('layer{}'.format(i)):
-                # xavier initialization for variables
-                xavier_initializer = tf.contrib.layers.xavier_initializer()
+            with tf.variable_scope('layers'):
 
-                # activation function
-                activation_fn = tf.nn.relu
+                # cnn 1
+                net = tf.layers.conv1d(
+                    net,
+                    filters=64,
+                    kernel_size=256,
+                    strides=64,
+                    padding="SAME",
+                    activation=tf.nn.relu)
 
-                # fully connected graph
-                net = tf.contrib.layers.fully_connected(
-                    net, hidden_layer,
-                    activation_fn=activation_fn,
-                    biases_initializer=xavier_initializer,
-                    weights_initializer=xavier_initializer,
-                    weights_regularizer=regularizer)
+                # max pooling 1
+                net = tf.layers.max_pooling1d(
+                    net,
+                    pool_size=4,
+                    strides=4)
 
-                # batch normalization
-                if self.batch_normalization:
-                    net = tf.layers. \
-                        batch_normalization(net,
-                                            training=is_training_tf)
+                # cnn 2
+                net = tf.layers.conv1d(
+                    net,
+                    filters=32,
+                    kernel_size=64,
+                    strides=8,
+                    padding="SAME",
+                    activation=tf.nn.relu)
 
+                # max pooling 2
+                net = tf.layers.max_pooling1d(
+                    net,
+                    pool_size=4,
+                    strides=4)
 
-            # end of build graph
-            net = tf.contrib.layers.flatten(net)
-            net = tf.layers.dense(net, n_classes)
+                # flattening
+                net = tf.layers.flatten(net)
 
-        return net, X_tf, y_tf, is_training_tf
+                # dense layer 1
+                net = tf.layers.dense(
+                    net,
+                    units=512,
+                    activation=tf.nn.relu)
+
+                net = tf.layers.dropout(inputs=net,
+                                        rate=self.dropout_rate,
+                                        training=is_training_tf)
+
+                logits = tf.layers.dense(
+                    net,
+                    units=4,
+                    activation=None)
+
+                probabs = tf.nn.softmax(logits)
+                predictions = tf.argmax(probabs, axis=1)
+
+        return predictions, X_tf, y_tf, is_training_tf
 
     def batches(self, X_train, y_train):
         # size
@@ -327,13 +342,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
             optimizer = \
                 tf.train.AdamOptimizer(learning_rate=self.learning_rate)
 
-        # When using the batchnormalization layers,
-        # it is necessary to manually add the update operations
-        # because the moving averages are not included in the graph
-        update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope="network")
-
-        with tf.control_dependencies(update_op):
-            train_op = optimizer.minimize(loss)
+        train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
 
         init_op = tf.global_variables_initializer()
         saver = tf.train.Saver()
@@ -357,7 +366,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                     _, loss_val = sess.run([train_op, loss],
                                            feed_dict=feed)
 
-                    if (epoch % 100) == 0:
+                    if (epoch % 1) == 0:
                         print(epoch, loss_val)
 
             # save tensorflow model
@@ -369,7 +378,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
                 self.model_name = self.model_name + "_"
 
             # create directory
-            Path(self.save_path + self.model_name).\
+            Path(self.save_path + self.model_name). \
                 mkdir(exist_ok=False, parents=True)
             self.model_path = \
                 self.save_path + self.model_name + '/model.ckpt'
@@ -581,17 +590,22 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         return f1_score(y, y_predicted)
 
 
-class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
-    """Convolutional Neural Net Classifier"""
-    def __init__(self, batch_normalization=True,
-                 batch_size=128, dropout=True, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.0001, num_epoch=20,
-                 score_metric='f1', one_hot_encoding=True, weighted_class=False,
+class NeuralNetClassifier(BaseEstimator, TransformerMixin):
+    """Neural Net Classifier"""
+    def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
+                 regularizer_scale=1.0, batch_normalization=True,
+                 batch_size=58, dropout=True, dropout_rate=0.3,
+                 optimizer='Adam', learning_rate=0.01, num_epoch=500,
+                 score_metric='f1', one_hot_encoding=True, weighted_class=True,
                  save_path=None):
 
+        self.hidden_layers = hidden_layers
+        self.activations = activations
         self.dropout = dropout
         self.dropout_rate = dropout_rate
         self.num_epochs = num_epoch
+        self.regularizer = regularizer
+        self.regularizer_scale = regularizer_scale
         self.batch_normalization = batch_normalization
         self.batch_size = batch_size
         self.score_metric = score_metric
@@ -604,6 +618,15 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.model_path = None
         self.one_hot_encoder = None
 
+        # network structure
+        if hidden_layers is None:
+            self.hidden_layers = [100]
+        if activations is None:
+            self.activations = ["relu"]
+
+        # exceptions
+        if len(self.hidden_layers) != len(self.activations):
+            assert "length of hidden layers and activation is not same."
         if optimizer != "Adam" and optimizer != "GradientDescent":
             assert "invalid optimizer"
 
@@ -670,8 +693,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     # dropout
                     if self.dropout:
                         net = tf.contrib.layers.dropout(net,
-                                      keep_prob=(1-self.dropout_rate),
-                                      is_training=is_training_tf)
+                                                        keep_prob=(1-self.dropout_rate),
+                                                        is_training=is_training_tf)
 
             # end of build graph
             net = tf.contrib.layers.flatten(net)
@@ -802,7 +825,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 self.model_name = self.model_name + "_"
 
             # create directory
-            Path(self.save_path + self.model_name).\
+            Path(self.save_path + self.model_name). \
                 mkdir(exist_ok=False, parents=True)
             self.model_path = \
                 self.save_path + self.model_name + '/model.ckpt'
