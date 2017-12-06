@@ -212,15 +212,10 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 net = tf.layers.conv1d(
                     net,
                     filters=64,
-                    kernel_size=256,
-                    strides=64,
+                    kernel_size=128,
+                    strides=32,
                     padding="SAME",
                     activation=tf.nn.relu)
-
-                if self.dropout:
-                    net = tf.layers.dropout(inputs=net,
-                                            rate=self.dropout_rate,
-                                            training=is_training_tf)
 
                 # max pooling 1
                 net = tf.layers.max_pooling1d(
@@ -228,25 +223,30 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     pool_size=4,
                     strides=4)
 
-                # cnn 2
-                net = tf.layers.conv1d(
-                    net,
-                    filters=64,
-                    kernel_size=64,
-                    strides=8,
-                    padding="SAME",
-                    activation=tf.nn.relu)
-
                 if self.dropout:
                     net = tf.layers.dropout(inputs=net,
                                             rate=self.dropout_rate,
                                             training=is_training_tf)
+
+                # cnn 2
+                net = tf.layers.conv1d(
+                    net,
+                    filters=64,
+                    kernel_size=32,
+                    strides=8,
+                    padding="SAME",
+                    activation=tf.nn.relu)
 
                 # max pooling 2
                 net = tf.layers.max_pooling1d(
                     net,
                     pool_size=4,
                     strides=4)
+
+                if self.dropout:
+                    net = tf.layers.dropout(inputs=net,
+                                            rate=self.dropout_rate,
+                                            training=is_training_tf)
 
                 # flattening
                 net = tf.layers.flatten(net)
