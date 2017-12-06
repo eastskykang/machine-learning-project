@@ -159,6 +159,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Convolutional Neural Net Classifier"""
     def __init__(self, batch_normalization=True,
                  batch_size=128, dropout=True, dropout_rate=0.3,
+                 kernel_size=None,
                  optimizer='Adam', learning_rate=0.0001, num_epoch=20,
                  one_hot_encoding=True, weighted_class=False,
                  save_path=None, verbosity=1):
@@ -175,10 +176,13 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.verbosity = verbosity
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
+        self.kernel_size = kernel_size
         self.model_path = None
         self.one_hot_encoder = None
 
         # exceptions
+        if kernel_size is None:
+            self.kernel_size = [256, 64]
         if optimizer != "Adam" and optimizer != "GradientDescent":
             assert "invalid optimizer"
 
@@ -207,46 +211,27 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
             net = X_tf
             with tf.variable_scope('layers'):
+                for i, kernel_size in enumerate(self.kernel_size):
 
-                # cnn 1
-                net = tf.layers.conv1d(
-                    net,
-                    filters=64,
-                    kernel_size=128,
-                    strides=32,
-                    padding="SAME",
-                    activation=tf.nn.relu)
+                    # cnn
+                    net = tf.layers.conv1d(
+                        net,
+                        filters=64,
+                        kernel_size=kernel_size,
+                        strides=int(kernel_size/4),
+                        padding="SAME",
+                        activation=tf.nn.relu)
 
-                # max pooling 1
-                net = tf.layers.max_pooling1d(
-                    net,
-                    pool_size=4,
-                    strides=4)
+                    # max pooling
+                    net = tf.layers.max_pooling1d(
+                        net,
+                        pool_size=2,
+                        strides=2)
 
-                if self.dropout:
-                    net = tf.layers.dropout(inputs=net,
-                                            rate=self.dropout_rate,
-                                            training=is_training_tf)
-
-                # cnn 2
-                net = tf.layers.conv1d(
-                    net,
-                    filters=64,
-                    kernel_size=32,
-                    strides=8,
-                    padding="SAME",
-                    activation=tf.nn.relu)
-
-                # max pooling 2
-                net = tf.layers.max_pooling1d(
-                    net,
-                    pool_size=4,
-                    strides=4)
-
-                if self.dropout:
-                    net = tf.layers.dropout(inputs=net,
-                                            rate=self.dropout_rate,
-                                            training=is_training_tf)
+                    if self.dropout:
+                        net = tf.layers.dropout(inputs=net,
+                                                rate=self.dropout_rate,
+                                                training=is_training_tf)
 
                 # flattening
                 net = tf.layers.flatten(net)
