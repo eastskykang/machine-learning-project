@@ -218,7 +218,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                         net,
                         filters=64,
                         kernel_size=kernel_size,
-                        # strides=int(kernel_size/8),
+                        strides=int(kernel_size/16),
                         padding="SAME",
                         activation=tf.nn.relu)
 
@@ -240,6 +240,17 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 net = tf.layers.dense(
                     net,
                     units=512,
+                    activation=tf.nn.relu)
+
+                if self.dropout:
+                    net = tf.layers.dropout(inputs=net,
+                                            rate=self.dropout_rate,
+                                            training=is_training_tf)
+
+                # dense layer 2
+                net = tf.layers.dense(
+                    net,
+                    units=64,
                     activation=tf.nn.relu)
 
                 if self.dropout:
