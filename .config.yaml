@@ -583,6 +583,7 @@ params:
   param_grid:
     ConvolutionalNeuralNetClassifier__dropout:
       - True
+      - False
     ConvolutionalNeuralNetClassifier__num_epoch:
       - 15
       - 30
@@ -594,6 +595,6 @@ params:
     module: sklearn.model_selection
     class: KFold
     params:
-      n_splits: 10
+      n_splits: 5
       shuffle: True
       random_state: 37
