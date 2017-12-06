@@ -525,10 +525,11 @@ class IntensityAndGradient(BaseEstimator, TransformerMixin):
 class Wavelet(BaseEstimator, TransformerMixin):
     """Wavelet sym6 1-4"""
 
-    def __init__(self, sample_radius=100, sampling_rate=300, verbosity=1):
+    def __init__(self, sample_radius=100, sampling_rate=300, n_peaks=5, verbosity=1):
         self.sample_radius = sample_radius
         self.sampling_rate = sampling_rate
         self.verbosity = verbosity
+        self.n_peaks = n_peaks
         self.n_features = None
 
     def fit(self, X, y=None):
@@ -547,14 +548,14 @@ class Wavelet(BaseEstimator, TransformerMixin):
         # samples
         filtered_x = filtered_x[
                      r_peak[3] - (self.sample_radius - 1):r_peak[3] + (
-                     self.sample_radius + 1)]
+                         self.sample_radius + 1)]
 
         # wavelet
         cA4, cD4, cD3, cD2, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
 
         # n_features
         self.n_features = np.array([len(cA4), len(cD4), len(cD3)])
-        print("number of features : {}".format(self.n_features))
+        print("number of features : {} x {}".format(self.n_features, self.n_peaks))
         return self
 
     def transform(self, X, y=None):
@@ -568,9 +569,9 @@ class Wavelet(BaseEstimator, TransformerMixin):
             print(X.shape)
 
         X_new = np.zeros((n_samples,
-                          self.n_features[0] +
-                          self.n_features[1] +
-                          self.n_features[2]))
+                          (self.n_features[0] +
+                           self.n_features[1] +
+                           self.n_features[2]) * self.n_peaks))
 
         for i in range(0, n_samples):
             x = X[i, :]
@@ -580,15 +581,13 @@ class Wavelet(BaseEstimator, TransformerMixin):
             r_peak = result[2]
 
             # size of features
-            n_peaks = np.shape(r_peak)[0] - 2
-
-            cA4s = np.zeros((n_peaks, self.n_features[0]))
-            cD4s = np.zeros((n_peaks, self.n_features[1]))
-            cD3s = np.zeros((n_peaks, self.n_features[2]))
+            cA4s = np.zeros((self.n_peaks, self.n_features[0]))
+            cD4s = np.zeros((self.n_peaks, self.n_features[1]))
+            cD3s = np.zeros((self.n_peaks, self.n_features[2]))
             # cD2s = np.zeros((n_peaks, self.n_features[3]))
 
             # samples
-            for j in range(1, n_peaks + 1):
+            for j in range(1, self.n_peaks + 1):
                 sample = filtered_x[r_peak[j] - (self.sample_radius-1):r_peak[j] + (self.sample_radius+1)]
                 sample = detrend(sample, type='constant')
 
@@ -600,29 +599,10 @@ class Wavelet(BaseEstimator, TransformerMixin):
                 cD3s[j-1, :] = cD3
                 # cD2s[j-1, :] = cD2
 
-            # plot coeffs for debugging
-            # for i in range(0, n_peaks):
-            #     plt.figure(1)
-            #     plt.plot(cA4s[i])
-            #
-            #     plt.figure(2)
-            #     plt.plot(cD4s[i])
-            #
-            #     plt.figure(3)
-            #     plt.plot(cD3s[i])
-            #
-            #     plt.figure(4)
-            #     plt.plot(cD2s[i])
-            #
-            # plt.show(1)
-            # plt.show(2)
-            # plt.show(3)
-            # plt.show(4)
-
             # new features
-            X_new[i,:] = np.concatenate((np.mean(cA4s, axis=0),
-                                         np.mean(cD4s, axis=0),
-                                         np.mean(cD3s, axis=0)))
+            X_new[i,:] = np.concatenate((cA4s.flatten(),
+                                         cD4s.flatten(),
+                                         cD3s.flatten()))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")

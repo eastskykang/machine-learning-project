@@ -375,7 +375,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     _, loss_val = sess.run([train_op, loss],
                                            feed_dict=feed)
 
-                if epoch % 1  == 0 and self.verbosity > 0:
+                if epoch % 1 == 0 and self.verbosity > 0:
                     print(epoch, loss_val)
 
             # save tensorflow model
