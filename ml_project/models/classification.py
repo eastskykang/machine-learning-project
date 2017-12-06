@@ -160,8 +160,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     def __init__(self, batch_normalization=True,
                  batch_size=128, dropout=True, dropout_rate=0.3,
                  optimizer='Adam', learning_rate=0.0001, num_epoch=20,
-                 one_hot_encoding=True, weighted_class=True,
-                 save_path=None):
+                 one_hot_encoding=True, weighted_class=False,
+                 save_path=None, verbosity=0):
 
         self.dropout = dropout
         self.dropout_rate = dropout_rate
@@ -172,6 +172,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.learning_rate = learning_rate
         self.one_hot_encoding = one_hot_encoding
         self.weighted_class = weighted_class
+        self.verbosity = verbosity
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
@@ -225,7 +226,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 # cnn 2
                 net = tf.layers.conv1d(
                     net,
-                    filters=32,
+                    filters=64,
                     kernel_size=64,
                     strides=8,
                     padding="SAME",
@@ -255,10 +256,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     units=4,
                     activation=None)
 
-                probabs = tf.nn.softmax(logits)
-                predictions = tf.argmax(probabs, axis=1)
-
-        return predictions, X_tf, y_tf, is_training_tf
+        return logits, X_tf, y_tf, is_training_tf
 
     def batches(self, X_train, y_train):
         # size
@@ -290,7 +288,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     def fit(self, X, y, sample_weight=None):
 
         print("------------------------------------")
-        print("NeuralNetClassifier fit")
+        print("CNNClassifier fit")
 
         # size
         n_samples, n_features = np.shape(X)
@@ -316,6 +314,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         # cost (loss)
         if self.weighted_class:
             weight_class = tf.reshape(class_weight, [4, 1])
+            weight_class = tf.cast(weight_class, tf.float32)
             weight_per_sample = tf.matmul(y_tf, weight_class)
 
             # cost (class weighted)
@@ -347,7 +346,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         init_op = tf.global_variables_initializer()
         saver = tf.train.Saver()
 
-        # tensorflow seesion
+        # tensorflow session
         with tf.Session() as sess:
 
             # initialization
@@ -356,6 +355,9 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             for epoch in range(self.num_epochs):
                 for batch in batches:
                     batch_X, batch_y = batch
+
+                    batch_samples, batch_features = np.shape(batch_X)
+                    batch_X = np.reshape(batch_X, (batch_samples, batch_features, 1))
 
                     feed = {
                         X_tf: batch_X,
@@ -366,7 +368,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     _, loss_val = sess.run([train_op, loss],
                                            feed_dict=feed)
 
-                    if (epoch % 1) == 0:
+                    if epoch % 1  == 0 and self.verbosity > 0:
                         print(epoch, loss_val)
 
             # save tensorflow model
@@ -387,16 +389,14 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             tf_save_path = self.model_path
             tf_saved_path = saver.save(sess, tf_save_path)
             print("fitted model save: {}".format(tf_saved_path))
-
-        if self.score_metric is 'f1':
-            print("f1 score: {}".format(self.score(X, y)))
+            # print("f1 score: {}".format(self.score(X, y)))
 
         return self
 
     def predict_proba(self, X):
 
         print("------------------------------------")
-        print("NeuralNetClassifier predict_proba")
+        print("CNNClassifier predict_proba")
 
         # build neural net
         network, X_tf, _, is_training_tf = self.model(X)
@@ -408,6 +408,9 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             save_path = self.model_path
             saver.restore(sess, save_path)
             print("fitted model restored: {}".format(save_path))
+
+            n_samples, n_features = np.shape(X)
+            X = np.reshape(X, (n_samples, n_features, 1))
 
             feed = {
                 X_tf: X,
@@ -421,27 +424,16 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
     def predict(self, X):
         print("------------------------------------")
-        print("NeuralNetClassifier predict")
+        print("CNNClassifier predict")
 
         P_predicted = self.predict_proba(X)
         return np.argmax(P_predicted, axis=1)
 
     def score(self, X, y, sample_weight=None):
-        if self.score_metric is 'spearmanr':
-            P_predicted = self.predict_proba(X)
-            n_samples, n_labels = np.shape(P_predicted)
-            score = np.zeros(n_samples)
+        y_predicted = self.predict(X)
+        score = f1_score(y, y_predicted, average="micro")
 
-            for i in range(0, n_samples):
-                score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
-
-            score = np.mean(score)
-        elif self.score_metric is 'f1':
-            y_predicted = self.predict(X)
-            score = f1_score(y, y_predicted, average="micro")
-        else:
-            y_predicted = self.predict(X)
-            score = f1_score(y, y_predicted, average="micro")
+        print("f1 score = {}".format(score))
 
         return score
 
