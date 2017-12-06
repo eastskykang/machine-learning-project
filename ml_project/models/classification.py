@@ -161,7 +161,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                  batch_size=128, dropout=True, dropout_rate=0.3,
                  optimizer='Adam', learning_rate=0.0001, num_epoch=20,
                  one_hot_encoding=True, weighted_class=False,
-                 save_path=None, verbosity=0):
+                 save_path=None, verbosity=1):
 
         self.dropout = dropout
         self.dropout_rate = dropout_rate
@@ -379,8 +379,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     _, loss_val = sess.run([train_op, loss],
                                            feed_dict=feed)
 
-                    if epoch % 1  == 0 and self.verbosity > 0:
-                        print(epoch, loss_val)
+                if epoch % 1  == 0 and self.verbosity > 0:
+                    print(epoch, loss_val)
 
             # save tensorflow model
             if self.save_path is None:
