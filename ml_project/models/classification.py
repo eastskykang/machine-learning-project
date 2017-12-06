@@ -217,49 +217,27 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
             # build graph
             net = X_tf
-            for i, (hidden_layer, activation) \
-                    in enumerate(zip(self.hidden_layers, self.activations)):
-                with tf.variable_scope('layer{}'.format(i)):
-                    # xavier initialization for variables
-                    xavier_initializer = tf.contrib.layers.xavier_initializer()
+            with tf.variable_scope('layer{}'.format(i)):
+                # xavier initialization for variables
+                xavier_initializer = tf.contrib.layers.xavier_initializer()
 
-                    # activation function
-                    if activation == 'relu':
-                        activation_fn = tf.nn.relu
-                    elif activation == 'sigmoid':
-                        activation_fn = tf.nn.sigmoid
-                    elif activation == 'elu':
-                        activation_fn = tf.nn.elu
-                    else:
-                        activation_fn = tf.nn.relu
+                # activation function
+                activation_fn = tf.nn.relu
 
-                    # regularizer
-                    if self.regularizer == 'l1':
-                        regularizer = tf.contrib.layers.l1_regularizer(self.regularizer_scale)
-                    elif self.regularizer == 'l2':
-                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
-                    else:
-                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
+                # fully connected graph
+                net = tf.contrib.layers.fully_connected(
+                    net, hidden_layer,
+                    activation_fn=activation_fn,
+                    biases_initializer=xavier_initializer,
+                    weights_initializer=xavier_initializer,
+                    weights_regularizer=regularizer)
 
-                    # fully connected graph
-                    net = tf.contrib.layers.fully_connected(
-                        net, hidden_layer,
-                        activation_fn=activation_fn,
-                        biases_initializer=xavier_initializer,
-                        weights_initializer=xavier_initializer,
-                        weights_regularizer=regularizer)
+                # batch normalization
+                if self.batch_normalization:
+                    net = tf.layers. \
+                        batch_normalization(net,
+                                            training=is_training_tf)
 
-                    # batch normalization
-                    if self.batch_normalization:
-                        net = tf.layers. \
-                            batch_normalization(net,
-                                                training=is_training_tf)
-
-                    # dropout
-                    if self.dropout:
-                        net = tf.contrib.layers.dropout(net,
-                                      keep_prob=(1-self.dropout_rate),
-                                      is_training=is_training_tf)
 
             # end of build graph
             net = tf.contrib.layers.flatten(net)
@@ -601,3 +579,295 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
     def score(self, X, y, sample_weight=None):
         y_predicted = self.predict(X)
         return f1_score(y, y_predicted)
+
+
+class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
+    """Convolutional Neural Net Classifier"""
+    def __init__(self, batch_normalization=True,
+                 batch_size=128, dropout=True, dropout_rate=0.3,
+                 optimizer='Adam', learning_rate=0.0001, num_epoch=20,
+                 score_metric='f1', one_hot_encoding=True, weighted_class=False,
+                 save_path=None):
+
+        self.dropout = dropout
+        self.dropout_rate = dropout_rate
+        self.num_epochs = num_epoch
+        self.batch_normalization = batch_normalization
+        self.batch_size = batch_size
+        self.score_metric = score_metric
+        self.optimizer = optimizer
+        self.learning_rate = learning_rate
+        self.one_hot_encoding = one_hot_encoding
+        self.weighted_class = weighted_class
+        self.save_path = save_path
+        self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
+        self.model_path = None
+        self.one_hot_encoder = None
+
+        if optimizer != "Adam" and optimizer != "GradientDescent":
+            assert "invalid optimizer"
+
+    def model(self, X_train, y_train=None):
+        n_samples, n_features = np.shape(X_train)
+
+        if y_train is None:
+            n_classes = 4
+        else:
+            _, n_classes = np.shape(y_train)
+
+        tf.reset_default_graph()
+        with tf.variable_scope("network"):
+            # input
+            X_tf = tf.placeholder(tf.float64,
+                                  shape=[None, n_features],
+                                  name='X')
+            y_tf = tf.placeholder(tf.float64,
+                                  shape=[None, n_classes],
+                                  name='y')
+            is_training_tf = tf.placeholder(tf.bool,
+                                            name='is_training')
+
+            # build graph
+            net = X_tf
+            for i, (hidden_layer, activation) \
+                    in enumerate(zip(self.hidden_layers, self.activations)):
+                with tf.variable_scope('layer{}'.format(i)):
+                    # xavier initialization for variables
+                    xavier_initializer = tf.contrib.layers.xavier_initializer()
+
+                    # activation function
+                    if activation == 'relu':
+                        activation_fn = tf.nn.relu
+                    elif activation == 'sigmoid':
+                        activation_fn = tf.nn.sigmoid
+                    elif activation == 'elu':
+                        activation_fn = tf.nn.elu
+                    else:
+                        activation_fn = tf.nn.relu
+
+                    # regularizer
+                    if self.regularizer == 'l1':
+                        regularizer = tf.contrib.layers.l1_regularizer(self.regularizer_scale)
+                    elif self.regularizer == 'l2':
+                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
+                    else:
+                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
+
+                    # fully connected graph
+                    net = tf.contrib.layers.fully_connected(
+                        net, hidden_layer,
+                        activation_fn=activation_fn,
+                        biases_initializer=xavier_initializer,
+                        weights_initializer=xavier_initializer,
+                        weights_regularizer=regularizer)
+
+                    # batch normalization
+                    if self.batch_normalization:
+                        net = tf.layers. \
+                            batch_normalization(net,
+                                                training=is_training_tf)
+
+                    # dropout
+                    if self.dropout:
+                        net = tf.contrib.layers.dropout(net,
+                                      keep_prob=(1-self.dropout_rate),
+                                      is_training=is_training_tf)
+
+            # end of build graph
+            net = tf.contrib.layers.flatten(net)
+            net = tf.layers.dense(net, n_classes)
+
+        return net, X_tf, y_tf, is_training_tf
+
+    def batches(self, X_train, y_train):
+        # size
+        n_samples, _ = np.shape(X_train)
+        batch_size = self.batch_size
+
+        # batchs
+        batches = []
+
+        random_mask = list(np.random.permutation(n_samples))
+        random_X = X_train[random_mask, :]
+        random_Y = y_train[random_mask, :]
+
+        num_batches = n_samples // batch_size
+        for i in range(0, num_batches):
+            batch_X = random_X[batch_size * i:batch_size * i + batch_size, :]
+            batch_Y = random_Y[batch_size * i:batch_size * i + batch_size, :]
+            batch = (batch_X, batch_Y)
+            batches.append(batch)
+
+        if n_samples % batch_size != 0:
+            batch_X = random_X[num_batches * batch_size:n_samples, :]
+            batch_Y = random_Y[num_batches * batch_size:n_samples, :]
+            batch = (batch_X, batch_Y)
+            batches.append(batch)
+
+        return batches
+
+    def fit(self, X, y, sample_weight=None):
+
+        print("------------------------------------")
+        print("NeuralNetClassifier fit")
+
+        # size
+        n_samples, n_features = np.shape(X)
+
+        # class weight
+        if self.weighted_class:
+            class_weight = compute_class_weight('balanced', np.unique(y), y)
+
+        # one hot encoder
+        if self.one_hot_encoding:
+            self.one_hot_encoder = LabelBinarizer()
+            self.one_hot_encoder.fit(y)
+            y_onehot = self.one_hot_encoder.transform(y)
+
+        _, n_classes = np.shape(y_onehot)
+
+        # generate batches
+        batches = self.batches(X_train=X, y_train=y_onehot)
+
+        # build neural net
+        network, X_tf, y_tf, is_training_tf = self.model(X, y_onehot)
+
+        # cost (loss)
+        if self.weighted_class:
+            weight_class = tf.reshape(class_weight, [4, 1])
+            weight_per_sample = tf.matmul(y_tf, weight_class)
+
+            # cost (class weighted)
+            loss = tf.nn.softmax_cross_entropy_with_logits(
+                labels=y_tf,
+                logits=network)
+            loss = tf.multiply(weight_per_sample, loss)
+            loss = tf.reduce_mean(loss)
+        else:
+            loss = tf.reduce_mean(
+                tf.nn.softmax_cross_entropy_with_logits(labels=y_tf,
+                                                        logits=network))
+
+        # optimizer
+        if self.optimizer == 'Adam':
+            optimizer = \
+                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+        elif self.optimizer == 'GradientDescent':
+            optimizer = \
+                tf.train.GradientDescentOptimizer(
+                    learning_rate=self.learning_rate)
+        else:
+            optimizer = \
+                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+
+        # When using the batchnormalization layers,
+        # it is necessary to manually add the update operations
+        # because the moving averages are not included in the graph
+        update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope="network")
+
+        with tf.control_dependencies(update_op):
+            train_op = optimizer.minimize(loss)
+
+        init_op = tf.global_variables_initializer()
+        saver = tf.train.Saver()
+
+        # tensorflow seesion
+        with tf.Session() as sess:
+
+            # initialization
+            sess.run(init_op)
+
+            for epoch in range(self.num_epochs):
+                for batch in batches:
+                    batch_X, batch_y = batch
+
+                    feed = {
+                        X_tf: batch_X,
+                        y_tf: batch_y,
+                        is_training_tf: True
+                    }
+
+                    _, loss_val = sess.run([train_op, loss],
+                                           feed_dict=feed)
+
+                    if (epoch % 100) == 0:
+                        print(epoch, loss_val)
+
+            # save tensorflow model
+            if self.save_path is None:
+                self.save_path = 'data/tmp/'
+
+            # model path
+            while Path(self.save_path + self.model_name).exists():
+                self.model_name = self.model_name + "_"
+
+            # create directory
+            Path(self.save_path + self.model_name).\
+                mkdir(exist_ok=False, parents=True)
+            self.model_path = \
+                self.save_path + self.model_name + '/model.ckpt'
+
+            # save model
+            tf_save_path = self.model_path
+            tf_saved_path = saver.save(sess, tf_save_path)
+            print("fitted model save: {}".format(tf_saved_path))
+
+        if self.score_metric is 'f1':
+            print("f1 score: {}".format(self.score(X, y)))
+
+        return self
+
+    def predict_proba(self, X):
+
+        print("------------------------------------")
+        print("NeuralNetClassifier predict_proba")
+
+        # build neural net
+        network, X_tf, _, is_training_tf = self.model(X)
+
+        # tensorflow seesion
+        saver = tf.train.Saver()
+
+        with tf.Session() as sess:
+            save_path = self.model_path
+            saver.restore(sess, save_path)
+            print("fitted model restored: {}".format(save_path))
+
+            feed = {
+                X_tf: X,
+                is_training_tf: False
+            }
+
+            predict_op = tf.nn.softmax(network, name='softmax')
+            P_predicted = sess.run(predict_op, feed_dict=feed)
+
+        return P_predicted
+
+    def predict(self, X):
+        print("------------------------------------")
+        print("NeuralNetClassifier predict")
+
+        P_predicted = self.predict_proba(X)
+        return np.argmax(P_predicted, axis=1)
+
+    def score(self, X, y, sample_weight=None):
+        if self.score_metric is 'spearmanr':
+            P_predicted = self.predict_proba(X)
+            n_samples, n_labels = np.shape(P_predicted)
+            score = np.zeros(n_samples)
+
+            for i in range(0, n_samples):
+                score[i] = spearmanr(y[i, :], P_predicted[i, :])[0]
+
+            score = np.mean(score)
+        elif self.score_metric is 'f1':
+            y_predicted = self.predict(X)
+            score = f1_score(y, y_predicted, average="micro")
+        else:
+            y_predicted = self.predict(X)
+            score = f1_score(y, y_predicted, average="micro")
+
+        return score
+
+    def set_save_path(self, save_path):
+        self.save_path = save_path
