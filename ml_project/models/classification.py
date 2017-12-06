@@ -247,9 +247,10 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     units=512,
                     activation=tf.nn.relu)
 
-                net = tf.layers.dropout(inputs=net,
-                                        rate=self.dropout_rate,
-                                        training=is_training_tf)
+                if self.dropout:
+                    net = tf.layers.dropout(inputs=net,
+                                            rate=self.dropout_rate,
+                                            training=is_training_tf)
 
                 logits = tf.layers.dense(
                     net,
