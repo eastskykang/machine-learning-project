@@ -579,7 +579,7 @@ params:
 #        dropout: True
         dropout_rate: 0.3
         batch_size: 128
-        num_epoch: 20
+#        num_epoch: 20
   param_grid:
     ConvolutionalNeuralNetClassifier__dropout:
       - True

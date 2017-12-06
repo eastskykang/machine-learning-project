@@ -218,7 +218,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                         net,
                         filters=64,
                         kernel_size=kernel_size,
-                        strides=int(kernel_size/8),
+                        # strides=int(kernel_size/8),
                         padding="SAME",
                         activation=tf.nn.relu)
 
