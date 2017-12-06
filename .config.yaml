@@ -586,7 +586,8 @@ params:
       - False
     ConvolutionalNeuralNetClassifier__num_epoch:
       - 15
-      - 20
+      - 30
+      - 60
   cv:
     module: sklearn.model_selection
     class: KFold
