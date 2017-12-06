@@ -588,12 +588,12 @@ params:
       - 30
       - 60
     ConvolutionalNeuralNetClassifier__kernel_size:
-#      - [256, 64]
-      - [256, 32, 4]
+      - [256, 32]
+#      - [256, 32, 4]
   cv:
     module: sklearn.model_selection
     class: KFold
     params:
-      n_splits: 3
+      n_splits: 10
       shuffle: True
       random_state: 37
