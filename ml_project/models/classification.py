@@ -217,6 +217,11 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     padding="SAME",
                     activation=tf.nn.relu)
 
+                if self.dropout:
+                    net = tf.layers.dropout(inputs=net,
+                                            rate=self.dropout_rate,
+                                            training=is_training_tf)
+
                 # max pooling 1
                 net = tf.layers.max_pooling1d(
                     net,
@@ -231,6 +236,11 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     strides=8,
                     padding="SAME",
                     activation=tf.nn.relu)
+
+                if self.dropout:
+                    net = tf.layers.dropout(inputs=net,
+                                            rate=self.dropout_rate,
+                                            training=is_training_tf)
 
                 # max pooling 2
                 net = tf.layers.max_pooling1d(
