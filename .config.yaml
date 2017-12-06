@@ -577,7 +577,7 @@ params:
       class: ConvolutionalNeuralNetClassifier
       params:
         dropout: True
-        dropout_rate: 0.3
+        dropout_rate: 0.2
         batch_size: 128
         num_epoch: 20
   param_grid: {}
@@ -585,6 +585,6 @@ params:
     module: sklearn.model_selection
     class: KFold
     params:
-      n_splits: 3
+      n_splits: 10
       shuffle: True
       random_state: 37
