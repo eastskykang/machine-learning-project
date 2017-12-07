@@ -641,7 +641,7 @@
 module: ml_project.model_selection
 class: GridSearchCV
 params:
-  n_jobs: -1
+  n_jobs: 1
   est_module: ml_project.pipeline
   est_class: Pipeline
   est_params:
@@ -649,13 +649,7 @@ params:
       class: Wavelet
     - module: ml_project.models.classification
       class: NeuralNetClassifier
-  param_grid:
-    NeuralNetClassifier__num_epoch:
-      - 500
-    NeuralNetClassifier__hidden_layers:
-      - [256, 64, 16]
-    NeuralNetClassifier__activations:
-      - ['relu', 'relu', 'relu']
+  param_grid: {}
   cv:
     module: sklearn.model_selection
     class: KFold

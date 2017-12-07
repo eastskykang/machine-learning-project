@@ -159,7 +159,6 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Convolutional Neural Net Classifier"""
     def __init__(self, batch_normalization=True,
                  batch_size=128, dropout=False, dropout_rate=0.3,
-                 kernel_size=None,
                  optimizer='Adam', learning_rate=0.0001, num_epoch=30,
                  one_hot_encoding=True, weighted_class=False,
                  save_path=None, verbosity=1):
@@ -176,13 +175,10 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.verbosity = verbosity
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
-        self.kernel_size = kernel_size
         self.model_path = None
         self.one_hot_encoder = None
 
         # exceptions
-        if kernel_size is None:
-            self.kernel_size = [256, 64]
         if optimizer != "Adam" and optimizer != "GradientDescent":
             assert "invalid optimizer"
 
@@ -211,27 +207,63 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
             net = X_tf
             with tf.variable_scope('layers'):
-                for i, kernel_size in enumerate(self.kernel_size):
 
-                    # cnn
-                    net = tf.layers.conv1d(
-                        net,
-                        filters=64,
-                        kernel_size=kernel_size,
-                        strides=1,
-                        padding="SAME",
-                        activation=tf.nn.relu)
+                # cnn 1
+                net = tf.layers.conv1d(
+                    net,
+                    filters=16,
+                    kernel_size=200,
+                    strides=1,
+                    padding="SAME",
+                    activation=tf.nn.relu)
 
-                    # max pooling
-                    net = tf.layers.max_pooling1d(
-                        net,
-                        pool_size=32,
-                        strides=32)
+                net = tf.layers. \
+                    batch_normalization(net,
+                                        training=is_training_tf)
 
-                    if self.dropout:
-                        net = tf.layers.dropout(inputs=net,
-                                                rate=self.dropout_rate,
-                                                training=is_training_tf)
+                # max pooling 1
+                net = tf.layers.max_pooling1d(
+                    net,
+                    pool_size=2,
+                    strides=1)
+
+                # cnn 2
+                net = tf.layers.conv1d(
+                    net,
+                    filters=16,
+                    kernel_size=100,
+                    strides=2,
+                    padding="SAME",
+                    activation=tf.nn.relu)
+
+                net = tf.layers. \
+                    batch_normalization(net,
+                                        training=is_training_tf)
+
+                # max pooling 2
+                net = tf.layers.max_pooling1d(
+                    net,
+                    pool_size=4,
+                    strides=2)
+
+                # cnn 3
+                net = tf.layers.conv1d(
+                    net,
+                    filters=16,
+                    kernel_size=50,
+                    strides=4,
+                    padding="SAME",
+                    activation=tf.nn.relu)
+
+                net = tf.layers. \
+                    batch_normalization(net,
+                                        training=is_training_tf)
+
+                # max pooling 3
+                net = tf.layers.max_pooling1d(
+                    net,
+                    pool_size=16,
+                    strides=8)
 
                 # flattening
                 net = tf.layers.flatten(net)
@@ -239,7 +271,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 # dense layer 1
                 net = tf.layers.dense(
                     net,
-                    units=128,
+                    units=1024,
                     activation=tf.nn.relu)
 
                 if self.dropout:
@@ -247,6 +279,18 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                                             rate=self.dropout_rate,
                                             training=is_training_tf)
 
+                # dense layer 2
+                net = tf.layers.dense(
+                    net,
+                    units=32,
+                    activation=tf.nn.relu)
+
+                if self.dropout:
+                    net = tf.layers.dropout(inputs=net,
+                                            rate=self.dropout_rate,
+                                            training=is_training_tf)
+
+                # logit
                 logits = tf.layers.dense(
                     net,
                     units=4,
@@ -337,7 +381,14 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             optimizer = \
                 tf.train.AdamOptimizer(learning_rate=self.learning_rate)
 
-        train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
+
+        # When using the batchnormalization layers,
+        # it is necessary to manually add the update operations
+        # because the moving averages are not included in the graph
+        update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope="network")
+
+        with tf.control_dependencies(update_op):
+            train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
 
         init_op = tf.global_variables_initializer()
         saver = tf.train.Saver()
@@ -364,8 +415,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     _, loss_val = sess.run([train_op, loss],
                                            feed_dict=feed)
 
-                if epoch % 1 == 0 and self.verbosity > 0:
-                    print(epoch, loss_val)
+                    if epoch % 1 == 0 and self.verbosity > 0:
+                        print(epoch, loss_val)
 
             # save tensorflow model
             if self.save_path is None:
@@ -608,9 +659,9 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         # network structure
         if hidden_layers is None:
-            self.hidden_layers = [256, 64, 16]
+            self.hidden_layers = [128, 32]
         if activations is None:
-            self.activations = ['relu', 'relu', 'relu']
+            self.activations = ['relu', 'relu']
 
         # exceptions
         if len(self.hidden_layers) != len(self.activations):
