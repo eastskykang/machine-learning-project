@@ -224,8 +224,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 # max pooling 1
                 net = tf.layers.max_pooling1d(
                     net,
-                    pool_size=2,
-                    strides=1)
+                    pool_size=16,
+                    strides=8)
 
                 # cnn 2
                 net = tf.layers.conv1d(
@@ -262,8 +262,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 # max pooling 3
                 net = tf.layers.max_pooling1d(
                     net,
-                    pool_size=16,
-                    strides=8)
+                    pool_size=2,
+                    strides=1)
 
                 # flattening
                 net = tf.layers.flatten(net)
