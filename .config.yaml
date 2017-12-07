@@ -577,30 +577,31 @@
 #        batch_size: 100
 
 
-#module: ml_project.model_selection
-#class: GridSearchCV
-#params:
-#  n_jobs: -1
-#  est_module: ml_project.pipeline
-#  est_class: Pipeline
-#  est_params:
-#    - module: ml_project.models.classification
-#      class: ConvolutionalNeuralNetClassifier
-#      params:
-#        dropout: False
-#        batch_size: 100
-##        num_epoch: 20
-#  param_grid:
-#    ConvolutionalNeuralNetClassifier__kernel_size:
-#      - [32]
-##      - [256, 32, 4]
-#  cv:
-#    module: sklearn.model_selection
-#    class: KFold
-#    params:
-#      n_splits: 5
-#      shuffle: True
-#      random_state: 37
+module: ml_project.model_selection
+class: GridSearchCV
+params:
+  n_jobs: -1
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.classification
+      class: ConvolutionalNeuralNetClassifier
+      params:
+        dropout: False
+        batch_size: 100
+        num_epoch: 20
+  param_grid:
+    ConvolutionalNeuralNetClassifier__kernel_size:
+      - [32]
+    ConvolutionalNeuralNetClassifier__learning_rate
+      - 0.001
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 5
+      shuffle: True
+      random_state: 37
 
 
 #module: ml_project.model_selection
@@ -636,36 +637,36 @@
 #      shuffle: True
 #      random_state: 37
 
-#should be retried
-module: ml_project.model_selection
-class: GridSearchCV
-params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
-    - module: ml_project.models.feature_extraction
-      class: Wavelet
-    - module: ml_project.models.classification
-      class: NeuralNetClassifier
-      params:
-        dropout: True
-#        regularizer_scale: 1.0
-        hidden_layers: [256, 64, 16]
-        activations: ['relu', 'relu', 'relu']
-        batch_size: 128
-        num_epoch: 500
-  param_grid:
-    NeuralNetClassifier__regularizer_scale:
-      - 2.0
-      - 5.0
-    NeuralNetClassifier__num_epoch:
-      - 500
-      - 300
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 5
-      shuffle: True
-      random_state: 37
+##should be retried
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  n_jobs: -1
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.feature_extraction
+#      class: Wavelet
+#    - module: ml_project.models.classification
+#      class: NeuralNetClassifier
+#      params:
+#        dropout: True
+##        regularizer_scale: 1.0
+#        hidden_layers: [256, 64, 16]
+#        activations: ['relu', 'relu', 'relu']
+#        batch_size: 128
+#        num_epoch: 500
+#  param_grid:
+#    NeuralNetClassifier__regularizer_scale:
+#      - 2.0
+#      - 5.0
+#    NeuralNetClassifier__num_epoch:
+#      - 500
+#      - 300
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 5
+#      shuffle: True
+#      random_state: 37

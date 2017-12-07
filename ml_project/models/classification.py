@@ -160,7 +160,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     def __init__(self, batch_normalization=True,
                  batch_size=128, dropout=False, dropout_rate=0.3,
                  kernel_size=None,
-                 optimizer='Adam', learning_rate=0.0001, num_epoch=90,
+                 optimizer='Adam', learning_rate=0.0001, num_epoch=30,
                  one_hot_encoding=True, weighted_class=False,
                  save_path=None, verbosity=1):
 
