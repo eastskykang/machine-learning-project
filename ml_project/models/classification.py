@@ -608,9 +608,9 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         # network structure
         if hidden_layers is None:
-            self.hidden_layers = [100]
+            self.hidden_layers = [256, 64, 16]
         if activations is None:
-            self.activations = ["relu"]
+            self.activations = ['relu', 'relu', 'relu']
 
         # exceptions
         if len(self.hidden_layers) != len(self.activations):

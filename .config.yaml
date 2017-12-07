@@ -649,18 +649,13 @@ params:
       class: Wavelet
     - module: ml_project.models.classification
       class: NeuralNetClassifier
-      params:
-        dropout: True
-#        regularizer_scale: 1.0
-        hidden_layers: [256, 64, 16]
-        activations: ['relu', 'relu', 'relu']
-        batch_size: 128
   param_grid:
-    NeuralNetClassifier__regularizer_scale:
-      - 2.0
-      - 3.0
     NeuralNetClassifier__num_epoch:
-      - 800
+      - 500
+    NeuralNetClassifier__hidden_layers:
+      - [256, 64, 16]
+    NeuralNetClassifier__activations:
+      - ['relu', 'relu', 'relu']
   cv:
     module: sklearn.model_selection
     class: KFold
