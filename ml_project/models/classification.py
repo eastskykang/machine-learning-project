@@ -393,7 +393,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
         with tf.control_dependencies(update_op):
-            train_op = optimizer.minimize(loss)
+            train_op = optimizer.minimize(loss,
+                                          global_step=tf.train.get_global_step())
 
         # initialization operation
         init_op = tf.global_variables_initializer()
