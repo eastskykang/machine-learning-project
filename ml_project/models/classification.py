@@ -186,96 +186,95 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         n_samples, n_features = np.shape(X_train)
 
         tf.reset_default_graph()
-        with tf.variable_scope("network"):
-            # input
-            X_tf = tf.placeholder(tf.float32,
-                                  shape=[None, n_features],
-                                  name='X')
-            y_tf = tf.placeholder(tf.float32,
-                                  name='y')
-            is_training_tf = tf.placeholder(tf.bool,
-                                            name='is_training')
 
-            # build graph
-            net = tf.expand_dims(X_tf, axis=-1)
+        # input
+        X_tf = tf.placeholder(tf.float32,
+                              shape=[None, n_features],
+                              name='X')
+        y_tf = tf.placeholder(tf.float32,
+                              name='y')
+        is_training_tf = tf.placeholder(tf.bool,
+                                        name='is_training')
 
-            with tf.variable_scope('layers'):
-                # cnn 1
-                net = tf.layers.conv1d(
-                    net,
-                    filters=8,
-                    kernel_size=256,
-                    strides=1,
-                    activation=tf.nn.relu)
+        # build graph
+        net = tf.expand_dims(X_tf, axis=-1)
 
-                # max pooling 1
-                net = tf.layers.max_pooling1d(
-                    net,
-                    pool_size=2,
-                    strides=1)
+        # cnn 1
+        net = tf.layers.conv1d(
+            net,
+            filters=8,
+            kernel_size=256,
+            strides=1,
+            activation=tf.nn.relu)
 
-                # cnn 2
-                net = tf.layers.conv1d(
-                    net,
-                    filters=8,
-                    kernel_size=128,
-                    strides=1,
-                    activation=tf.nn.relu)
+        # max pooling 1
+        net = tf.layers.max_pooling1d(
+            net,
+            pool_size=2,
+            strides=1)
 
-                # max pooling 2
-                net = tf.layers.max_pooling1d(
-                    net,
-                    pool_size=4,
-                    strides=2)
+        # cnn 2
+        net = tf.layers.conv1d(
+            net,
+            filters=8,
+            kernel_size=128,
+            strides=1,
+            activation=tf.nn.relu)
 
-                # cnn 3
-                net = tf.layers.conv1d(
-                    net,
-                    filters=8,
-                    kernel_size=64,
-                    strides=1,
-                    activation=tf.nn.relu)
+        # max pooling 2
+        net = tf.layers.max_pooling1d(
+            net,
+            pool_size=4,
+            strides=2)
 
-                # max pooling 3
-                net = tf.layers.max_pooling1d(
-                    net,
-                    pool_size=16,
-                    strides=8)
+        # cnn 3
+        net = tf.layers.conv1d(
+            net,
+            filters=8,
+            kernel_size=64,
+            strides=1,
+            activation=tf.nn.relu)
 
-                # flattening
-                net = tf.contrib.layers.flatten(net)
+        # max pooling 3
+        net = tf.layers.max_pooling1d(
+            net,
+            pool_size=16,
+            strides=8)
 
-                # dense layer 1
-                net = tf.layers.dense(
-                    net,
-                    units=1024,
-                    activation=tf.nn.relu)
+        # flattening
+        net = tf.contrib.layers.flatten(net)
 
-                net = tf.layers.dropout(inputs=net,
-                                        rate=self.dropout_rate,
-                                        training=is_training_tf)
+        # dense layer 1
+        net = tf.layers.dense(
+            net,
+            units=1024,
+            activation=tf.nn.relu)
 
-                # dense layer 2
-                net = tf.layers.dense(
-                    net,
-                    units=32,
-                    activation=tf.nn.relu)
+        net = tf.layers.dropout(inputs=net,
+                                rate=self.dropout_rate,
+                                training=is_training_tf)
 
-                net = tf.layers.dropout(inputs=net,
-                                        rate= self.dropout_rate,
-                                        training=is_training_tf)
+        # dense layer 2
+        net = tf.layers.dense(
+            net,
+            units=32,
+            activation=tf.nn.relu)
 
-                # logit
-                logits_tf = tf.layers.dense(
-                    net,
-                    units=4,
-                    activation=None)
+        net = tf.layers.dropout(inputs=net,
+                                rate= self.dropout_rate,
+                                training=is_training_tf)
 
-                # probs
-                probs_tf = tf.nn.softmax(logits_tf)
+        # logit
+        logits_tf = tf.layers.dense(
+            net,
+            units=4,
+            activation=None)
 
-                # prediction
-                predictions_tf = tf.argmax(probs_tf, axis=1)
+        # probs
+        probs_tf = tf.nn.softmax(logits_tf)
+
+        # prediction
+        predictions_tf = tf.argmax(probs_tf, axis=1)
 
         return X_tf, y_tf, is_training_tf, logits_tf, probs_tf, predictions_tf
 

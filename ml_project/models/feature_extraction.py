@@ -1,7 +1,9 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
+from sklearn.preprocessing import normalize
 from ml_project.models import utils
 from biosppy.signals import ecg
+from biosppy.signals import tools
 from scipy.signal import detrend
 import numpy as np
 import cv2
@@ -589,7 +591,15 @@ class Wavelet(BaseEstimator, TransformerMixin):
             # samples
             for j in range(1, self.n_peaks + 1):
                 sample = filtered_x[r_peak[j] - (self.sample_radius-1):r_peak[j] + (self.sample_radius+1)]
-                sample = detrend(sample, type='constant')
+
+                plt.figure(0)
+                plt.plot(sample)
+                plt.show(0)
+
+                # sample = np.reshape(sample, (1, self.sample_radius * 2))
+                # sample = normalize(sample, axis=1)
+
+                sample = tools.normalize(sample)
 
                 # wavelet
                 cA4, cD4, cD3, _, _ = pywt.wavedec(sample, wavelet='sym6', level=4)
