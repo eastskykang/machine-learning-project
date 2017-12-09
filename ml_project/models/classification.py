@@ -207,6 +207,11 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             strides=1,
             activation=tf.nn.relu)
 
+        # batch norm 1
+        net = tf.layers. \
+            batch_normalization(net,
+                                training=is_training_tf)
+
         # max pooling 1
         net = tf.layers.max_pooling1d(
             net,
@@ -220,6 +225,11 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             kernel_size=128,
             strides=1,
             activation=tf.nn.relu)
+
+        # batch norm 1
+        net = tf.layers. \
+            batch_normalization(net,
+                                training=is_training_tf)
 
         # max pooling 2
         net = tf.layers.max_pooling1d(
@@ -374,8 +384,16 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 tf.train.AdamOptimizer(learning_rate=self.learning_rate)
 
         # train operation
-        train_op = optimizer.minimize(loss,
-                                      global_step=tf.train.get_global_step())
+        # train_op = optimizer.minimize(loss,
+        #                               global_step=tf.train.get_global_step())
+
+        # When using the batchnormalization layers,
+        # it is necessary to manually add the update operations
+        # because the moving averages are not included in the graph
+        update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
+        with tf.control_dependencies(update_op):
+            train_op = optimizer.minimize(loss)
 
         # initialization operation
         init_op = tf.global_variables_initializer()
