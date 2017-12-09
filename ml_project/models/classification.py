@@ -268,9 +268,12 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     units=4,
                     activation=None)
 
-        return logits, X_tf, y_tf, is_training_tf
+                # probs
+                probs_tf = tf.nn.softmax(logits)
 
-    def batches(self, X_train, y_train):
+        return logits, X_tf, y_tf, is_training_tf, probs_tf
+
+    def random_batches(self, X_train, y_train):
         # size
         n_samples, _ = np.shape(X_train)
         batch_size = self.batch_size
@@ -297,6 +300,29 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         return batches
 
+    def order_batches(self, X_train, y_train):
+        # size
+        n_samples, _ = np.shape(X_train)
+        batch_size = self.batch_size
+
+        # batchs
+        batches = []
+
+        num_batches = n_samples // batch_size
+        for i in range(0, num_batches):
+            batch_X = X_train[batch_size * i:batch_size * i + batch_size, :]
+            batch_Y = y_train[batch_size * i:batch_size * i + batch_size]
+            batch = (batch_X, batch_Y)
+            batches.append(batch)
+
+        if n_samples % batch_size != 0:
+            batch_X = X_train[num_batches * batch_size:n_samples, :]
+            batch_Y = y_train[num_batches * batch_size:n_samples]
+            batch = (batch_X, batch_Y)
+            batches.append(batch)
+
+        return batches
+
     def fit(self, X, y, sample_weight=None):
 
         print("------------------------------------")
@@ -311,18 +337,14 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         _, n_classes = np.shape(y_onehot)
 
         # training mask / evaluation mask
-        n_samples, _ = np.shape(X)
+        n_samples, n_features = np.shape(X)
         mask = list(np.random.permutation(n_samples))
         self.training_mask = mask[0:6000]
         self.evaluation_mask = mask[6000:-1]
 
-        # generate batches (for training)
-        batches = self.batches(X_train=X[self.training_mask, :],
-                               y_train=y_onehot[self.training_mask, :])
-
         # build neural net
-        network, X_tf, y_tf, is_training_tf = self.model(X[self.training_mask, :],
-                                                         y_onehot[self.training_mask, :])
+        network, X_tf, y_tf, is_training_tf, prob_tf = self.model(X[self.training_mask, :],
+                                                                  y_onehot[self.training_mask, :])
 
         # cost (loss)
         loss = tf.reduce_mean(
@@ -368,6 +390,10 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                 # =============================================================
                 # training with batch
+                batches = self.random_batches(X_train=X[self.training_mask, :],
+                                              y_train=y_onehot[
+                                                      self.training_mask, :])
+
                 for batch in batches:
                     batch_X, batch_y = batch
 
@@ -383,27 +409,36 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     _, loss_val = sess.run([train_op, loss],
                                            feed_dict=feed_train)
 
+
                 # =============================================================
                 # training score
-                n_train_samples, n_features = np.shape(X[self.training_mask, :])
+                batches = self.order_batches(X_train=X[self.training_mask, :],
+                                             y_train=y[self.training_mask])
 
-                feed_eval = {
-                    X_tf: np.reshape(X[self.training_mask, :],
-                                     (n_train_samples, n_features, 1)),
-                    is_training_tf: False
-                }
+                score_trains = np.zeros((len(batches)))
 
-                predict_op = tf.nn.softmax(network, name='softmax')
-                P_predicted = sess.run(predict_op, feed_dict=feed_eval)
-                y_predicted = np.argmax(P_predicted, axis=1)
+                for i, batch in enumerate(batches):
+                    batch_X, batch_y = batch
 
-                score_train = f1_score(y[self.training_mask],
-                                       y_predicted,
-                                       average="micro")
+                    batch_samples, batch_features = np.shape(batch_X)
+                    batch_X = np.reshape(batch_X, (batch_samples, batch_features, 1))
+
+                    feed_train = {
+                        X_tf: batch_X,
+                        is_training_tf: True
+                    }
+
+                    P_predicted_train = sess.run(prob_tf,
+                                                 feed_dict=feed_train)
+                    y_predicted_train = np.argmax(P_predicted_train, axis=1)
+
+                    score_trains[i] = f1_score(batch_y,
+                                               y_predicted_train,
+                                               average="micro")
 
                 # =============================================================
                 # evaluation score
-                n_eval_samples, n_features = np.shape(X[self.evaluation_mask, :])
+                n_eval_samples, _ = np.shape(X[self.evaluation_mask, :])
 
                 feed_eval = {
                     X_tf: np.reshape(X[self.evaluation_mask, :],
@@ -411,19 +446,19 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     is_training_tf: False
                 }
 
-                predict_op = tf.nn.softmax(network, name='softmax')
-                P_predicted = sess.run(predict_op, feed_dict=feed_eval)
-                y_predicted = np.argmax(P_predicted, axis=1)
+                P_predicted_eval = sess.run(prob_tf, feed_dict=feed_eval)
+                y_predicted_eval = np.argmax(P_predicted_eval, axis=1)
 
                 score_eval = f1_score(y[self.evaluation_mask],
-                                      y_predicted, average="micro")
+                                      y_predicted_eval, average="micro")
 
                 if self.verbosity > 0:
                     print("epoch    = {} / "
                           "loss     = {} / "
                           "f1 train = {} / "
                           "f1 eval  = {}".format(epoch, loss_val,
-                                                 score_train, score_eval))
+                                                 np.mean(score_trains),
+                                                 score_eval))
 
             # save tensorflow model
             if self.save_path is None:
