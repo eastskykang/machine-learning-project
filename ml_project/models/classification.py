@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
@@ -959,3 +960,16 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
     def set_save_path(self, save_path):
         self.save_path = save_path
+
+
+class RandomForestClassifier(RandomForestClassifier):
+    def __init__(self, n_estimators, n_jobs):
+        super(RandomForestClassifier, self).__init__(n_estimators=n_estimators, n_jobs=n_jobs)
+
+    def fit(self, X, y, sample_weight=None):
+        super(RandomForestClassifier, self).fit(X, y)
+        return self
+
+    def predict(self, X):
+        y = super(RandomForestClassifier, self).predict(X)
+        return y.astype(int)
