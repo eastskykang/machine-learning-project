@@ -19,3 +19,4 @@ dependencies:
     - keras
     - h5py
     - biosppy
+    - imbalanced-learn

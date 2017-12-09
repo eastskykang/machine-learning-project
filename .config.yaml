@@ -660,11 +660,17 @@ params:
   est_params:
     - module: ml_project.models.feature_extraction
       class: Wavelet
-    - module: sklearn.ensemble
-      class: RandomForestClassifier
+    - module: ml_project.models.preprocessing
+      class: StandardScaler
+    - module: imblearn.ensemble
+      class: BalancedBaggingClassifier
   param_grid:
-    RandomForestClassifier__n_jobs:
+    BalancedBaggingClassifier__n_jobs:
       - -1
+    BalancedBaggingClassifier__max_depth:
+      - None
+      - 5
+      - 10
   cv:
     module: sklearn.model_selection
     class: KFold
