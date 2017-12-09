@@ -964,7 +964,12 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
 class RandomForestClassifier(RandomForestClassifier):
     def __init__(self, n_estimators, n_jobs):
-        super(RandomForestClassifier, self).__init__(n_estimators=n_estimators, n_jobs=n_jobs)
+        self.n_estimators = n_estimators
+        self.n_jobs = n_jobs
+
+        super(RandomForestClassifier, self)\
+            .__init__(n_estimators=self.n_estimators,
+                      n_jobs=self.n_jobs)
 
     def fit(self, X, y, sample_weight=None):
         super(RandomForestClassifier, self).fit(X, y)
