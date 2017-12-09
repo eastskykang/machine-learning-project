@@ -157,20 +157,17 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
 
 class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Convolutional Neural Net Classifier"""
-    def __init__(self, batch_normalization=False,
+    def __init__(self,
                  batch_size=128, dropout=False, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.001, num_epoch=1500,
-                 one_hot_encoding=True,
+                 optimizer='Adam', learning_rate=0.001, num_epoch=50,
                  save_path=None, verbosity=1):
 
         self.dropout = dropout
         self.dropout_rate = dropout_rate
         self.num_epochs = num_epoch
-        self.batch_normalization = batch_normalization
         self.batch_size = batch_size
         self.optimizer = optimizer
         self.learning_rate = learning_rate
-        self.one_hot_encoding = one_hot_encoding
         self.verbosity = verbosity
         self.save_path = save_path
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
@@ -185,13 +182,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         if optimizer != "Adam" and optimizer != "GradientDescent":
             assert "invalid optimizer"
 
-    def model(self, X_train, y_train=None):
+    def model(self, X_train):
         n_samples, n_features = np.shape(X_train)
-
-        if y_train is None:
-            n_classes = 4
-        else:
-            _, n_classes = np.shape(y_train)
 
         tf.reset_default_graph()
         with tf.variable_scope("network"):
@@ -200,17 +192,14 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                                   shape=[None, n_features],
                                   name='X')
             y_tf = tf.placeholder(tf.float32,
-                                  shape=[None, n_classes],
                                   name='y')
             is_training_tf = tf.placeholder(tf.bool,
                                             name='is_training')
 
             # build graph
-            X_tf = tf.expand_dims(X_tf, axis=-1)
+            net = tf.expand_dims(X_tf, axis=-1)
 
-            net = X_tf
             with tf.variable_scope('layers'):
-
                 # cnn 1
                 net = tf.layers.conv1d(
                     net,
@@ -240,12 +229,12 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     strides=2)
 
                 # flattening
-                net = tf.layers.flatten(net)
+                net = tf.contrib.layers.flatten(net)
 
                 # dense layer 1
                 net = tf.layers.dense(
                     net,
-                    units=512,
+                    units=1024,
                     activation=tf.nn.relu)
 
                 net = tf.layers.dropout(inputs=net,
@@ -255,7 +244,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 # dense layer 2
                 net = tf.layers.dense(
                     net,
-                    units=64,
+                    units=32,
                     activation=tf.nn.relu)
 
                 net = tf.layers.dropout(inputs=net,
@@ -263,17 +252,23 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                                         training=is_training_tf)
 
                 # logit
-                logits = tf.layers.dense(
+                logits_tf = tf.layers.dense(
                     net,
                     units=4,
                     activation=None)
 
                 # probs
-                probs_tf = tf.nn.softmax(logits)
+                probs_tf = tf.nn.softmax(logits_tf)
 
-        return logits, X_tf, y_tf, is_training_tf, probs_tf
+                # prediction
+                predictions_tf = tf.argmax(probs_tf, axis=1)
+
+        return X_tf, y_tf, is_training_tf, logits_tf, probs_tf, predictions_tf
 
     def random_batches(self, X_train, y_train):
+
+        print("         generate batch")
+
         # size
         n_samples, _ = np.shape(X_train)
         batch_size = self.batch_size
@@ -283,18 +278,18 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         random_mask = list(np.random.permutation(n_samples))
         random_X = X_train[random_mask, :]
-        random_Y = y_train[random_mask, :]
+        random_Y = y_train[random_mask]
 
         num_batches = n_samples // batch_size
         for i in range(0, num_batches):
             batch_X = random_X[batch_size * i:batch_size * i + batch_size, :]
-            batch_Y = random_Y[batch_size * i:batch_size * i + batch_size, :]
+            batch_Y = random_Y[batch_size * i:batch_size * i + batch_size]
             batch = (batch_X, batch_Y)
             batches.append(batch)
 
         if n_samples % batch_size != 0:
             batch_X = random_X[num_batches * batch_size:n_samples, :]
-            batch_Y = random_Y[num_batches * batch_size:n_samples, :]
+            batch_Y = random_Y[num_batches * batch_size:n_samples]
             batch = (batch_X, batch_Y)
             batches.append(batch)
 
@@ -328,28 +323,30 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         print("------------------------------------")
         print("CNNClassifier fit")
 
-        # one hot encoder
-        if self.one_hot_encoding:
-            self.one_hot_encoder = LabelBinarizer()
-            self.one_hot_encoder.fit(y)
-            y_onehot = self.one_hot_encoder.transform(y)
-
-        _, n_classes = np.shape(y_onehot)
-
-        # training mask / evaluation mask
+        # training / evaluation data
         n_samples, n_features = np.shape(X)
-        mask = list(np.random.permutation(n_samples))
-        self.training_mask = mask[0:6000]
-        self.evaluation_mask = mask[6000:-1]
 
-        # build neural net
-        network, X_tf, y_tf, is_training_tf, prob_tf = self.model(X[self.training_mask, :],
-                                                                  y_onehot[self.training_mask, :])
+        mask = list(np.random.permutation(n_samples))
+        self.training_mask = mask[0:6200]
+        self.evaluation_mask = mask[6200:None]
+        X_eval = X[self.evaluation_mask, :]
+        y_eval = y[self.evaluation_mask]
+
+        # build network
+        X_tf, y_tf, is_training_tf, \
+        logits, probs_tf, prediction_tf = \
+            self.model(X[self.training_mask, :])
 
         # cost (loss)
+        labels = tf.cast(y_tf, tf.int32)
+        labels = tf.one_hot(labels, depth=4)
+
+        labels = tf.cast(labels, tf.float64)
+        logits = tf.cast(logits, tf.float64)
+
         loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(labels=y_tf,
-                                                    logits=network))
+            tf.nn.softmax_cross_entropy_with_logits(labels=labels,
+                                                    logits=logits))
 
         # optimizer
         if self.optimizer == 'Adam':
@@ -363,102 +360,70 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             optimizer = \
                 tf.train.AdamOptimizer(learning_rate=self.learning_rate)
 
-        if self.batch_normalization:
-            # When using the batchnormalization layers,
-            # it is necessary to manually add the update operations
-            # because the moving averages are not included in the graph
-            update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope="network")
+        # train operation
+        train_op = optimizer.minimize(loss,
+                                      global_step=tf.train.get_global_step())
 
-            with tf.control_dependencies(update_op):
-                train_op = optimizer.minimize(loss,
-                                              global_step=tf.train.get_global_step())
-        else:
-            # no batch normalization
-            train_op = optimizer.minimize(loss,
-                                          global_step=tf.train.get_global_step())
-
+        # initialization operation
         init_op = tf.global_variables_initializer()
         saver = tf.train.Saver()
 
         # tensorflow session
         with tf.Session() as sess:
 
-            # initialization
+            # initialization run
+            print("     initialization")
             sess.run(init_op)
+
+            # training
+            print("     training")
 
             for epoch in range(self.num_epochs):
 
                 # =============================================================
                 # training with batch
                 batches = self.random_batches(X_train=X[self.training_mask, :],
-                                              y_train=y_onehot[
-                                                      self.training_mask, :])
+                                              y_train=y[self.training_mask])
 
-                for batch in batches:
-                    batch_X, batch_y = batch
-
-                    batch_samples, batch_features = np.shape(batch_X)
-                    batch_X = np.reshape(batch_X, (batch_samples, batch_features, 1))
+                for (batch_X, batch_y) in batches:
 
                     feed_train = {
                         X_tf: batch_X,
-                        y_tf: batch_y,
+                        y_tf: batch_y.astype('float32'),
                         is_training_tf: True
                     }
 
-                    _, loss_val = sess.run([train_op, loss],
-                                           feed_dict=feed_train)
+                    _, loss_train, prediction_train = \
+                        sess.run([train_op, loss, prediction_tf],
+                                 feed_dict=feed_train)
 
+                    # training score
+                    score_train = f1_score(batch_y,
+                                           prediction_train,
+                                           average="micro")
 
-                # =============================================================
-                # training score
-                batches = self.order_batches(X_train=X[self.training_mask, :],
-                                             y_train=y[self.training_mask])
-
-                score_trains = np.zeros((len(batches)))
-
-                for i, batch in enumerate(batches):
-                    batch_X, batch_y = batch
-
-                    batch_samples, batch_features = np.shape(batch_X)
-                    batch_X = np.reshape(batch_X, (batch_samples, batch_features, 1))
-
-                    feed_train = {
-                        X_tf: batch_X,
-                        is_training_tf: True
+                    # evaluation score
+                    feed_eval = {
+                        X_tf: X_eval,
+                        y_tf: y_eval.astype('float32'),
+                        is_training_tf: False
                     }
 
-                    P_predicted_train = sess.run(prob_tf,
-                                                 feed_dict=feed_train)
-                    y_predicted_train = np.argmax(P_predicted_train, axis=1)
+                    loss_eval, prediction_eval = sess.run([loss, prediction_tf],
+                                                          feed_dict=feed_eval)
+                    score_eval = f1_score(y_eval,
+                                          prediction_eval,
+                                          average="micro")
 
-                    score_trains[i] = f1_score(batch_y,
-                                               y_predicted_train,
-                                               average="micro")
-
-                # =============================================================
-                # evaluation score
-                n_eval_samples, _ = np.shape(X[self.evaluation_mask, :])
-
-                feed_eval = {
-                    X_tf: np.reshape(X[self.evaluation_mask, :],
-                                     (n_eval_samples, n_features, 1)),
-                    is_training_tf: False
-                }
-
-                P_predicted_eval = sess.run(prob_tf, feed_dict=feed_eval)
-                y_predicted_eval = np.argmax(P_predicted_eval, axis=1)
-
-                score_eval = f1_score(y[self.evaluation_mask],
-                                      y_predicted_eval, average="micro")
-
-                if self.verbosity > 0:
-                    print("epoch    = {} / "
-                          "loss     = {} / "
-                          "f1 train = {} / "
-                          "f1 eval  = {}".format(epoch, loss_val,
-                                                 np.mean(score_trains),
-                                                 score_eval))
+                    print("         epoch = {} / "
+                          "loss train   = {} / "
+                          "f1 train     = {} / "
+                          "loss eval    = {} / "
+                          "f1 eval      = {}".format(epoch,
+                                                     loss_train,
+                                                     score_train,
+                                                     loss_eval,
+                                                     score_eval))
 
             # save tensorflow model
             if self.save_path is None:
@@ -482,13 +447,12 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         return self
 
-    def predict_proba(self, X):
-
+    def predict(self, X):
         print("------------------------------------")
-        print("CNNClassifier predict_proba")
+        print("CNNClassifier predict")
 
         # build neural net
-        network, X_tf, _, is_training_tf = self.model(X)
+        X_tf, _, is_training_tf, _, _, predictions_tf = self.model(X)
 
         # tensorflow seesion
         saver = tf.train.Saver()
@@ -498,30 +462,18 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             saver.restore(sess, save_path)
             print("fitted model restored: {}".format(save_path))
 
-            n_samples, n_features = np.shape(X)
-            X = np.reshape(X, (n_samples, n_features, 1))
-
             feed = {
                 X_tf: X,
                 is_training_tf: False
             }
 
-            predict_op = tf.nn.softmax(network, name='softmax')
-            P_predicted = sess.run(predict_op, feed_dict=feed)
+            prediction = sess.run(predictions_tf, feed_dict=feed)
 
-        return P_predicted
-
-    def predict(self, X):
-        print("------------------------------------")
-        print("CNNClassifier predict")
-
-        P_predicted = self.predict_proba(X)
-        return np.argmax(P_predicted, axis=1)
+        return prediction
 
     def score(self, X, y, sample_weight=None):
         y_predicted = self.predict(X)
         score = f1_score(y, y_predicted, average="micro")
-
         print("f1 score = {}".format(score))
 
         return score
