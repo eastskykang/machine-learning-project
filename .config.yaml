@@ -666,11 +666,8 @@ params:
     RandomForestClassifier__n_jobs:
       - -1
     RandomForestClassifier__max_depth:
-      - 5
       - 10
     RandomForestClassifier__n_estimators:
-      - 5
-      - 10
       - 20
   cv:
     module: sklearn.model_selection
