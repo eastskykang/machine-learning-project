@@ -667,10 +667,6 @@ params:
   param_grid:
     BalancedBaggingClassifier__n_jobs:
       - -1
-    BalancedBaggingClassifier__max_depth:
-      - None
-      - 5
-      - 10
   cv:
     module: sklearn.model_selection
     class: KFold
