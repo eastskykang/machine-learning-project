@@ -551,10 +551,10 @@ class Wavelet(BaseEstimator, TransformerMixin):
                          self.sample_radius + 1)]
 
         # wavelet
-        cA4, cD4, cD3, cD2, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
+        cA4, cD4, cD3, _, _ = pywt.wavedec(filtered_x, wavelet='sym6', level=4)
 
         # n_features
-        self.n_features = np.array([len(cA4), len(cD4), len(cD3), len(cD2)])
+        self.n_features = np.array([len(cA4), len(cD4), len(cD3)])
         print("number of features : {} x {}".format(self.n_features, self.n_peaks))
         return self
 
@@ -571,8 +571,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
         X_new = np.zeros((n_samples,
                           (self.n_features[0] +
                            self.n_features[1] +
-                           self.n_features[2] +
-                           self.n_features[3]) * self.n_peaks))
+                           self.n_features[2]) * self.n_peaks))
 
         for i in range(0, n_samples):
             x = X[i, :]
@@ -585,7 +584,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
             cA4s = np.zeros((self.n_peaks, self.n_features[0]))
             cD4s = np.zeros((self.n_peaks, self.n_features[1]))
             cD3s = np.zeros((self.n_peaks, self.n_features[2]))
-            cD2s = np.zeros((self.n_peaks, self.n_features[3]))
+            # cD2s = np.zeros((self.n_peaks, self.n_features[3]))
 
             # samples
             for j in range(1, self.n_peaks + 1):
@@ -593,18 +592,17 @@ class Wavelet(BaseEstimator, TransformerMixin):
                 sample = detrend(sample, type='constant')
 
                 # wavelet
-                cA4, cD4, cD3, cD2, _ = pywt.wavedec(sample, wavelet='sym6', level=4)
+                cA4, cD4, cD3, _, _ = pywt.wavedec(sample, wavelet='sym6', level=4)
 
                 cA4s[j-1, :] = cA4
                 cD4s[j-1, :] = cD4
                 cD3s[j-1, :] = cD3
-                cD2s[j-1, :] = cD2
+                # cD2s[j-1, :] = cD2
 
             # new features
             X_new[i,:] = np.concatenate((cA4s.flatten(),
                                          cD4s.flatten(),
-                                         cD3s.flatten(),
-                                         cD2s.flatten()))
+                                         cD3s.flatten()))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")
