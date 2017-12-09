@@ -573,7 +573,6 @@ params:
     - module: ml_project.models.classification
       class: ConvolutionalNeuralNetClassifier
 
-
 #module: ml_project.model_selection
 #class: GridSearchCV
 #params:
