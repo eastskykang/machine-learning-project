@@ -316,17 +316,13 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.training_mask = mask[0:6000]
         self.evaluation_mask = mask[6000:-1]
 
-        # train data / evaluation data
-        X_train = X[self.training_mask, :]
-        y_train = y_onehot[self.training_mask, :]
-        X_eval = X[self.evaluation_mask, :]
-        y_eval = y_onehot[self.evaluation_mask, :]
-
         # generate batches (for training)
-        batches = self.batches(X_train=X_train, y_train=y_train)
+        batches = self.batches(X_train=X[self.training_mask, :],
+                               y_train=y_onehot[self.training_mask, :])
 
         # build neural net
-        network, X_tf, y_tf, is_training_tf = self.model(X_train, y_train)
+        network, X_tf, y_tf, is_training_tf = self.model(X[self.training_mask, :],
+                                                         y_onehot[self.training_mask, :])
 
         # cost (loss)
         loss = tf.reduce_mean(
@@ -389,10 +385,11 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                 # =============================================================
                 # training score
-                n_train_samples, n_features = np.shape(X_train)
+                n_train_samples, n_features = np.shape(X[self.training_mask, :])
 
                 feed_eval = {
-                    X_tf: np.reshape(X_train, (n_train_samples, n_features, 1)),
+                    X_tf: np.reshape(X[self.training_mask, :],
+                                     (n_train_samples, n_features, 1)),
                     is_training_tf: False
                 }
 
@@ -400,14 +397,17 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 P_predicted = sess.run(predict_op, feed_dict=feed_eval)
                 y_predicted = np.argmax(P_predicted, axis=1)
 
-                score_train = f1_score(y_train, y_predicted, average="micro")
+                score_train = f1_score(y[self.training_mask],
+                                       y_predicted,
+                                       average="micro")
 
                 # =============================================================
                 # evaluation score
-                n_eval_samples, n_features = np.shape(X_eval)
+                n_eval_samples, n_features = np.shape(X[self.evaluation_mask, :])
 
                 feed_eval = {
-                    X_tf: np.reshape(X_eval, (n_eval_samples, n_features, 1)),
+                    X_tf: np.reshape(X[self.evaluation_mask, :],
+                                     (n_eval_samples, n_features, 1)),
                     is_training_tf: False
                 }
 
@@ -415,7 +415,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                 P_predicted = sess.run(predict_op, feed_dict=feed_eval)
                 y_predicted = np.argmax(P_predicted, axis=1)
 
-                score_eval = f1_score(y_eval, y_predicted, average="micro")
+                score_eval = f1_score(y[self.evaluation_mask],
+                                      y_predicted, average="micro")
 
                 if self.verbosity > 0:
                     print("epoch    = {} / "
