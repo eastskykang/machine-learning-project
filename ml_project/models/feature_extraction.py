@@ -591,14 +591,6 @@ class Wavelet(BaseEstimator, TransformerMixin):
             # samples
             for j in range(1, self.n_peaks + 1):
                 sample = filtered_x[r_peak[j] - (self.sample_radius-1):r_peak[j] + (self.sample_radius+1)]
-
-                plt.figure(0)
-                plt.plot(sample)
-                plt.show(0)
-
-                # sample = np.reshape(sample, (1, self.sample_radius * 2))
-                # sample = normalize(sample, axis=1)
-
                 sample = tools.normalize(sample)
 
                 # wavelet
