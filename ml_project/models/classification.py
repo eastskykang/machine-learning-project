@@ -158,8 +158,8 @@ class LogisticRegressionWithProbability(BaseEstimator, TransformerMixin):
 class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Convolutional Neural Net Classifier"""
     def __init__(self,
-                 batch_size=128, dropout=False, dropout_rate=0.3,
-                 optimizer='Adam', learning_rate=0.001, num_epoch=50,
+                 batch_size=128, dropout=False, dropout_rate=0.1,
+                 optimizer='Adam', learning_rate=0.002, num_epoch=50,
                  save_path=None, verbosity=1):
 
         self.dropout = dropout
@@ -252,7 +252,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     activation=tf.nn.relu)
 
                 net = tf.layers.dropout(inputs=net,
-                                        rate=0.3,
+                                        rate=self.dropout_rate,
                                         training=is_training_tf)
 
                 # dense layer 2
@@ -262,7 +262,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     activation=tf.nn.relu)
 
                 net = tf.layers.dropout(inputs=net,
-                                        rate=0.3,
+                                        rate= self.dropout_rate,
                                         training=is_training_tf)
 
                 # logit
