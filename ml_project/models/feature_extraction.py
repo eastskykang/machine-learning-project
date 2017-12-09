@@ -571,7 +571,8 @@ class Wavelet(BaseEstimator, TransformerMixin):
         X_new = np.zeros((n_samples,
                           (self.n_features[0] +
                            self.n_features[1] +
-                           self.n_features[2]) * self.n_peaks))
+                           self.n_features[2] +
+                           self.n_features[3]) * self.n_peaks))
 
         for i in range(0, n_samples):
             x = X[i, :]
