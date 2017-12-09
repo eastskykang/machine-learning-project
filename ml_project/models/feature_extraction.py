@@ -525,7 +525,7 @@ class IntensityAndGradient(BaseEstimator, TransformerMixin):
 class Wavelet(BaseEstimator, TransformerMixin):
     """Wavelet sym6 1-4"""
 
-    def __init__(self, sample_radius=100, sampling_rate=300, n_peaks=5, verbosity=1):
+    def __init__(self, sample_radius=100, sampling_rate=300, n_peaks=1, verbosity=1):
         self.sample_radius = sample_radius
         self.sampling_rate = sampling_rate
         self.verbosity = verbosity

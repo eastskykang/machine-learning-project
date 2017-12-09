@@ -577,23 +577,23 @@
 #        batch_size: 100
 
 
-module: ml_project.model_selection
-class: GridSearchCV
-params:
-  n_jobs: -1
-  est_module: ml_project.pipeline
-  est_class: Pipeline
-  est_params:
-    - module: ml_project.models.classification
-      class: ConvolutionalNeuralNetClassifier
-  param_grid: {}
-  cv:
-    module: sklearn.model_selection
-    class: KFold
-    params:
-      n_splits: 5
-      shuffle: True
-      random_state: 37
+#module: ml_project.model_selection
+#class: GridSearchCV
+#params:
+#  n_jobs: -1
+#  est_module: ml_project.pipeline
+#  est_class: Pipeline
+#  est_params:
+#    - module: ml_project.models.classification
+#      class: ConvolutionalNeuralNetClassifier
+#  param_grid: {}
+#  cv:
+#    module: sklearn.model_selection
+#    class: KFold
+#    params:
+#      n_splits: 5
+#      shuffle: True
+#      random_state: 37
 
 
 #module: ml_project.model_selection
@@ -649,3 +649,26 @@ params:
 #      n_splits: 5
 #      shuffle: True
 #      random_state: 37
+
+
+module: ml_project.model_selection
+class: GridSearchCV
+params:
+  n_jobs: 1
+  est_module: ml_project.pipeline
+  est_class: Pipeline
+  est_params:
+    - module: ml_project.models.feature_extraction
+      class: Wavelet
+    - module: sklearn.ensemble
+      class: RandomForestClassifier
+  param_grid:
+    RandomForestClassifier__n_jobs:
+      - -1
+  cv:
+    module: sklearn.model_selection
+    class: KFold
+    params:
+      n_splits: 5
+      shuffle: True
+      random_state: 37
