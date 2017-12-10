@@ -330,8 +330,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         eval_score_tf = tf.placeholder(tf.float64, shape=())
 
         train_loss_summary = tf.summary.scalar('loss_train', loss_tf)
-        train_score_summary = tf.summary.scalar('loss_train', train_score_tf)
-        eval_loss_summary = tf.summary.scalar('score_eval', loss_tf)
+        train_score_summary = tf.summary.scalar('score_train', train_score_tf)
+        eval_loss_summary = tf.summary.scalar('loss_eval', loss_tf)
         eval_score_summary = tf.summary.scalar('score_eval', eval_score_tf)
 
 
