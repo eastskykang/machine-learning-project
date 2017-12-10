@@ -160,7 +160,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Convolutional Neural Net Classifier"""
     def __init__(self,
                  batch_size=128, dropout=False, dropout_rate=0.1,
-                 optimizer='Adam', learning_rate=0.0001, num_epoch=17,
+                 optimizer='Adam', learning_rate=0.0001, num_epoch=30,
                  save_path=None, verbosity=1):
 
         self.dropout = dropout
