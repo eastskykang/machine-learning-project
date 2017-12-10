@@ -174,6 +174,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         self.model_name = datetime.now().strftime('model_%Y%m%d-%H%M%S')
         self.model_path = None
         self.one_hot_encoder = None
+        self.random_state = np.random.RandomState(seed=41)
 
         # training / evaluation mask
         self.training_mask = None
