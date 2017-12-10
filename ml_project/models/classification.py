@@ -160,7 +160,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Convolutional Neural Net Classifier"""
     def __init__(self,
                  batch_size=128, dropout=False, dropout_rate=0.1,
-                 optimizer='Adam', learning_rate=0.002, num_epoch=50,
+                 optimizer='Adam', learning_rate=0.0001, num_epoch=50,
                  save_path=None, verbosity=1):
 
         self.dropout = dropout
@@ -184,6 +184,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             assert "invalid optimizer"
 
     def model(self, X_train):
+        print("model")
         n_samples, n_features = np.shape(X_train)
 
         tf.reset_default_graph()
@@ -208,16 +209,15 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             strides=1,
             activation=tf.nn.relu)
 
-        # batch norm 1
-        net = tf.layers. \
-            batch_normalization(net,
-                                training=is_training_tf)
+        print(" cnn 1: {}".format(net.get_shape()))
 
         # max pooling 1
         net = tf.layers.max_pooling1d(
             net,
             pool_size=2,
             strides=1)
+
+        print(" max pool 1: {}".format(net.get_shape()))
 
         # cnn 2
         net = tf.layers.conv1d(
@@ -227,16 +227,15 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             strides=1,
             activation=tf.nn.relu)
 
-        # batch norm 1
-        net = tf.layers. \
-            batch_normalization(net,
-                                training=is_training_tf)
+        print(" cnn 2: {}".format(net.get_shape()))
 
         # max pooling 2
         net = tf.layers.max_pooling1d(
             net,
             pool_size=4,
             strides=2)
+
+        print(" max pool 2: {}".format(net.get_shape()))
 
         # cnn 3
         net = tf.layers.conv1d(
@@ -246,20 +245,28 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             strides=1,
             activation=tf.nn.relu)
 
+        print(" cnn 3: {}".format(net.get_shape()))
+
         # max pooling 3
         net = tf.layers.max_pooling1d(
             net,
             pool_size=16,
             strides=8)
 
+        print(" max pool 3: {}".format(net.get_shape()))
+
         # flattening
         net = tf.contrib.layers.flatten(net)
+
+        print(" flatten: {}".format(net.get_shape()))
 
         # dense layer 1
         net = tf.layers.dense(
             net,
             units=1024,
             activation=tf.nn.relu)
+
+        print(" dense 1: {}".format(net.get_shape()))
 
         net = tf.layers.dropout(inputs=net,
                                 rate=self.dropout_rate,
@@ -271,6 +278,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             units=32,
             activation=tf.nn.relu)
 
+        print(" dense 2: {}".format(net.get_shape()))
+
         net = tf.layers.dropout(inputs=net,
                                 rate= self.dropout_rate,
                                 training=is_training_tf)
@@ -281,13 +290,49 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             units=4,
             activation=None)
 
+        print(" logit : {}".format(logits_tf.get_shape()))
+
         # probs
         probs_tf = tf.nn.softmax(logits_tf)
 
         # prediction
         predictions_tf = tf.argmax(probs_tf, axis=1)
 
-        return X_tf, y_tf, is_training_tf, logits_tf, probs_tf, predictions_tf
+        # cost (loss)
+        labels_tf = tf.cast(y_tf, tf.int32)
+        labels_tf = tf.one_hot(labels_tf, depth=4)
+
+        logits_tf = tf.cast(logits_tf, tf.float64)
+        labels_tf = tf.cast(labels_tf, tf.float64)
+
+        loss_tf = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits(labels=labels_tf,
+                                                    logits=logits_tf))
+
+        # training summary
+        train_loss_summary = tf.summary.scalar('loss_train', loss_tf)
+        eval_loss_summary = tf.summary.scalar('loss_eval', loss_tf)
+
+        # optimizer
+        if self.optimizer == 'Adam':
+            optimizer = \
+                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+        elif self.optimizer == 'GradientDescent':
+            optimizer = \
+                tf.train.GradientDescentOptimizer(
+                    learning_rate=self.learning_rate)
+        else:
+            optimizer = \
+                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+
+        # train operation
+        train_op = optimizer.minimize(loss_tf,
+                                      global_step=tf.train.get_global_step())
+
+
+        return X_tf, y_tf, is_training_tf, \
+               logits_tf, probs_tf, predictions_tf, loss_tf, \
+               train_op, train_loss_summary, eval_loss_summary
 
     def random_batches(self, X_train, y_train):
 
@@ -319,29 +364,6 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         return batches
 
-    def order_batches(self, X_train, y_train):
-        # size
-        n_samples, _ = np.shape(X_train)
-        batch_size = self.batch_size
-
-        # batchs
-        batches = []
-
-        num_batches = n_samples // batch_size
-        for i in range(0, num_batches):
-            batch_X = X_train[batch_size * i:batch_size * i + batch_size, :]
-            batch_Y = y_train[batch_size * i:batch_size * i + batch_size]
-            batch = (batch_X, batch_Y)
-            batches.append(batch)
-
-        if n_samples % batch_size != 0:
-            batch_X = X_train[num_batches * batch_size:n_samples, :]
-            batch_Y = y_train[num_batches * batch_size:n_samples]
-            batch = (batch_X, batch_Y)
-            batches.append(batch)
-
-        return batches
-
     def fit(self, X, y, sample_weight=None):
 
         print("------------------------------------")
@@ -351,51 +373,16 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         n_samples, n_features = np.shape(X)
 
         mask = list(np.random.permutation(n_samples))
-        self.training_mask = mask[0:6200]
-        self.evaluation_mask = mask[6200:None]
+        self.training_mask = mask[0:6000]
+        self.evaluation_mask = mask[6000:None]
         X_eval = X[self.evaluation_mask, :]
         y_eval = y[self.evaluation_mask]
 
         # build network
         X_tf, y_tf, is_training_tf, \
-        logits, probs_tf, prediction_tf = \
+        logits, probs_tf, prediction_tf, loss_tf, \
+        train_op, train_loss_summary, eval_loss_summary = \
             self.model(X[self.training_mask, :])
-
-        # cost (loss)
-        labels = tf.cast(y_tf, tf.int32)
-        labels = tf.one_hot(labels, depth=4)
-
-        labels = tf.cast(labels, tf.float64)
-        logits = tf.cast(logits, tf.float64)
-
-        loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(labels=labels,
-                                                    logits=logits))
-
-        # optimizer
-        if self.optimizer == 'Adam':
-            optimizer = \
-                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
-        elif self.optimizer == 'GradientDescent':
-            optimizer = \
-                tf.train.GradientDescentOptimizer(
-                    learning_rate=self.learning_rate)
-        else:
-            optimizer = \
-                tf.train.AdamOptimizer(learning_rate=self.learning_rate)
-
-        # train operation
-        # train_op = optimizer.minimize(loss,
-        #                               global_step=tf.train.get_global_step())
-
-        # When using the batchnormalization layers,
-        # it is necessary to manually add the update operations
-        # because the moving averages are not included in the graph
-        update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-
-        with tf.control_dependencies(update_op):
-            train_op = optimizer.minimize(loss,
-                                          global_step=tf.train.get_global_step())
 
         # initialization operation
         init_op = tf.global_variables_initializer()
@@ -404,12 +391,18 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         # tensorflow session
         with tf.Session() as sess:
 
+            # tensorboard writer
+            summary_writer = tf.summary.FileWriter('./data/summary', sess.graph)
+
             # initialization run
             print("     initialization")
             sess.run(init_op)
 
             # training
             print("     training")
+
+            # step
+            step = 0
 
             for epoch in range(self.num_epochs):
 
@@ -420,43 +413,61 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                 for (batch_X, batch_y) in batches:
 
+                    # training
                     feed_train = {
                         X_tf: batch_X,
                         y_tf: batch_y.astype('float32'),
                         is_training_tf: True
                     }
 
-                    _, loss_train, prediction_train = \
-                        sess.run([train_op, loss, prediction_tf],
+                    _, loss_train, prediction_train, train_loss_summ = \
+                        sess.run([train_op, loss_tf, prediction_tf, train_loss_summary],
                                  feed_dict=feed_train)
+
+                    summary_writer.add_summary(train_loss_summ, step)
+                    summary_writer.flush()
 
                     # training score
                     score_train = f1_score(batch_y,
                                            prediction_train,
                                            average="micro")
 
-                    # evaluation score
+                    # evaluation
                     feed_eval = {
                         X_tf: X_eval,
                         y_tf: y_eval.astype('float32'),
                         is_training_tf: False
                     }
 
-                    loss_eval, prediction_eval = sess.run([loss, prediction_tf],
-                                                          feed_dict=feed_eval)
+                    loss_eval, prediction_eval, eval_loss_summ = \
+                        sess.run([loss_tf, prediction_tf, eval_loss_summary],
+                                 feed_dict=feed_eval)
+
+                    summary_writer.add_summary(eval_loss_summ, step)
+                    summary_writer.flush()
+
+                    # evaluation score
                     score_eval = f1_score(y_eval,
                                           prediction_eval,
                                           average="micro")
 
-                    print("         epoch = {} / "
+                    # log and tensorboard
+                    print("         epoch = {} (step = {})/ "
                           "loss train   = {} / "
                           "f1 train     = {} / "
                           "loss eval    = {} / "
-                          "f1 eval      = {}".format(epoch,
+                          "f1 eval      = {}".format(epoch, step,
                                                      loss_train,
                                                      score_train,
                                                      loss_eval,
                                                      score_eval))
+
+                    # step
+                    step = step + 1
+
+            # close summary writer
+            summary_writer.close()
+
 
             # save tensorflow model
             if self.save_path is None:
@@ -485,7 +496,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         print("CNNClassifier predict")
 
         # build neural net
-        X_tf, _, is_training_tf, _, _, predictions_tf = self.model(X)
+        X_tf, _, is_training_tf, _, _, predictions_tf, _, _, _, _ = self.model(X)
 
         # tensorflow seesion
         saver = tf.train.Saver()
