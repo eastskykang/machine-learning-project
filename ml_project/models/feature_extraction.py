@@ -658,7 +658,7 @@ class SampleFromRpeak(BaseEstimator, TransformerMixin):
                 sample = tools.normalize(sample)
 
             # new features
-            X_new[i,:] = sample
+            X_new[i,:] = np.reshape(sample, (1, self.n_features))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")
