@@ -309,10 +309,6 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
             tf.nn.softmax_cross_entropy_with_logits(labels=labels_tf,
                                                     logits=logits_tf))
 
-        # training summary
-        train_loss_summary = tf.summary.scalar('loss_train', loss_tf)
-        eval_loss_summary = tf.summary.scalar('loss_eval', loss_tf)
-
         # optimizer
         if self.optimizer == 'Adam':
             optimizer = \
@@ -329,10 +325,20 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         train_op = optimizer.minimize(loss_tf,
                                       global_step=tf.train.get_global_step())
 
+        # summary
+        train_score_tf = tf.placeholder(tf.float64, shape=())
+        eval_score_tf = tf.placeholder(tf.float64, shape=())
 
-        return X_tf, y_tf, is_training_tf, \
+        train_loss_summary = tf.summary.scalar('loss_train', loss_tf)
+        train_score_summary = tf.summary.scalar('loss_train', train_score_tf)
+        eval_loss_summary = tf.summary.scalar('loss_eval', loss_tf)
+        eval_score_summary = tf.summary.scalar('loss_eval', eval_score_tf)
+
+
+        return X_tf, y_tf, is_training_tf, train_score_tf, eval_score_tf, \
                logits_tf, probs_tf, predictions_tf, loss_tf, \
-               train_op, train_loss_summary, eval_loss_summary
+               train_op, \
+               train_loss_summary, eval_loss_summary, train_score_summary, eval_score_summary
 
     def random_batches(self, X_train, y_train):
 
@@ -379,9 +385,10 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         y_eval = y[self.evaluation_mask]
 
         # build network
-        X_tf, y_tf, is_training_tf, \
+        X_tf, y_tf, is_training_tf, train_score_tf, eval_score_tf, \
         logits, probs_tf, prediction_tf, loss_tf, \
-        train_op, train_loss_summary, eval_loss_summary = \
+        train_op, \
+        train_loss_summary, eval_loss_summary, train_score_summary, eval_score_summary = \
             self.model(X[self.training_mask, :])
 
         # initialization operation
@@ -424,13 +431,15 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                         sess.run([train_op, loss_tf, prediction_tf, train_loss_summary],
                                  feed_dict=feed_train)
 
-                    summary_writer.add_summary(train_loss_summ, step)
-                    summary_writer.flush()
-
                     # training score
                     score_train = f1_score(batch_y,
                                            prediction_train,
                                            average="micro")
+                    train_score_summ = sess.run(train_score_summary,
+                                                feed_dict={train_score_summary: score_train})
+
+                    summary_writer.add_summary(train_loss_summ, step)
+                    summary_writer.add_summary(train_score_summ, step)
 
                     # evaluation
                     feed_eval = {
@@ -443,13 +452,15 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                         sess.run([loss_tf, prediction_tf, eval_loss_summary],
                                  feed_dict=feed_eval)
 
-                    summary_writer.add_summary(eval_loss_summ, step)
-                    summary_writer.flush()
-
                     # evaluation score
                     score_eval = f1_score(y_eval,
                                           prediction_eval,
                                           average="micro")
+                    eval_score_summ = sess.run(eval_score_summary,
+                                               feed_dict={eval_score_summary: score_eval})
+
+                    summary_writer.add_summary(eval_loss_summ, step)
+                    summary_writer.add_summary(eval_score_summ, step)
 
                     # log and tensorboard
                     print("         epoch = {} (step = {})/ "
@@ -467,7 +478,6 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
             # close summary writer
             summary_writer.close()
-
 
             # save tensorflow model
             if self.save_path is None:
@@ -496,7 +506,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         print("CNNClassifier predict")
 
         # build neural net
-        X_tf, _, is_training_tf, _, _, predictions_tf, _, _, _, _ = self.model(X)
+        X_tf, _, is_training_tf, _, _, \
+        _, _, predictions_tf, _, _, _, _, _, _ = self.model(X)
 
         # tensorflow seesion
         saver = tf.train.Saver()
