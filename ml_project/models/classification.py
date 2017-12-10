@@ -331,8 +331,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
 
         train_loss_summary = tf.summary.scalar('loss_train', loss_tf)
         train_score_summary = tf.summary.scalar('loss_train', train_score_tf)
-        eval_loss_summary = tf.summary.scalar('loss_eval', loss_tf)
-        eval_score_summary = tf.summary.scalar('loss_eval', eval_score_tf)
+        eval_loss_summary = tf.summary.scalar('score_eval', loss_tf)
+        eval_score_summary = tf.summary.scalar('score_eval', eval_score_tf)
 
 
         return X_tf, y_tf, is_training_tf, train_score_tf, eval_score_tf, \
@@ -436,7 +436,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                                            prediction_train,
                                            average="micro")
                     train_score_summ = sess.run(train_score_summary,
-                                                feed_dict={train_score_summary: score_train})
+                                                feed_dict={train_score_tf: score_train})
 
                     summary_writer.add_summary(train_loss_summ, step)
                     summary_writer.add_summary(train_score_summ, step)
@@ -457,7 +457,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                                           prediction_eval,
                                           average="micro")
                     eval_score_summ = sess.run(eval_score_summary,
-                                               feed_dict={eval_score_summary: score_eval})
+                                               feed_dict={eval_score_tf: score_eval})
 
                     summary_writer.add_summary(eval_loss_summ, step)
                     summary_writer.add_summary(eval_score_summ, step)
