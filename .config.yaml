@@ -9,14 +9,10 @@ params:
   est_class: Pipeline
   est_params:
     - module: ml_project.models.feature_extraction
-      class: Wavelet
-    - module: ml_project.models.classification
+      class: SampleFromRpeak
+    - module: sklearn.ensemble
       class: RandomForestClassifier
-  param_grid:
-    RandomForestClassifier__n_jobs:
-      - -1
-    RandomForestClassifier__n_estimators:
-      - 80
+  param_grid: {}
   cv:
     module: sklearn.model_selection
     class: KFold

@@ -611,3 +611,57 @@ class Wavelet(BaseEstimator, TransformerMixin):
             print(X_new.shape)
 
         return X_new
+
+
+class SampleFromRpeak(BaseEstimator, TransformerMixin):
+    """Wavelet sym6 1-4"""
+
+    def __init__(self, sample_radius=100, sampling_rate=300,verbosity=1):
+        self.sample_radius = sample_radius
+        self.sampling_rate = sampling_rate
+        self.verbosity = verbosity
+        self.n_features = None
+
+    def fit(self, X, y=None):
+        X = check_array(X)
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("SampleFromRPeak fit ")
+
+        self.n_features = self.sample_radius * 2
+        return self
+
+    def transform(self, X, y=None):
+        X = check_array(X)
+        n_samples, n_features = np.shape(X)
+
+        if self.verbosity > 0:
+            print("------------------------------------")
+            print("Wavelet transform")
+            print("shape of X before transform : ")
+            print(X.shape)
+
+        X_new = np.zeros((n_samples,
+                          self.n_features))
+
+        for i in range(0, n_samples):
+            x = X[i, :]
+
+            result = ecg.ecg(x, sampling_rate=self.sampling_rate, show=False)
+            filtered_x = result[1]
+            r_peak = result[2]
+
+            # samples
+            for j in range(1, 2):
+                sample = filtered_x[r_peak[j] - (self.sample_radius-1):r_peak[j] + (self.sample_radius+1)]
+                sample = tools.normalize(sample)
+
+            # new features
+            X_new[i,:] = sample
+
+        if self.verbosity > 0:
+            print("shape of X after transform : ")
+            print(X_new.shape)
+
+        return X_new

@@ -660,7 +660,7 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
     """Neural Net Classifier"""
     def __init__(self, hidden_layers=None, activations=None, regularizer='l2',
                  regularizer_scale=1.0, batch_normalization=True,
-                 batch_size=58, dropout=True, dropout_rate=0.3,
+                 batch_size=128, dropout=True, dropout_rate=0.3,
                  optimizer='Adam', learning_rate=0.01, num_epoch=500,
                  score_metric='f1', one_hot_encoding=True, weighted_class=True,
                  save_path=None):
@@ -960,21 +960,3 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
     def set_save_path(self, save_path):
         self.save_path = save_path
-
-
-class RandomForestClassifier(RandomForestClassifier):
-    def __init__(self, n_estimators, n_jobs):
-        self.n_estimators = n_estimators
-        self.n_jobs = n_jobs
-
-        super(RandomForestClassifier, self)\
-            .__init__(n_estimators=self.n_estimators,
-                      n_jobs=self.n_jobs)
-
-    def fit(self, X, y, sample_weight=None):
-        super(RandomForestClassifier, self).fit(X, y)
-        return self
-
-    def predict(self, X):
-        y = super(RandomForestClassifier, self).predict(X)
-        return y.astype(int)
