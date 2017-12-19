@@ -1,13 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from scipy.ndimage import zoom
 from sklearn.utils.validation import check_array
-from sklearn.metrics import f1_score, precision_score, recall_score
-from keras.callbacks import Callback
 import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
-from biosppy.signals import ecg
-import pywt
 
 
 class Constants:

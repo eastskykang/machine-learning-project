@@ -1,14 +1,11 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
-from sklearn.preprocessing import normalize
 from ml_project.models import utils
 from biosppy.signals import ecg
 from biosppy.signals import tools
-from scipy.signal import detrend
 import numpy as np
 import cv2
 import pywt
-import matplotlib.pyplot as plt
 
 
 class IntensityHistogram(BaseEstimator, TransformerMixin):
@@ -527,7 +524,8 @@ class IntensityAndGradient(BaseEstimator, TransformerMixin):
 class Wavelet(BaseEstimator, TransformerMixin):
     """Wavelet sym6 1-4"""
 
-    def __init__(self, sample_radius=100, sampling_rate=300, n_peaks=1, verbosity=1):
+    def __init__(self, sample_radius=100, sampling_rate=300,
+                 n_peaks=1, verbosity=1):
         self.sample_radius = sample_radius
         self.sampling_rate = sampling_rate
         self.verbosity = verbosity
@@ -543,7 +541,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
             print("shape of X before transform : ")
             print(X.shape)
 
-        result = ecg.ecg(X[0,:], sampling_rate=self.sampling_rate, show=False)
+        result = ecg.ecg(X[0, :], sampling_rate=self.sampling_rate, show=False)
         filtered_x = result[1]
         r_peak = result[2]
 
@@ -557,7 +555,8 @@ class Wavelet(BaseEstimator, TransformerMixin):
 
         # n_features
         self.n_features = np.array([len(cA4), len(cD4), len(cD3)])
-        print("number of features : {} x {}".format(self.n_features, self.n_peaks))
+        print("number of features : {} x {}".format(self.n_features,
+                                                    self.n_peaks))
         return self
 
     def transform(self, X, y=None):
@@ -590,11 +589,15 @@ class Wavelet(BaseEstimator, TransformerMixin):
 
             # samples
             for j in range(1, self.n_peaks + 1):
-                sample = filtered_x[r_peak[j] - (self.sample_radius-1):r_peak[j] + (self.sample_radius+1)]
+                sample = filtered_x[
+                         r_peak[j] - (self.sample_radius-1):
+                         r_peak[j] + (self.sample_radius+1)]
                 sample = tools.normalize(sample)
 
                 # wavelet
-                cA4, cD4, cD3, _, _ = pywt.wavedec(sample, wavelet='sym6', level=4)
+                cA4, cD4, cD3, _, _ = pywt.wavedec(sample,
+                                                   wavelet='sym6',
+                                                   level=4)
 
                 cA4s[j-1, :] = cA4
                 cD4s[j-1, :] = cD4
@@ -602,7 +605,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
                 # cD2s[j-1, :] = cD2
 
             # new features
-            X_new[i,:] = np.concatenate((cA4s.flatten(),
+            X_new[i, :] = np.concatenate((cA4s.flatten(),
                                          cD4s.flatten(),
                                          cD3s.flatten()))
 
@@ -616,7 +619,7 @@ class Wavelet(BaseEstimator, TransformerMixin):
 class SampleFromRpeak(BaseEstimator, TransformerMixin):
     """Wavelet sym6 1-4"""
 
-    def __init__(self, sample_radius=100, sampling_rate=300,verbosity=1):
+    def __init__(self, sample_radius=100, sampling_rate=300, verbosity=1):
         self.sample_radius = sample_radius
         self.sampling_rate = sampling_rate
         self.verbosity = verbosity
@@ -654,11 +657,13 @@ class SampleFromRpeak(BaseEstimator, TransformerMixin):
 
             # samples
             for j in range(1, 2):
-                sample = filtered_x[r_peak[j] - (self.sample_radius-1):r_peak[j] + (self.sample_radius+1)]
+                sample = filtered_x[
+                         r_peak[j] - (self.sample_radius-1):
+                         r_peak[j] + (self.sample_radius+1)]
                 sample = tools.normalize(sample)
 
             # new features
-            X_new[i,:] = np.reshape(sample, (1, self.n_features))
+            X_new[i, :] = np.reshape(sample, (1, self.n_features))
 
         if self.verbosity > 0:
             print("shape of X after transform : ")

@@ -1,18 +1,17 @@
 import numpy as np
 import tensorflow as tf
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import LabelBinarizer
-from sklearn.utils.class_weight import compute_sample_weight, compute_class_weight
+from sklearn.utils.class_weight import compute_sample_weight, \
+    compute_class_weight
 from scipy.stats import spearmanr
 from datetime import datetime
 from pathlib import Path
-from keras.callbacks import EarlyStopping
 from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, LSTM
+from keras.layers import Dense, LSTM
 from keras.preprocessing import sequence
 
 
@@ -282,7 +281,7 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         print(" dense 2: {}".format(net.get_shape()))
 
         net = tf.layers.dropout(inputs=net,
-                                rate= self.dropout_rate,
+                                rate=self.dropout_rate,
                                 training=is_training_tf)
 
         # logit
@@ -335,11 +334,12 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         eval_loss_summary = tf.summary.scalar('loss_eval', loss_tf)
         eval_score_summary = tf.summary.scalar('score_eval', eval_score_tf)
 
-
-        return X_tf, y_tf, is_training_tf, train_score_tf, eval_score_tf, \
-               logits_tf, probs_tf, predictions_tf, loss_tf, \
-               train_op, \
-               train_loss_summary, eval_loss_summary, train_score_summary, eval_score_summary
+        return \
+            X_tf, y_tf, is_training_tf, train_score_tf, eval_score_tf, \
+            logits_tf, probs_tf, predictions_tf, loss_tf, \
+            train_op, \
+            train_loss_summary, eval_loss_summary, train_score_summary, \
+            eval_score_summary
 
     def random_batches(self, X_train, y_train):
 
@@ -386,11 +386,11 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         y_eval = y[self.evaluation_mask]
 
         # build network
-        X_tf, y_tf, is_training_tf, train_score_tf, eval_score_tf, \
-        logits, probs_tf, prediction_tf, loss_tf, \
-        train_op, \
-        train_loss_summary, eval_loss_summary, train_score_summary, eval_score_summary = \
-            self.model(X[self.training_mask, :])
+        (
+            X_tf, y_tf, is_training_tf, train_score_tf, eval_score_tf, logits,
+            probs_tf, prediction_tf, loss_tf, train_op, train_loss_summary,
+            eval_loss_summary, train_score_summary, eval_score_summary)\
+            = self.model(X[self.training_mask, :])
 
         # initialization operation
         init_op = tf.global_variables_initializer()
@@ -400,7 +400,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         with tf.Session() as sess:
 
             # tensorboard writer
-            summary_writer = tf.summary.FileWriter('./data/summary', sess.graph)
+            summary_writer = tf.summary.FileWriter(
+                './data/summary', sess.graph)
 
             # initialization run
             print("     initialization")
@@ -429,7 +430,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                     }
 
                     _, loss_train, prediction_train, train_loss_summ = \
-                        sess.run([train_op, loss_tf, prediction_tf, train_loss_summary],
+                        sess.run([train_op, loss_tf, prediction_tf,
+                                  train_loss_summary],
                                  feed_dict=feed_train)
 
                     # training score
@@ -437,7 +439,9 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                                            prediction_train,
                                            average="micro")
                     train_score_summ = sess.run(train_score_summary,
-                                                feed_dict={train_score_tf: score_train})
+                                                feed_dict={
+                                                    train_score_tf:
+                                                        score_train})
 
                     summary_writer.add_summary(train_loss_summ, step)
                     summary_writer.add_summary(train_score_summ, step)
@@ -458,7 +462,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
                                           prediction_eval,
                                           average="micro")
                     eval_score_summ = sess.run(eval_score_summary,
-                                               feed_dict={eval_score_tf: score_eval})
+                                               feed_dict={
+                                                   eval_score_tf: score_eval})
 
                     summary_writer.add_summary(eval_loss_summ, step)
                     summary_writer.add_summary(eval_score_summ, step)
@@ -507,8 +512,8 @@ class ConvolutionalNeuralNetClassifier(BaseEstimator, TransformerMixin):
         print("CNNClassifier predict")
 
         # build neural net
-        X_tf, _, is_training_tf, _, _, \
-        _, _, predictions_tf, _, _, _, _, _, _ = self.model(X)
+        X_tf, _, is_training_tf, _, _, _, _, predictions_tf, _, _, _, _, _, _ \
+            = self.model(X)
 
         # tensorflow seesion
         saver = tf.train.Saver()
@@ -569,15 +574,23 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         for i, lstm_layer in enumerate(self.lstm_layers):
             if i is 0 and i is len(self.lstm_layers) - 1:
                 # first layer also last layer
-                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), dropout=self.dropout_rate))
+                model.add(
+                    LSTM(lstm_layer,
+                         input_shape=(timestep, n_feature),
+                         dropout=self.dropout_rate))
             elif i is 0 and i is not len(self.lstm_layers) - 1:
                 # first layer
-                model.add(LSTM(lstm_layer, input_shape=(timestep, n_feature), return_sequences=True, dropout=self.dropout_rate))
+                model.add(LSTM(lstm_layer,
+                               input_shape=(timestep, n_feature),
+                               return_sequences=True,
+                               dropout=self.dropout_rate))
             elif i is len(self.lstm_layers) - 1:
                 # last layer
                 model.add(LSTM(lstm_layer, dropout=self.dropout_rate))
             else:
-                model.add(LSTM(lstm_layer, return_sequences=True, dropout=self.dropout_rate))
+                model.add(LSTM(lstm_layer,
+                               return_sequences=True,
+                               dropout=self.dropout_rate))
 
         # output
         model.add(Dense(4, activation='softmax'))
@@ -596,7 +609,8 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         print("LSTMClassifier fit")
 
         # truncate X
-        X = sequence.pad_sequences(X, maxlen=self.max_len * self.n_feature, truncating="post")
+        X = sequence.pad_sequences(
+            X, maxlen=self.max_len * self.n_feature, truncating="post")
         n_samples, n_timestep = np.shape(X)
 
         # kth order (feature)
@@ -606,7 +620,6 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         print("input shape = {}".format(np.shape(X)))
 
         # class weight (for imbalance data)
-        class_weight = compute_class_weight('balanced', np.unique(y), y)
         sample_weight = compute_sample_weight('balanced', y)
 
         # one hot encoding
@@ -615,11 +628,6 @@ class LSTMClassifier(BaseEstimator, TransformerMixin):
         y = one_hot_encoder.transform(y)
 
         # model
-        # call back for early stopping
-        callback = [
-            EarlyStopping(monitor='loss', min_delta=1e-4, verbose=1)
-        ]
-
         # network
         net = self.model(timestep, self.n_feature)
         net.fit(X.astype(float), y,
@@ -759,11 +767,14 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                     # regularizer
                     if self.regularizer == 'l1':
-                        regularizer = tf.contrib.layers.l1_regularizer(self.regularizer_scale)
+                        regularizer = tf.contrib.layers.l1_regularizer(
+                            self.regularizer_scale)
                     elif self.regularizer == 'l2':
-                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
+                        regularizer = tf.contrib.layers.l2_regularizer(
+                            self.regularizer_scale)
                     else:
-                        regularizer = tf.contrib.layers.l2_regularizer(self.regularizer_scale)
+                        regularizer = tf.contrib.layers.l2_regularizer(
+                            self.regularizer_scale)
 
                     # fully connected graph
                     net = tf.contrib.layers.fully_connected(
@@ -781,9 +792,10 @@ class NeuralNetClassifier(BaseEstimator, TransformerMixin):
 
                     # dropout
                     if self.dropout:
-                        net = tf.contrib.layers.dropout(net,
-                                                        keep_prob=(1-self.dropout_rate),
-                                                        is_training=is_training_tf)
+                        net = tf.contrib.layers.dropout(
+                            net,
+                            keep_prob=(1-self.dropout_rate),
+                            is_training=is_training_tf)
 
             # end of build graph
             net = tf.contrib.layers.flatten(net)
